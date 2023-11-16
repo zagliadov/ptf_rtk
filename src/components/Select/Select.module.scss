@@ -1,0 +1,28 @@
+@import "src/styles/colors";
+
+.wrapper {
+    height: 2.5em;
+    width: 100%;
+
+    .error {
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: color($var-color-app-orange);
+    }
+
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: scale(.25) translateY(-21px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .menu {
+        animation: fadeIn .2s cubic-bezier(.5, 0, 0, 1.25), opacity .15s ease-out;
+    }
+}

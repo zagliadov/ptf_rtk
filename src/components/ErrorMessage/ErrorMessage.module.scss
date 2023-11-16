@@ -1,0 +1,7 @@
+@import "src/styles/colors.scss";
+
+.error-message {
+  position: static;
+  color: color($var-color-app-orange);
+  font-size: 12px;
+}

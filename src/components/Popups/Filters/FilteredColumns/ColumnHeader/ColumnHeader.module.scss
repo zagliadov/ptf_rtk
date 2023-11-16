@@ -1,0 +1,27 @@
+@import "src/styles/colors.scss";
+
+.column-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 10px;
+  .drag-and-drop-icon {
+    display: flex;
+    align-items: center;
+    padding-right: 4px;
+  }
+  
+  .bookmark-icon {
+    display: flex;
+    align-items: center;
+  }
+
+  .column-name {
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    color: color($var-color-app-dark-blue);
+  }
+}

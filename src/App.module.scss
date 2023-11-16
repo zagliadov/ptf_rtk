@@ -1,0 +1,6 @@
+@import "./styles/colors.scss";
+
+.app {
+  height: 100vh;
+  background-color: color($var-color-app-bg);
+}

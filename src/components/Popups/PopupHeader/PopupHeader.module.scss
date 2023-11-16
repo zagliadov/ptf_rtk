@@ -1,0 +1,29 @@
+@import "src/styles/colors.scss";
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  div {
+    display: flex;
+    justify-content: space-between;
+  }
+  .popup-title {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 29.5px;
+    letter-spacing: -1.5px;
+    color: color($var-color-app-dark-blue);
+  }
+  .popup-description {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: color($var-color-app-dark-blue);
+    padding-top: 8px;
+  }
+  button {
+    display: flex;
+    align-items: center;
+  }
+}

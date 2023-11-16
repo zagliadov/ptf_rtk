@@ -1,0 +1,28 @@
+@import "src/styles/colors.scss";
+
+.my-custom-scrollbar-sidebar .simplebar-track.simplebar-vertical {
+  right: 0px;
+  pointer-events: all;
+  cursor: pointer;
+}
+.my-custom-scrollbar-sidebar {
+
+  .simplebar-wrapper {
+    width: 100%;
+  }
+
+  .simplebar-scrollbar::before {
+    background-color: color($var-color-app-grey-2);
+    transition: all 0.4s;
+  }
+
+  .simplebar-scrollbar:hover::before {
+    background-color: color($var-color-app-blue-main);
+    transition: all 0.4s;
+  }
+
+  .simplebar-scrollbar {
+    width: 7px;
+    border-radius: 10px;
+  }
+}

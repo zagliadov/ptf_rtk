@@ -1,0 +1,50 @@
+$var-color-app-dark-blue: "app-dark-blue";
+$var-color-app-dark-blue-2: "app-dark-blue-2";
+$var-color-app-dark-blue-3: "app-dark-blue-3";
+$var-color-app-grey-1: "app-grey-1";
+$var-color-app-grey-2: "app-grey-2";
+$var-color-app-grey-3: "app-grey-3";
+$var-color-app-grey-4: "app-grey-4";
+$var-color-app-grey-5: "app-grey-5";
+$var-color-app-grey-6: "app-grey-6";
+$var-color-app-bg: "app-bg";
+$var-color-app-black: "app-black";
+$var-color-app-black-2: "app-black-2";
+$var-color-app-blue-light: "app-blue-light";
+$var-color-app-blue-light-2: "app-blue-light-2";
+$var-color-app-blue-grey-1: "app-blue-grey-1";
+$var-color-app-blue-grey-2: "app-blue-grey-2";
+$var-color-app-blue-main: "app-blue-main";
+$var-color-app-white: "app-white";
+$var-color-app-orange: "app-orange";
+
+
+$app-colors: (
+    $var-color-app-dark-blue: #454A54,
+    $var-color-app-dark-blue-2: #2E3138,
+    $var-color-app-dark-blue-3: #4A7A8A,
+    $var-color-app-blue-main: #4EB0C2,
+    $var-color-app-blue-light: #99BCC2,
+    $var-color-app-blue-light-2: #19B3C6,
+    $var-color-app-grey-1: #D9DDE2,
+    $var-color-app-grey-2: #ADB4BD,
+    $var-color-app-grey-3:#EFF2F5,
+    $var-color-app-grey-4: #D3ECEF,
+    $var-color-app-grey-5: #808080,
+    $var-color-app-grey-6: #DEE4EB,
+    $var-color-app-bg: #F6FAFD,
+    $var-color-app-black: #202020,
+    $var-color-app-black-2: #272937,
+    $var-color-app-blue-grey-1: #EAF3F4,
+    $var-color-app-blue-grey-2: #92A9AC,
+    $var-color-app-white: #FFFFFF,
+    $var-color-app-orange: #DF715F
+    );
+
+@function color($name) {
+    @if not map-get($app-colors, $name) {
+        @error "Color `#{$name}` not found in map $app-colors";
+    }
+
+    @return var(--color-#{unquote($name)});
+}

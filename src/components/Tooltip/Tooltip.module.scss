@@ -1,0 +1,38 @@
+@import "src/styles/colors.scss";
+
+.tooltip {
+  background-color: color($var-color-app-dark-blue-2);
+  width: 194px;
+  height: 152px;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding-top: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+
+  .tooltip-header {
+    span {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 20px;
+      color: color($var-color-app-white);
+    }
+  }
+
+  ul {
+    padding-top: 8px;
+    padding-left: 16px;
+    margin: 0;
+  }
+
+  .tooltip-line {
+    font-weight: 400;
+    font-size: 12px;
+    color: color($var-color-app-grey-2);
+    height: 20px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+@import "src/styles/colors.scss";
+
+.main {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 62px);
+
+  .toggle-menu {
+    position: relative;
+    height: 40px;
+  }
+}

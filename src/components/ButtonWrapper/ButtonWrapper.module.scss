@@ -1,0 +1,12 @@
+.button-wrapper {
+  display: flex;
+  &.right {
+    justify-content: flex-end;
+  }
+  &.left {
+    justify-content: flex-start;
+  }
+  &.center {
+    justify-content: center;
+  }
+}

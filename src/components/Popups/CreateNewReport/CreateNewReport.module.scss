@@ -1,0 +1,17 @@
+@import "src/styles/colors.scss";
+
+.create-new-report {
+  width: 376px;
+  height: 319px;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: color($var-color-app-white);
+  box-shadow: 8px 4px 39px 0px #0000000F;
+  .popup-body {
+    height: 225px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 24px;
+  }
+}

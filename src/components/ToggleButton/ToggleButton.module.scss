@@ -1,0 +1,26 @@
+@import "src/styles/colors.scss";
+
+.toggle-button-wrapper {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid color($var-color-app-grey-1);
+  border-radius: 8px;
+  height: 33px;
+  padding: 1px;
+
+  .toggle-button {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    background-color: transparent;
+    width: 50%;
+    transition: all 0.3s ease-in-out;
+    color: color($var-color-app-grey-2);
+    border-radius: 7px;
+
+    &.active {
+      background-color: color($var-color-app-blue-grey-1);
+      color: color($var-color-app-blue-main);
+    }
+  }
+}
