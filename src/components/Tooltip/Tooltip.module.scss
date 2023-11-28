@@ -1,6 +1,8 @@
 @import "src/styles/colors.scss";
 
 .tooltip {
+  position: fixed;
+  z-index: 1000;
   background-color: color($var-color-app-dark-blue-2);
   width: 194px;
   height: 152px;

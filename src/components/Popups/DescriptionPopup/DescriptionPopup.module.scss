@@ -1,0 +1,23 @@
+@import "src/styles/colors.scss";
+
+.description-popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1001;
+  width: 300px;
+  background-color: color($var-color-app-dark-blue-2);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  padding: 12px;
+
+  span {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 20px;
+    color: color($var-color-app-white);
+  }
+}

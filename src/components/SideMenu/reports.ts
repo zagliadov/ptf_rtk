@@ -1,7 +1,7 @@
 export const reports = [
   {
     id: 0,
-    reportsName: "Site reports",
+    name: "Site reports",
     details: [
       {
         reportName: "Site Report A",
@@ -16,7 +16,7 @@ export const reports = [
   },
   {
     id: 1,
-    reportsName: "Travel reports Content Based on 12",
+    name: "Travel reports Content Based on 12",
     details: [
       {
         reportName: "Travel Report B Content Base on 19",
@@ -58,7 +58,7 @@ export const reports = [
   },
   {
     id: 2,
-    reportsName: "Budget reports",
+    name: "Budget reports",
     details: [
       {
         reportName: "Budget Report C",
@@ -100,7 +100,7 @@ export const reports = [
   },
   {
     id: 3,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -115,7 +115,7 @@ export const reports = [
   },
   {
     id: 4,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -130,7 +130,7 @@ export const reports = [
   },
   {
     id: 5,
-    reportsName: "Site reports",
+    name: "Site reports",
     details: [
       {
         reportName: "Site Report A",
@@ -172,7 +172,7 @@ export const reports = [
   },
   {
     id: 6,
-    reportsName: "Travel reports",
+    name: "Travel reports",
     details: [
       {
         reportName: "Travel Report B",
@@ -187,7 +187,7 @@ export const reports = [
   },
   {
     id: 7,
-    reportsName: "Budget reports",
+    name: "Budget reports",
     details: [
       {
         reportName: "Budget Report C",
@@ -202,7 +202,7 @@ export const reports = [
   },
   {
     id: 8,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -217,7 +217,7 @@ export const reports = [
   },
   {
     id: 9,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -232,7 +232,7 @@ export const reports = [
   },
   {
     id: 10,
-    reportsName: "Site reports",
+    name: "Site reports",
     details: [
       {
         reportName: "Site Report A",
@@ -247,7 +247,7 @@ export const reports = [
   },
   {
     id: 11,
-    reportsName: "Travel reports",
+    name: "Travel reports",
     details: [
       {
         reportName: "Travel Report B",
@@ -262,7 +262,7 @@ export const reports = [
   },
   {
     id: 12,
-    reportsName: "Budget reports",
+    name: "Budget reports",
     details: [
       {
         reportName: "Budget Report C",
@@ -277,7 +277,7 @@ export const reports = [
   },
   {
     id: 13,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -292,7 +292,7 @@ export const reports = [
   },
   {
     id: 14,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -307,7 +307,7 @@ export const reports = [
   },
   {
     id: 15,
-    reportsName: "Site reports",
+    name: "Site reports",
     details: [
       {
         reportName: "Site Report A",
@@ -322,7 +322,7 @@ export const reports = [
   },
   {
     id: 16,
-    reportsName: "Travel reports",
+    name: "Travel reports",
     details: [
       {
         reportName: "Travel Report B",
@@ -337,7 +337,7 @@ export const reports = [
   },
   {
     id: 17,
-    reportsName: "Budget reports",
+    name: "Budget reports",
     details: [
       {
         reportName: "Budget Report C",
@@ -352,7 +352,7 @@ export const reports = [
   },
   {
     id: 18,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -367,7 +367,7 @@ export const reports = [
   },
   {
     id: 19,
-    reportsName: "Marketing reports",
+    name: "Marketing reports",
     details: [
       {
         reportName: "Marketing Report D",
@@ -382,7 +382,7 @@ export const reports = [
   },
   {
     id: 20,
-    reportsName: "Final reports",
+    name: "Final reports",
     details: [
       {
         reportName: "Final Report T",

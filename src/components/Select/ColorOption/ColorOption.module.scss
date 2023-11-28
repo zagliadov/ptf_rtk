@@ -1,0 +1,16 @@
+@import "src/styles/colors.scss";
+
+.options-wrapper {
+  display: flex;
+  align-items: center;
+
+  .options-colorization {
+    width: 10px;
+    height: 10px;
+    margin-right: 10px;
+  }
+  .options-label {
+    font-weight: 400;
+    font-size: 14px;
+  }
+}

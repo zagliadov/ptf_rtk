@@ -11,10 +11,10 @@ export const useElementHeight = (
   ref: RefObject<HTMLElement>,
   offset: number = 16.5
 ) => {
-  const [height, setHeight] = useState("0px");
+  const [height, setHeight] = useState<string>("0px");
 
   useEffect(() => {
-    const handleResize = () => {
+    const handleResize = (): void => {
       if (ref.current) {
         setHeight(`${ref.current.clientHeight - offset}px`);
       }

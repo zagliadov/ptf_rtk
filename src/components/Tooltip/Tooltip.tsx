@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { CSSProperties, FC } from "react";
 import ReactDOM from "react-dom";
 import styles from "./Tooltip.module.scss";
 import classnames from "classnames/bind";
@@ -11,14 +11,12 @@ interface TooltipProps {
 }
 
 export const Tooltip: FC<TooltipProps> = ({ content, position }) => {
-  const style: any = {
-    position: "fixed",
+  const style: CSSProperties = {
     top: position.top + window.scrollY - 158,
     left: position.left + window.scrollX - 15,
-    zIndex: 1000,
   };
 
-  const tooltipElement = (
+  const tooltipElement: JSX.Element = (
     <div className={cx("tooltip")} style={style}>
       <div className={cx("tooltip-header")}>
         <span>Report Title</span>

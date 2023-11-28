@@ -2,13 +2,17 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux'
 import { filtersApi } from './services/filtersApi';
 import managerSlice from './managerSlice';
+import filtersSlice from './filtersSlice';
 
 export const store = configureStore({
     reducer: {
         [filtersApi.reducerPath]: filtersApi.reducer,
         manager: managerSlice,
+        filters: filtersSlice,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(filtersApi.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+        serializableCheck: false,
+      }).concat(filtersApi.middleware),
 })
 
 

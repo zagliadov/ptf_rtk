@@ -8,6 +8,10 @@
   height: 33px;
   padding: 1px;
 
+  &.error-border {
+    border-color: color($var-color-app-orange);
+  }
+
   .toggle-button {
     font-size: 14px;
     font-weight: 400;

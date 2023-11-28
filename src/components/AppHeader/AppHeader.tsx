@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import styles from "./AppHeader.module.scss";
 import classnames from "classnames/bind";
 import { Button } from "../Button/Button";
@@ -8,9 +8,11 @@ import { ReactComponent as ExcelTableIcon } from "src/assets/icons/excel-table-i
 
 const cx: CX = classnames.bind(styles);
 export const AppHeader: FC = () => {
-  const handleGetApiUrl = async () => {
+
+  const handleGetApiUrl = useCallback(async() => {
     console.log("handleGetApiUrl");
-  };
+  }, []);
+
   return (
     <header className={cx("app-header")}>
       <div className={cx("app-header-content-wrapper")}>

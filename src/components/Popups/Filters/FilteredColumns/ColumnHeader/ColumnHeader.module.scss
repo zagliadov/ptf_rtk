@@ -4,15 +4,32 @@
   display: flex;
   align-items: center;
   padding-bottom: 10px;
+  position: relative;
+
   .drag-and-drop-icon {
     display: flex;
     align-items: center;
     padding-right: 4px;
+    cursor: default;
   }
-  
+
   .bookmark-icon {
     display: flex;
     align-items: center;
+    cursor: pointer;
+
+    .item-no-pin {
+      g path:nth-child(1) {
+        fill: color($var-color-app-dark-blue-3);
+        stroke: transparent;
+      }
+    }
+  }
+
+  .info-icon {
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
   }
 
   .column-name {

@@ -44,6 +44,7 @@ export const Button: FC<IProps> = ({
     <button
       type={type === "submit" ? "submit" : "button"}
       onClick={onClick}
+      aria-label={title}
       style={style}
       className={cx("button", {
         primary: type === "submit" || primary,

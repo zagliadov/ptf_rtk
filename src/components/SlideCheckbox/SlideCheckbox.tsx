@@ -1,12 +1,11 @@
-import React, { useId } from "react";
-
+import React, { useCallback, useId } from "react";
 import classnames from "classnames/bind";
-
 import styles from "./SlideCheckbox.module.scss";
 
 const cx = classnames.bind(styles);
 
-interface Props extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
+interface Props
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   checked: boolean;
   index: number;
   checkboxNumber: number;
@@ -18,7 +17,6 @@ interface Props extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onCha
   ) => void;
 }
 
-
 function SlideCheckbox({
   checked,
   disabled,
@@ -27,13 +25,13 @@ function SlideCheckbox({
   checkboxNumber,
   ...attributes
 }: Props) {
-  const inputId = useId();
+  const inputId: string = useId();
 
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  const  handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
     if (!disabled) {
       onChange(event.target.checked, index, checkboxNumber, event);
     }
-  }
+  }, [checkboxNumber, disabled, index, onChange]);
 
   return (
     <div className={cx("slide-checkbox")}>
@@ -43,14 +41,14 @@ function SlideCheckbox({
           disabled,
         })}
       >
-          <input
-            id={inputId}
-            type="checkbox"
-            checked={checked}
-            disabled={disabled}
-            onChange={handleChange}
-            {...attributes}
-          />
+        <input
+          id={inputId}
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={handleChange}
+          {...attributes}
+        />
 
         <div className={cx("checkbox-wrapper")}>
           <div className={cx("circle")} />

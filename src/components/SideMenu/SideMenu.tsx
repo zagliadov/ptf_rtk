@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from "react";
+import { FC, useCallback, useRef, useState } from "react";
 import styles from "./SideMenu.module.scss";
 import classnames from "classnames/bind";
 import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
@@ -19,6 +19,9 @@ import { useElementHeight } from "src/hook/useElementHeight";
 import { reports } from "./reports";
 import { Tooltip } from "../Tooltip/Tooltip";
 import ReactDOM from "react-dom";
+import { useHoverPositionVisibility } from "src/hook/useHoverPositionVisibility";
+import { useSearch } from "src/hook/useSearch";
+import * as _ from "lodash";
 
 const cx: CX = classnames.bind(styles);
 
@@ -28,62 +31,58 @@ const options = [
   { label: "kiwi", value: "kiwi" },
 ];
 
+interface IDetail {
+  creator: string;
+  department: string;
+  reportName: string;
+  dateCreated: string;
+  dateUpdated: string;
+  purpose: string;
+}
+
 export const SideMenu: FC = () => {
   const [value] = useState<string>("");
-  const [currentDetail, setCurrentDetail] = useState<any>(null);
-  const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
-  const [tooltipPosition, setTooltipPosition] = useState<any>({
-    top: 0,
-    left: 0,
-  });
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [currentDetail, setCurrentDetail] = useState<IDetail | null>(null);
+  const { isVisible, position, handleMouseEnter, handleMouseLeave } =
+    useHoverPositionVisibility<IDetail>({
+      setDetail: setCurrentDetail,
+    });
   const [activeReport, setActiveReport] = useState<number | null>(null);
-
+  const { filteredList, } = useSearch(reports, searchValue);
   const reportsWrapperRef = useRef<HTMLDivElement>(null);
-  const maxHeight = useElementHeight(reportsWrapperRef, 0);
+  const maxHeight: string = useElementHeight(reportsWrapperRef, 0);
   const dispatch = useAppDispatch();
   const { isSideMenuOpen } = useAppSelector(
     (state: RootState) => state.manager
   );
-  const handleBuildNewReport = () => {
+  const handleBuildNewReport = (): void => {
     dispatch(setCreateNewReportOpen(true));
   };
-  const onPrimaryChange = () => {
+  const onPrimaryChange = useCallback((): void => {
     console.log("onPrimaryChange");
-  };
+  }, []);
 
-  const handleCloseSideMenu = () => {
+  const handleCloseSideMenu = (): void => {
     dispatch(setIsSideMenuOpen(!isSideMenuOpen));
   };
 
-  const handleResetSearch = () => {};
+  const handleSearchChange = useCallback((newValue: string): void => {
+    setSearchValue(newValue);
+  }, []);
 
-  const handleReportsOpen = (id: number) => {
+  const handleReportsOpen = (id: number): void => {
     setActiveReport(id === activeReport ? null : id);
   };
 
-  const handleMouseEnter = (detail: any, rect: DOMRect) => {
-    setCurrentDetail(detail);
-    setTooltipPosition({
-      top: rect.top + window.scrollY,
-      left: rect.right + window.scrollX,
-    });
-    setTooltipVisible(true);
-  };
-
-  const renderItemDetails = (detail: any, index: any) => {
+  const renderItemDetails = (detail: IDetail, index: number): JSX.Element => {
     return (
       <div key={index} className={cx("detail-item")}>
         <span>{detail.reportName}</span>
         <div
           className={cx("info-icon-container")}
-          onMouseEnter={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            handleMouseEnter(detail, rect);
-          }}
-          onMouseLeave={() => {
-            setTooltipVisible(false);
-            setCurrentDetail(null);
-          }}
+          onMouseEnter={(e) => handleMouseEnter(e, detail)}
+          onMouseLeave={handleMouseLeave}
         >
           <InfoIcon />
         </div>
@@ -97,6 +96,8 @@ export const SideMenu: FC = () => {
         <div className={cx("side-menu-header")}>
           <span>Created Reports</span>
           <button
+            type="button"
+            aria-label="close-side-menu"
             className={cx("arrow-icon-wrapper")}
             onClick={handleCloseSideMenu}
           >
@@ -108,8 +109,8 @@ export const SideMenu: FC = () => {
         <div className={cx("side-menu-filters-wrapper")}>
           <div className={cx("side-menu-filters")}>
             <Search
-              onChange={handleResetSearch}
-              value={""}
+              onChange={handleSearchChange}
+              value={searchValue}
               placeholder={"Search by Reports"}
               width={"100%"}
             />
@@ -127,14 +128,16 @@ export const SideMenu: FC = () => {
           style={{ maxHeight }}
           className="my-custom-scrollbar-sidebar"
         >
-          {reports.map(({ id, reportsName, details }) => {
+          {_.map(filteredList, ({ id, name, details }: any) => {
             return (
               <div key={id}>
                 <div className={cx("reports-item")}>
-                  <span className={cx("reports-name")}>{reportsName}</span>
+                  <span className={cx("reports-name")}>{name}</span>
                   <button
+                    type="button"
                     className={cx("reports-open-button")}
                     onClick={() => handleReportsOpen(id)}
+                    aria-label={"open-report"}
                   >
                     <CaretDownIcon
                       className={cx({
@@ -161,11 +164,11 @@ export const SideMenu: FC = () => {
           style={{ width: "231px" }}
         />
       </div>
-      {tooltipVisible &&
+      {isVisible &&
         currentDetail &&
         ReactDOM.createPortal(
           <Tooltip
-            position={tooltipPosition}
+            position={position}
             content={[
               `Creator: ${currentDetail.creator}`,
               `Department: ${currentDetail.department}`,

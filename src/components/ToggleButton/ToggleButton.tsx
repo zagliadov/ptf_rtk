@@ -6,17 +6,22 @@ import { EDataKeys } from "src/types";
 const cx: CX = classnames.bind(styles);
 
 interface IProps {
-  onChange: (value: string) => void;
-  value: string;
+  onChange: (value: EDataKeys.INTERNAL | EDataKeys.EXTERNAL) => void;
+  value: EDataKeys.INTERNAL | EDataKeys.EXTERNAL;
+  error: string | undefined;
 }
-export const ToggleButton: FC<IProps> = ({ onChange, value }) => {
-  const handleOptionChange = (option: string, e: React.MouseEvent<HTMLButtonElement>) => {
+export const ToggleButton: FC<IProps> = ({ onChange, value, error }) => {
+  const handleOptionChange = (option: string, e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
-    onChange(option);
+    if (Object.values(EDataKeys).includes(option as EDataKeys)) {
+      onChange(option as EDataKeys.INTERNAL | EDataKeys.EXTERNAL);
+    }
   };
 
+  const isErrorBorder: boolean | "" | undefined = error && ![EDataKeys.INTERNAL, EDataKeys.EXTERNAL].includes(value as EDataKeys);
+
   return (
-    <div className={cx("toggle-button-wrapper")}>
+    <div className={cx("toggle-button-wrapper", { 'error-border': isErrorBorder })}>
       <button
         className={cx(
           "toggle-button",

@@ -1,7 +1,7 @@
 import { convertLocalToUTCDate, convertUTCToLocalDate } from "src/utils";
 import { ReactComponent as CalendarIcon } from "src/assets/icons/calendar-icon.svg";
-import { ReactComponent as CaretLeft } from "../../../assets/icons/caret/caret-left.svg";
-import { ReactComponent as CaretRight } from "../../../assets/icons/caret/caret-right.svg";
+import { ReactComponent as CaretLeft } from "src/assets/icons/caret-left-icon.svg";
+import { ReactComponent as CaretRight } from "src/assets/icons/caret-right-icon.svg";
 import "./DatePicker.global.scss";
 import styles from "./DatePicker.module.scss";
 import classnames from "classnames/bind";
@@ -22,7 +22,7 @@ const CustomInput = React.forwardRef(
     {
       error,
       ...attributes
-    }: React.InputHTMLAttributes<HTMLInputElement> & { error?: boolean }, //
+    }: React.InputHTMLAttributes<HTMLInputElement> & { error?: boolean },
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     return (
@@ -84,7 +84,7 @@ function DatePicker({
   endDate,
   error,
   errors,
-  message
+  message,
 }: Props) {
   return (
     <div className={cx("date-picker")}>
@@ -102,7 +102,7 @@ function DatePicker({
         onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
           event.preventDefault();
         }}
-        readOnly={true}
+        readOnly={false}
         allowSameDay={false}
         selected={convertUTCToLocalDate(startDate || date || null)}
         startDate={convertUTCToLocalDate(startDate || null)}

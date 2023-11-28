@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import styles from "./CreateNewReport.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
@@ -29,26 +29,30 @@ interface IProps {
   onContinue: () => void;
 }
 export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useFormContext<RData>();
+  const { register, handleSubmit, setValue, unregister, watch, clearErrors, formState: { errors } } = useFormContext<RData>();
   const dispatch = useAppDispatch();
-  const onPrimaryChange = (newValue: string | null): void => {
+
+  const onPrimaryChange = useCallback((newValue: string | null): void => {
     if (newValue) {
       setValue(EDataKeys.DATA_SOURCE, newValue);
+      clearErrors(EDataKeys.DATA_SOURCE);
+      unregister(EDataKeys.FILTERS);
+      unregister(EDataKeys.FILTERED_LIST);
     }
-  };
+  }, [clearErrors, setValue, unregister]);
 
-  const onSubmit = (data: RData) => {
+  const onSubmit = useCallback((data: RData) => {
     console.log("Form Data:", data);
     onContinue();
-  };
+  }, [onContinue]);
 
-  const onCancel = () => {
+  const onCancel = useCallback(() => {
     dispatch(setCreateNewReportOpen(false));
-  };
+  }, [dispatch]);
 
-  const onToggleChange = (newValue: string) => {
+  const onToggleChange = useCallback((newValue: EDataKeys.INTERNAL | EDataKeys.EXTERNAL) => {
     setValue(EDataKeys.REPORT_TYPE, newValue);
-  };
+  }, [setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -66,10 +70,12 @@ export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
             value={watch(EDataKeys.DATA_SOURCE)}
             onChange={onPrimaryChange}
             placeholder={EDataKeys.DATA_SOURCE}
+            error={errors[EDataKeys.DATA_SOURCE]?.message}
           />
           <ToggleButton
             value={watch(EDataKeys.REPORT_TYPE)}
             onChange={onToggleChange}
+            error={errors[EDataKeys.REPORT_TYPE]?.message}
           />
           <ButtonWrapper shift={"right"}>
             <Button

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import { Popup } from "src/components/Popup/Popup";
 import { ColumnSelector } from "../ColumnSelector/ColumnSelector";
 import { CreateNewReport } from "../CreateNewReport/CreateNewReport";
@@ -15,10 +15,9 @@ import { DeleteEntry } from "../DeleteEntry/DeleteEntry";
 import { FormProvider, useForm } from "react-hook-form";
 import { schema } from "src/validation";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { DynamicFormData } from "src/types";
 
 export const PopupManager: FC = () => {
-  const methods = useForm<DynamicFormData>({
+  const methods = useForm({
     resolver: yupResolver(schema),
   });
   const dispatch = useAppDispatch();
@@ -30,15 +29,15 @@ export const PopupManager: FC = () => {
     isDeleteEntryOpen,
   } = useAppSelector((state: RootState) => state.manager);
 
-  const openColumnSelector = () => {
+  const openColumnSelector = useCallback((): void => {
     dispatch(setCreateNewReportOpen(false));
     dispatch(setColumnSelectorOpen(true));
-  };
+  }, [dispatch]);
 
-  const openFilterPopup = () => {
+  const openFilterPopup = useCallback((): void => {
     dispatch(setColumnSelectorOpen(false));
     dispatch(setIsFiltersOpen(true));
-  };
+  }, [dispatch]);
 
   return (
     <FormProvider {...methods}>

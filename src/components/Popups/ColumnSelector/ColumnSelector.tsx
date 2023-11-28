@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState, lazy, Suspense } from "react";
 import classnames from "classnames/bind";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
@@ -14,11 +14,12 @@ import "simplebar/dist/simplebar.min.css";
 import styles from "./ColumnSelector.module.scss";
 import "./simplebar.scss";
 import { ColumnListHeader } from "./ColumnListHeader/ColumnListHeader";
-import { ColumnList } from "./ColumnList/ColumnList";
 import { useFormContext } from "react-hook-form";
 import { EDataKeys, RData } from "src/types";
-import { useGetFiltersDescribeDataQuery } from "src/store/services/filtersApi";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
+import useFilterInitialization from "src/hook/useFilterInitialization";
+import { useHandleCheckboxAll } from "src/hook/useHandleCheckboxAll";
+const ColumnList = lazy(() => import("./ColumnList/ColumnList"));
 
 const cx: CX = classnames.bind(styles);
 
@@ -27,33 +28,38 @@ interface IProps {
 }
 
 export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
-  const { register, handleSubmit, watch } = useFormContext();
+  const { register, handleSubmit } = useFormContext<RData>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const { isLoading } = useGetFiltersDescribeDataQuery(
-    watch(EDataKeys.DATA_SOURCE)
-  );
+  const { filters, setFilters, isLoading } = useFilterInitialization();
   const dispatch = useAppDispatch();
-  const handleCloseColumnSelector = () => {
+  const { isChecked, handleCheckedAll, handleResetAll } = useHandleCheckboxAll(
+    filters,
+    setFilters
+  );
+
+  const handleCloseColumnSelector = useCallback(() => {
     dispatch(setColumnSelectorOpen(false));
     dispatch(setCreateNewReportOpen(true));
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     register(EDataKeys.FILTERS);
   }, [register]);
 
-  const onSubmit = (data: any) => {
-    console.log("Form Data:", data);
-    onContinue();
-  };
+  const onSubmit = useCallback(
+    (data: RData) => {
+      onContinue();
+    },
+    [onContinue]
+  );
 
-  const handleResetColumns = () => {
-    console.log("Reset Columns");
-  };
+  const handleResetColumns = useCallback(() => {
+    handleResetAll();
+  }, [handleResetAll]);
 
-  const handleSearchChange = (newValue: string) => {
+  const handleSearchChange = useCallback((newValue: string) => {
     setSearchValue(newValue);
-  };
+  }, []);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -73,7 +79,11 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
           </div>
 
           <div className={cx("column-list")}>
-            <ColumnListHeader />
+            <ColumnListHeader
+              handleCheckedAll={handleCheckedAll}
+              isChecked={isChecked}
+              isLoading={isLoading}
+            />
             <SimpleBar
               style={{ maxHeight: "403px" }}
               className="my-custom-scrollbar-column"
@@ -83,7 +93,19 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
                   <DotSpinner />
                 </div>
               ) : (
-                <ColumnList searchValue={searchValue} />
+                <Suspense
+                  fallback={
+                    <div className={cx("is-loading")}>
+                      <DotSpinner />
+                    </div>
+                  }
+                >
+                  <ColumnList
+                    searchValue={searchValue}
+                    filters={filters}
+                    setFilters={setFilters}
+                  />
+                </Suspense>
               )}
             </SimpleBar>
           </div>

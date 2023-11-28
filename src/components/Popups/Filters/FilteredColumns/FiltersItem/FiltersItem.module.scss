@@ -1,0 +1,7 @@
+@import "src/styles/colors.scss";
+
+.filters-item {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid color($var-color-app-grey-6);
+}

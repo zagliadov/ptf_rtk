@@ -14,21 +14,35 @@ export interface UpdatedChoice {
 }
 
 export type DynamicFormData = Record<string, any>;
+export type SourceType = Record<EDataKeys.DATA_SOURCE | EDataKeys.API, EDataKeys>;
 
 export enum EDataKeys {
   REPORT_TITLE = "Report title",
   DATA_SOURCE = "Data Source",
+  DATA_SOURCE_SITE = "Site",
+  DATA_SOURCE_PROJECT = "Project",
+  DATA_SOURCE_TRAVEL_REQUEST = "Travel request",
+  DATA_SOURCE_TICKET = "Ticket",
+  API_DATA_WAREHOUSE = "API Data Warehouse",
+  API_VIEW = "API View",
+  API = "API",
+  COLUMN_IDS = "columnIds",
   REPORT_TYPE = "Report Type",
+  PIN_TO_MAIN_VIEW = "pinToMainView",
+  FILTERED_LIST = "Filtered List",
+  CHECKED1 = "checked1",
+  CHECKED2 = "checked2",
+  COLORIZATION = "colorization",
+  NAME = "name",
+  CHOICE = "choice",
   EXTERNAL = "External",
   INTERNAL = "Internal",
   FILTERS = "Filters",
-  TYPE_HTML = "Html",
   TYPE_NUMERIC = "Numeric",
   TYPE_TEXT = "Text",
   TYPE_URL = "URL",
   TYPE_DATE = "Date",
   TYPE_USER = "User",
-  TYPE_ATTACHMENT = "Attachment",
   TYPE_PHONE = "Phone",
   TYPE_TIMESTAMP = "Timestamp",
   TYPE_EMAIL = "Email",
@@ -39,7 +53,7 @@ export enum EDataKeys {
   TYPE_DURATION = "Duration",
 }
 
-type Colorization = {
+export type Colorization = {
   pattern?: string;
   color: string;
 };
@@ -52,7 +66,7 @@ type Reference = {
 
 export type  ColumnData = {
   id: number;
-  name: string;
+  [EDataKeys.NAME]: string;
   alias: string;
   description?: string;
   type: 'Html' | 'Numeric' | 'Text' | 'URL' | 'Date' | 'User' | 'Attachment' | 'Phone' | 'Timestamp' | 'Email' | 'Multiline' | 'Autonumber' | 'Location' | 'RecordSet' | 'Duration';
@@ -69,14 +83,18 @@ export type  ColumnData = {
 };
 
 export interface IIFilters extends ColumnData {
-  checked1: boolean;
-  checked2: boolean;
+  [EDataKeys.CHECKED1]: boolean;
+  [EDataKeys.CHECKED2]: boolean;
+  [EDataKeys.PIN_TO_MAIN_VIEW]: boolean;
+  [EDataKeys.CHOICE]: string | null;
 }
 
 
 export type RData = {
   [EDataKeys.REPORT_TITLE]: string;
   [EDataKeys.DATA_SOURCE]: string;
-  [EDataKeys.REPORT_TYPE]: string;
+  [EDataKeys.REPORT_TYPE]: EDataKeys.INTERNAL | EDataKeys.EXTERNAL;
   [EDataKeys.FILTERS]: ColumnData[];
+  [EDataKeys.FILTERED_LIST]: IIFilters[];
+  [EDataKeys.COLUMN_IDS]: string[];
 };

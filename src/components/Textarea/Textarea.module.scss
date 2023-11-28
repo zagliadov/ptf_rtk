@@ -1,0 +1,66 @@
+@import "src/styles/colors.scss";
+
+.wrapper {
+  width: 100%;
+  height: 90px;
+  border: 1px solid color($var-color-app-grey-1);
+  border-radius: 8px;
+  position: relative;
+  padding-top: 5px;
+  padding-left: 16px;
+  padding-bottom: 0px;
+
+  textarea {
+    resize: none;
+    max-width: 100%;
+    min-width: 100%;
+    font-size: 14px;
+    border-width: 5px;
+    border-style: solid;
+    background-color: transparent;
+    display: block;
+    border-color: transparent;
+    color: color($var-color-app-black);
+    height: 100%;
+    padding: 0px;
+    margin-top: 5px;
+    overflow: auto;
+
+    &::-webkit-scrollbar-thumb:hover {
+      transition: all 0.5s ease-out;
+      background: color($var-color-app-blue-main);
+    }
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: color($var-color-app-grey-2);
+      border-radius: 10px;
+      width: 5px;
+      height: 30px;
+    }
+
+    &::placeholder {
+      color: color($var-color-app-grey-2);
+      font-size: 14px;
+    }
+
+    &:focus,
+    &:active {
+      color: color($var-color-app-black);
+      outline: none;
+    }
+  }
+
+  &.error {
+
+    .error-field {
+      margin-top: 4px;
+      font-size: 0.75rem;
+      color: color($var-color-app-orange);
+    }
+  }
+
+}

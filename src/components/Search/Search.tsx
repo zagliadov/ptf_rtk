@@ -17,16 +17,16 @@ interface ISearchProps {
 }
 
 const Search = ({ value, onChange, onReset, disabled, placeholder, width }: ISearchProps) => {
-  const [option, setOption] = useState(value || "");
+  const [option, setOption] = useState<string>(value || "");
 
-  const handleInputState = (setState: (string: string) => void) => (e: any) => {
+  const handleInputState = (setState: (string: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target) {
       setState((e.target as HTMLInputElement).value);
       onChange((e.target as HTMLInputElement).value);
     }
   };
 
-  const handleReset = () => {
+  const handleReset = (): void => {
     if(disabled) return;
     setOption("");
     onChange("");
@@ -38,9 +38,9 @@ const Search = ({ value, onChange, onReset, disabled, placeholder, width }: ISea
   }, [value])
 
   return (
-    <div className={cx("box")}>
+    <label className={cx("box")} htmlFor={placeholder} style={{ width: width }}>
       {option.length > 0 && (
-        <button className={cx("reset")} onClick={handleReset}>
+        <button type="button" aria-label={"reset-icon"} className={cx("reset")} onClick={handleReset}>
           <CloseIcon />
         </button>
       )}
@@ -50,12 +50,13 @@ const Search = ({ value, onChange, onReset, disabled, placeholder, width }: ISea
       <input
         style={{ width: width }}
         type="text"
+        id={placeholder}
         value={option}
         onChange={handleInputState(setOption)}
         placeholder={placeholder}
         disabled={disabled}
       />
-    </div>
+    </label>
   );
 };
 

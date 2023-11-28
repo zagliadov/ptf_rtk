@@ -10,10 +10,11 @@ type InputProps = {
   placeholder?: string;
   error?: string | boolean;
   icon?: ReactNode;
+  type?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
 const Input = forwardRef<HTMLInputElement, InputProps>((props, ref: ForwardedRef<HTMLInputElement>) => {
-  const { label, name, error, icon, ...rest } = props;
+  const { label, name, error, icon, type = "search", ...rest } = props;
   return (
     <div className={cx("wrapper", { error })}>
       {icon && <div className={cx("icon")}>{icon}</div>}
@@ -21,7 +22,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, ref: ForwardedRef
         ref={ref}
         id={name}
         name={name}
-        type="search"
+        type={type}
         {...rest}
       />
     </div>

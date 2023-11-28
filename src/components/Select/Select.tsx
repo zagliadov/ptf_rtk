@@ -11,18 +11,29 @@ import classnames from "classnames/bind";
 
 import styles from "./Select.module.scss";
 import { ReactComponent as CloseIcon } from "src/assets/icons/close-icon.svg";
+import { ColorOption } from "./ColorOption/ColorOption";
 
 const cx: CX = classnames.bind(styles);
 
 const Select = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLSelectElement>) => {
-    const { error, options, onChange, value, isClearable = false, ...rest } = props;
+    const {
+      error,
+      options,
+      onChange,
+      value,
+      isClearable = false,
+      ...rest
+    } = props;
 
     const handleChange = (
-      selectedOption: SingleValue<{ value: string; label: string; }>,
-      actionMeta: ActionMeta<{ value: string; label: string; }>
+      selectedOption: SingleValue<{ value: string; label: string }>,
+      actionMeta: ActionMeta<{ value: string; label: string }>
     ) => {
-      if (actionMeta.action === "select-option" || actionMeta.action === "clear") {
+      if (
+        actionMeta.action === "select-option" ||
+        actionMeta.action === "clear"
+      ) {
         onChange(selectedOption ? selectedOption.value : null);
       }
     };
@@ -123,6 +134,7 @@ const Select = forwardRef(
           }}
           isSearchable={false}
           components={{
+            Option: ColorOption,
             Menu: (menuProps) => (
               <components.Menu {...menuProps} className={cx("menu")} />
             ),

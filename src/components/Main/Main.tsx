@@ -25,13 +25,14 @@ export const Main: FC = () => {
       <div className={cx("toggle-menu")}>
         <Button
           type="button"
+          aria-label={"extra-menu"}
           icon={<DotsIcon />}
           onClick={toggleMenu}
           style={{ width: "40px" }}
         />
         {isDotThreeMenuOpen && <DotThreeMenu />}
       </div>
-      <Button type="button" icon={<FilterIcon />} style={{ width: "40px" }} />
+      <Button type="button" aria-label={"filter-button"} icon={<FilterIcon />} style={{ width: "40px" }} />
 
 
       <div className={cx("date-income")}>
