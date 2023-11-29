@@ -47,7 +47,9 @@ const FiltersItem: FC<IProps> = ({ filteredList }) => {
   );
 
   useEffect(() => {
-    const idsArray: string[] = _.map(filteredList, (item) => _.toString(item.id));
+    const idsArray: string[] = _.map(filteredList, (item) =>
+      _.toString(item.id)
+    );
     setValue(EDataKeys.COLUMN_IDS, idsArray);
   }, [filteredList, setValue]);
 

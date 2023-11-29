@@ -10,46 +10,19 @@
   border-top-right-radius: 8px;
   background-color: color($var-color-app-white);
 
+  .side-menu-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .side-menu-header-wrapper {
     display: flex;
     flex-direction: column;
     padding-left: 16px;
     padding-top: 14px;
     padding-bottom: 16px;
-
-    .side-menu-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 32px;
-
-      .arrow-icon-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-        width: 32px;
-        height: 32px;
-        background-color: color($var-color-app-bg);
-
-        .arrow-icon-rotated {
-          transform: rotate(180deg);
-        }
-      }
-    }
-
-    .side-menu-filters-wrapper {
-      padding-top: 16px;
-
-      .side-menu-filters {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 231px;
-        height: 88px;
-      }
-    }
   }
 
   .side-menu-reports-wrapper {
@@ -96,6 +69,7 @@
         height: 44px;
         padding-right: 16px;
         transition: background-color 0.3s;
+
         .info-icon-container {
           display: flex;
           justify-content: center;
@@ -103,6 +77,7 @@
           padding-left: 12px;
           cursor: pointer;
         }
+
         span {
           font-weight: 400;
           font-size: 14px;
@@ -117,27 +92,20 @@
         &:hover {
           transition: background-color 0.3s;
           background-color: color($var-color-app-blue-main);
+
           span {
             color: color($var-color-app-white);
           }
+
           svg g path:nth-child(1) {
             stroke: color($var-color-app-dark-blue-3);
           }
-          
+
           svg g path:nth-child(2) {
             stroke: color($var-color-app-dark-blue-3);
           }
         }
       }
     }
-  }
-
-  .side-menu-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 83px;
-    background-color: color($var-color-app-white);
-    box-shadow: -2px 2px 36px 0px #061F331F;
   }
 }

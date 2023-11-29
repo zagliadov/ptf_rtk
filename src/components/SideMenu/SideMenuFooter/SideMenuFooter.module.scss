@@ -1,0 +1,10 @@
+@import "src/styles/colors.scss";
+
+.side-menu-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 83px;
+  background-color: color($var-color-app-white);
+  box-shadow: -2px 2px 36px 0px #061F331F;
+}

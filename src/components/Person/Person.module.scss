@@ -1,0 +1,19 @@
+.person {
+  display: flex;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  .name-wrapper {
+    margin-left: 10px;
+
+    .name {
+      font-weight: 700;
+    }
+
+    .role {
+      font-size: 12px;
+    }
+  }
+}

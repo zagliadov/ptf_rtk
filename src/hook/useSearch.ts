@@ -17,22 +17,22 @@ import { IIFilters } from "src/types";
  *   console.log(filter.name);
  * });
  *
- * // You can also manually set the filtered list if required
+ * You can also manually set the filtered list if required
  * setFilteredList(newFilteredList);
  */
 
 interface UseSearchResult {
-  filteredList: IIFilters[] | any;
+  filteredList: IIFilters[];
   setFilteredList: React.Dispatch<React.SetStateAction<IIFilters[]>>;
 }
 export const useSearch = (
-  selectedFilters: IIFilters[] | any,
+  selectedFilters: IIFilters[],
   searchValue: string
 ): UseSearchResult => {
   const [filteredList, setFilteredList] = useState<IIFilters[]>([]);
 
   useEffect(() => {
-    const updatedList = selectedFilters.filter((item: any) =>
+    const updatedList = selectedFilters.filter((item) =>
       item.name.toLowerCase().includes(searchValue.toLowerCase())
     );
     setFilteredList(updatedList);

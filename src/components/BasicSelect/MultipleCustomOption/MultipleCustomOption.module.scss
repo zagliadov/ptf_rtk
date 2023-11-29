@@ -1,0 +1,26 @@
+@import "src/styles/colors.scss";
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  cursor: pointer;
+
+  & * {
+    color: color($var-color-app-grey-2);
+  }
+
+  &.selected,
+  &:hover {
+    & * {
+      color: #202020;
+    }
+  }
+
+  .half-selected {
+    &~div {
+      background-color: rgb(78 176 194 / 50%) !important;
+      border: none;
+    }
+  }
+}

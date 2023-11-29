@@ -1,0 +1,7 @@
+@import "../colors";
+
+:export {
+  @each $key, $value in $app-colors {
+    #{$key}: $value;
+  }
+}

@@ -1,0 +1,13 @@
+@import "src/styles/colors.scss";
+
+.side-menu-filters-wrapper {
+  padding-top: 16px;
+
+  .side-menu-filters {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 231px;
+    height: 88px;
+  }
+}

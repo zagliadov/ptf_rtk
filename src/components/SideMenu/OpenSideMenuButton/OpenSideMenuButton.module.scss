@@ -1,0 +1,16 @@
+@import "src/styles/colors.scss";
+
+.arrow-icon-open-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  width: 32px;
+  height: 32px;
+  background-color: color($var-color-app-bg);
+  
+  .arrow-icon-rotated {
+    transform: rotate(180deg);
+  }
+}

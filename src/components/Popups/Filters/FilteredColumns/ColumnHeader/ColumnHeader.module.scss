@@ -3,8 +3,14 @@
 .column-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding-bottom: 10px;
   position: relative;
+
+  .column-control-item {
+    display: flex;
+    align-items: center;
+  }
 
   .drag-and-drop-icon {
     display: flex;

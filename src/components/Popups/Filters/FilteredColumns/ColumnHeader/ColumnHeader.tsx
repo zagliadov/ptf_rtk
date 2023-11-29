@@ -53,36 +53,40 @@ export const ColumnHeader: FC<IProps> = ({ item, filteredList }) => {
 
   return (
     <div className={cx("column-header")}>
-      <Reorder.Item key={item.id} value={item}>
+      <div className={cx("column-control-item")}>
+        <Reorder.Item key={item.id} value={item}>
+          <button
+            type="button"
+            onMouseEnter={handleDnDInfoMouseEnter}
+            onMouseLeave={handleDnDInfoMouseLeave}
+            className={cx("drag-and-drop-icon")}
+          >
+            <DnDIcon />
+          </button>
+        </Reorder.Item>
+
         <button
           type="button"
-          onMouseEnter={handleDnDInfoMouseEnter}
-          onMouseLeave={handleDnDInfoMouseLeave}
-          className={cx("drag-and-drop-icon")}
+          onMouseEnter={handleBookmarkInfoMouseEnter}
+          onMouseLeave={handleBookmarkInfoMouseLeave}
+          className={cx("bookmark-icon")}
+          onClick={() => handleChangeCheckbox(item?.id)}
         >
-          <DnDIcon />
+          <BookmarkIcon className={cx(item?.pinToMainView && "item-no-pin")} />
         </button>
-      </Reorder.Item>
 
-      <button
-        type="button"
-        onMouseEnter={handleBookmarkInfoMouseEnter}
-        onMouseLeave={handleBookmarkInfoMouseLeave}
-        className={cx("bookmark-icon")}
-        onClick={() => handleChangeCheckbox(item.id)}
-      >
-        <BookmarkIcon className={cx(item.pinToMainView && "item-no-pin")} />
-      </button>
-
-      <span className={cx("column-name")}>{item.name}</span>
-
-      <div
-        className={cx("info-icon")}
-        onMouseEnter={handleColumnInfoMouseEnter}
-        onMouseLeave={handleColumnInfoMouseLeave}
-      >
-        <ColumnInfoIcon />
+        <span className={cx("column-name")}>{item?.name}</span>
       </div>
+      {item?.description?.length !== 0 && (
+        <div
+          className={cx("info-icon")}
+          onMouseEnter={handleColumnInfoMouseEnter}
+          onMouseLeave={handleColumnInfoMouseLeave}
+        >
+          <ColumnInfoIcon />
+        </div>
+      )}
+
       {isDnDInfoVisible &&
         ReactDOM.createPortal(
           <DnDInfoPopup position={DnDInfoPosition} />,

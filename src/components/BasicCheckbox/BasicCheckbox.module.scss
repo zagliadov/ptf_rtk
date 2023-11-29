@@ -1,0 +1,56 @@
+@import "src/styles/colors.scss";
+
+.basic-checkbox {
+  display: flex;
+  align-items: center;
+
+  label {
+    display: flex;
+    width: fit-content;
+    margin: 0;
+    cursor: pointer;
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      background-color: color($var-color-app-white);
+      border: 1px solid color($var-color-app-grey-2);
+      border-radius: 4px;
+    }
+
+    .label-text {
+      display: flex;
+      align-items: center;
+      user-select: none;
+    }
+
+    input[type="checkbox"] {
+      display: none;
+      
+      &:checked {
+        &~.checkbox-wrapper {
+          background-color: color($var-color-app-blue-main);
+          border-color: color($var-color-app-blue-main);
+          box-shadow: 0 0 6px 0 rgb(78 176 194 / 61%);
+        }
+      }
+
+      &:disabled {
+
+        &~.checkbox-wrapper {
+          background-color: color($var-color-app-white);
+          border-color: color($var-color-app-grey-2);
+          box-shadow: none;
+        }
+      }
+    }
+
+    &.disabled {
+      cursor: default;
+    }
+  }
+}
