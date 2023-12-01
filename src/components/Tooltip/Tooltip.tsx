@@ -2,6 +2,7 @@ import { CSSProperties, FC } from "react";
 import ReactDOM from "react-dom";
 import styles from "./Tooltip.module.scss";
 import classnames from "classnames/bind";
+import * as _ from "lodash";
 
 const cx = classnames.bind(styles);
 
@@ -22,11 +23,12 @@ export const Tooltip: FC<TooltipProps> = ({ content, position }) => {
         <span>Report Title</span>
       </div>
       <ul>
-        {content.map((line, index) => (
-          <li key={index} className={cx("tooltip-line")}>
-            {line}
-          </li>
-        ))}
+        {!_.isEmpty(content) &&
+          _.map(content, (line, index) => (
+            <li key={index} className={cx("tooltip-line")}>
+              {line}
+            </li>
+          ))}
       </ul>
     </div>
   );

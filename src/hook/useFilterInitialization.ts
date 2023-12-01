@@ -4,6 +4,7 @@ import {
   useGetFiltersDescribeDataQuery,
   useGetFiltersSelectDataQuery,
 } from "src/store/services/filtersApi";
+import { useAppSelector, RootState } from "src/store/store";
 import { ColumnData, EDataKeys, IIFilters, SourceType } from "src/types";
 import * as _ from "lodash";
 
@@ -20,13 +21,13 @@ import * as _ from "lodash";
  *
  * This hook utilizes useMemo to optimize the processing of fetched data, ensuring efficient re-calculation only when necessary.
  * It also ensures that the filter data is initialized only once and not overwritten during subsequent renders.
- * 
+ *
  * @example
  * const { filters, setFilters, isLoading } = useFilterInitialization();
  *
  * useEffect(() => {
  *   if (!isLoading) {
- *     // Perform actions with filters
+ *     Perform actions with filters
  *   }
  * }, [filters, isLoading]);
  */
@@ -34,7 +35,7 @@ import * as _ from "lodash";
 const useFilterInitialization = () => {
   // useFormContext hook from react-hook-form is used for form state management.
   const { watch, setValue } = useFormContext();
-
+  const { reportIsEdit } = useAppSelector((state: RootState) => state.manager);
   // State to store filter data.
   const [filters, setFilters] = useState<IIFilters[]>([]);
 
@@ -44,7 +45,10 @@ const useFilterInitialization = () => {
   // Custom query hook from Redux Toolkit to fetch filter data based on data source.
   const source: SourceType = {
     [EDataKeys.DATA_SOURCE]: dataSource,
-    [EDataKeys.API]: dataSource === EDataKeys.DATA_SOURCE_PROJECT ? EDataKeys.API_DATA_WAREHOUSE : EDataKeys.API_VIEW,
+    [EDataKeys.API]:
+      dataSource === EDataKeys.DATA_SOURCE_PROJECT
+        ? EDataKeys.API_DATA_WAREHOUSE
+        : EDataKeys.API_VIEW,
   };
 
   const {
@@ -71,7 +75,6 @@ const useFilterInitialization = () => {
     return _.filter(describeColumns, (column) =>
       _.includes(selectKeys, column.name)
     );
-
   }, [selectData, describeData]);
 
   useEffect(() => {
@@ -91,8 +94,21 @@ const useFilterInitialization = () => {
             ...item,
           }));
 
-      setFilters(initialFilters);
-      setValue(EDataKeys.FILTERS, initialFilters);
+      //test ....
+      const storedSelectedFiltersRaw = localStorage.getItem("filtersArray");
+      const storedSelectedFilters: IIFilters[] = storedSelectedFiltersRaw
+        ? JSON.parse(storedSelectedFiltersRaw)
+        : [];
+      if (reportIsEdit) {
+        setFilters(storedSelectedFilters);
+        setValue(EDataKeys.FILTERS, storedSelectedFilters);
+      } else {
+        setFilters(initialFilters);
+        setValue(EDataKeys.FILTERS, initialFilters);
+      }
+      //.....
+      // setFilters(initialFilters);
+      // setValue(EDataKeys.FILTERS, initialFilters);
     }
   }, [
     processedData,
@@ -100,6 +116,7 @@ const useFilterInitialization = () => {
     isFetchingDescribeData,
     setValue,
     watch,
+    reportIsEdit,
   ]);
 
   const memoizedFilters = useMemo(() => {

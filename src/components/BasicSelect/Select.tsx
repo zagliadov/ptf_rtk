@@ -53,23 +53,26 @@ function BasicSelect<T extends Option & Record<string, unknown>>(
   );
 
   const formattedOptions = useMemo(() => {
+    // Deep clone the options to avoid mutating the original array.
     let result: (T | Group<T>)[] = _.cloneDeep(options);
-
+    // If options are not grouped and multiple selection is allowed, add an 'All' option.
     if (!isGroup) {
       if (isMultiple) {
         const allOption: Option = { value: "all", label: `All ${label || ""}` };
+        // Add 'All' option only if it's not already present.
         if (!_.some(result as T[], { value: "all" })) {
           result = [allOption as unknown as T, ...result];
         }
       }
     } else {
+      // If options are grouped, process each group.
       result = _.map(options as Group<T>[], (group) => {
         const allOption: Option = {
           value: "all",
           label: `All ${group.label}`,
           groupKey: group.key,
         };
-
+        // Combine 'All' option with the group's options, ensuring 'All' is not duplicated.
         const newOptions = _.concat(
           _.some(group.options, { value: "all" })
             ? []
@@ -80,12 +83,13 @@ function BasicSelect<T extends Option & Record<string, unknown>>(
         return { ...group, options: newOptions };
       });
     }
-
+    // Limit the result to the first 100 items if it's an array.
     return _.isArray(result) ? _.slice(result, 0, 100) : result;
   }, [options, isGroup, isMultiple, label]);
 
   const filteredValue = useMemo(() => {
     if (isGroup) {
+      // If options are grouped, filter out any items with 'halfSelected' property set to true.
       return _.filter(value as T[], (item: Option) => !item.halfSelected);
     }
     return value;
@@ -93,7 +97,11 @@ function BasicSelect<T extends Option & Record<string, unknown>>(
 
   const allOptions = useMemo(() => {
     if (isGroup) {
-      return _.flatMap(options as Group<T>[], (group: Group<T>) => group.options);
+      // If the options are grouped, create one flat array of options from all the groups.
+      return _.flatMap(
+        options as Group<T>[],
+        (group: Group<T>) => group.options
+      );
     } else {
       return options;
     }
@@ -190,37 +198,34 @@ export function getCustomOption<T extends Option>(
     const selectedOptions = getValue();
 
     if (optionData.groupKey) {
-      currentGroup = (options as Group<T>[]).find(
-        (item: Group<T>) => item.key === optionData.groupKey
-      );
+      currentGroup = _.find(options as Group<T>[], {
+        key: optionData.groupKey,
+      });
     }
 
     if (optionData.value === "all") {
-      let currentOptions;
-      if (currentGroup) {
-        currentOptions = currentGroup?.options;
-      } else {
-        currentOptions = options as T[];
-      }
+      let currentOptions = currentGroup
+        ? currentGroup.options
+        : (options as T[]);
 
-      isSelected = currentOptions
-        .filter((item: T) => item.value !== optionData.value)
-        .every((item: T) =>
-          selectedOptions.find((option: T) => option.value === item.value)
+      isSelected = _.every(currentOptions, (item: T) => {
+        return (
+          item.value !== optionData.value &&
+          _.some(selectedOptions, { value: item.value })
         );
+      });
 
-      halfSelected = currentOptions
-        .filter((item: T) => item.value !== optionData.value)
-        .some((item: T) =>
-          selectedOptions.find((option: T) => option.value === item.value)
+      halfSelected = _.some(currentOptions, (item: T) => {
+        return (
+          item.value !== optionData.value &&
+          _.some(selectedOptions, { value: item.value })
         );
+      });
     }
 
     if (Option) {
       if (isMulti) {
-        const data = (value as Option[]).find(
-          (option: Option) => option.value === optionData.value
-        );
+        const data = _.find(value as Option[], { value: optionData.value });
         return (
           <MultipleCustomOption
             onSelect={() => {
@@ -254,9 +259,7 @@ export function getCustomOption<T extends Option>(
     }
 
     if (isMulti) {
-      const data = (value as Option[]).find(
-        (option: Option) => option.value === optionData.value
-      );
+      const data = _.find(value as Option[], { value: optionData.value });
 
       return (
         <MultipleCustomOption

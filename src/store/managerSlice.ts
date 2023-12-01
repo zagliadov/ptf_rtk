@@ -9,6 +9,8 @@ interface IManagerState {
   isSideMenuOpen: boolean;
   isReportsOpen: boolean;
   isDotThreeMenuOpen: boolean;
+  reportIsEdit: boolean;
+  isReportEditOpen: boolean;
 }
 
 const initialState: IManagerState = {
@@ -20,6 +22,8 @@ const initialState: IManagerState = {
   isSideMenuOpen: true,
   isReportsOpen: false,
   isDotThreeMenuOpen: false,
+  reportIsEdit: false,
+  isReportEditOpen: false,
 };
 
 const managerSlice = createSlice({
@@ -49,7 +53,17 @@ const managerSlice = createSlice({
     },
     setIsDotThreeMenuOpen(state, action: PayloadAction<boolean>) {
       state.isDotThreeMenuOpen = action.payload;
-    }
+    },
+    setReportIsEdit(state, action: PayloadAction<boolean>) {
+      state.reportIsEdit = action.payload;
+    },
+    setIsReportEditOpen(state, action: PayloadAction<boolean>) {
+      state.isReportEditOpen = action.payload;
+    },
+    setReportEditAndSaveNewReport(state, action: PayloadAction<boolean>) {
+      state.isReportEditOpen = action.payload;
+      state.isSaveNewReportOpen = action.payload;
+    },
   },
 
   extraReducers: () => {},
@@ -64,6 +78,9 @@ export const {
   setIsSideMenuOpen,
   setIsReportsOpen,
   setIsDotThreeMenuOpen,
+  setReportIsEdit,
+  setIsReportEditOpen,
+  setReportEditAndSaveNewReport,
 } = managerSlice.actions;
 
 export default managerSlice.reducer;

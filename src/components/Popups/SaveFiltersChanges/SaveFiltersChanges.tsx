@@ -6,36 +6,50 @@ import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
 import { useAppDispatch } from "src/store/store";
 import {
-  setIsSaveNewReportOpen,
   setIsFiltersOpen,
+  setReportEditAndSaveNewReport,
 } from "src/store/managerSlice";
 import { DynamicFormData, EDataKeys } from "src/types";
 import { useFormContext } from "react-hook-form";
-import { setSelectedFilters } from "src/store/filtersSlice";
+import { setSelectedFilters, setReportData, setFilterArray } from "src/store/filtersSlice";
 
 const cx: CX = classnames.bind(styles);
 export const SaveFiltersChanges: FC = () => {
-  const { handleSubmit } = useFormContext<DynamicFormData>();
+  const { handleSubmit, reset } = useFormContext<DynamicFormData>();
   const dispatch = useAppDispatch();
 
   const handleCloseSaveFiltersChanges = useCallback((): void => {
     console.log("handleCloseSaveFiltersChanges");
-    dispatch(setIsSaveNewReportOpen(false));
+    dispatch(setReportEditAndSaveNewReport(false));
   }, [dispatch]);
 
   const onSubmit = useCallback(
     (data: DynamicFormData): void => {
       console.log(data, "handleSaveEdits");
       dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
-      dispatch(setIsSaveNewReportOpen(false));
+      localStorage.setItem("reportTitle", data[EDataKeys.REPORT_TITLE]);
+      localStorage.setItem("dataSource", data[EDataKeys.DATA_SOURCE]);
+      localStorage.setItem("reportType", data[EDataKeys.REPORT_TYPE]);
+      dispatch(
+        setReportData({
+          reportTitle: data[EDataKeys.REPORT_TITLE],
+          dataSource: data[EDataKeys.DATA_SOURCE],
+          reportType: data[EDataKeys.REPORT_TYPE],
+        })
+      );
+      // test..
+      dispatch(setFilterArray(data[EDataKeys.FILTERS]));
+      //...
       dispatch(setIsFiltersOpen(false));
+      dispatch(setReportEditAndSaveNewReport(false));
+      reset();
     },
-    [dispatch]
+    [dispatch, reset]
   );
 
   const handleClosePopup = useCallback((): void => {
     console.log("handleClosePopup");
-    dispatch(setIsSaveNewReportOpen(false));
+    dispatch(setReportEditAndSaveNewReport(false));
   }, [dispatch]);
 
   return (

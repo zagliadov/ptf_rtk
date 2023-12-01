@@ -4,11 +4,12 @@ import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
-import { useAppDispatch } from "src/store/store";
+import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
 import {
   setIsFiltersOpen,
   setColumnSelectorOpen,
   setIsSaveNewReportOpen,
+  setIsReportEditOpen,
 } from "src/store/managerSlice";
 import Search from "src/components/Search";
 import SimpleBar from "simplebar-react";
@@ -25,8 +26,13 @@ const cx: CX = classnames.bind(styles);
 export const Filters: FC = () => {
   const { handleSubmit, watch, setValue } = useFormContext<DynamicFormData>();
   const [searchValue, setSearchValue] = useState<string>("");
+  const { reportIsEdit } = useAppSelector((state: RootState) => state.manager);
+  const storedSelectedFiltersRaw = localStorage.getItem("selectedFilters");
+  const storedSelectedFilters: IIFilters[] = storedSelectedFiltersRaw
+    ? JSON.parse(storedSelectedFiltersRaw)
+    : [];
   const [saveFilteredList, setSaveFilteredList] = useState<IIFilters[]>(
-    watch(EDataKeys.FILTERED_LIST) || []
+    reportIsEdit ? storedSelectedFilters : watch(EDataKeys.FILTERED_LIST) || []
   );
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
   const maxHeight: string = useElementHeight(filtersWrapperRef);
@@ -40,10 +46,14 @@ export const Filters: FC = () => {
 
   const onSubmit = useCallback(
     (data: DynamicFormData): void => {
-      console.log("Form Data:", data);
-      dispatch(setIsSaveNewReportOpen(true));
+      if (reportIsEdit) {
+        dispatch(setIsReportEditOpen(true));
+      } else {
+        console.log("Form Data:", data);
+        dispatch(setIsSaveNewReportOpen(true));
+      }
     },
-    [dispatch]
+    [dispatch, reportIsEdit]
   );
 
   /**
@@ -101,12 +111,21 @@ export const Filters: FC = () => {
         </div>
         <div className={cx("filters-footer")}>
           <ButtonWrapper shift={"right"}>
-            <Button
-              primary
-              title="Create report"
-              type="submit"
-              style={{ width: "134px" }}
-            />
+            {reportIsEdit ? (
+              <Button
+                primary
+                title="Edit report"
+                type="submit"
+                style={{ width: "134px" }}
+              />
+            ) : (
+              <Button
+                primary
+                title="Create report"
+                type="submit"
+                style={{ width: "134px" }}
+              />
+            )}
             <Button
               title="Reset all"
               onClick={handleResetColumns}

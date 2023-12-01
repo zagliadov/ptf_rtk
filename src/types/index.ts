@@ -18,6 +18,7 @@ export type SourceType = Record<EDataKeys.DATA_SOURCE | EDataKeys.API, EDataKeys
 
 export enum EDataKeys {
   REPORT_TITLE = "Report title",
+  REPORT_ID = "Report ID",
   DATA_SOURCE = "Data Source",
   DATA_SOURCE_SITE = "Site",
   DATA_SOURCE_PROJECT = "Project",

@@ -19,6 +19,7 @@ import { EDataKeys, RData } from "src/types";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 import useFilterInitialization from "src/hook/useFilterInitialization";
 import { useHandleCheckboxAll } from "src/hook/useHandleCheckboxAll";
+import * as _ from "lodash";
 const ColumnList = lazy(() => import("./ColumnList/ColumnList"));
 
 const cx: CX = classnames.bind(styles);

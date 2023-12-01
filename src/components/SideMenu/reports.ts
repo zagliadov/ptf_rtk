@@ -14,6 +14,7 @@ export interface IReports {
   name: string;
   details: IDetails[];
 }
+export const emptyReport = [];
 export const reports: IReports[] = [
   {
     id: 0,

@@ -19,6 +19,8 @@ import { ReportFilterPanel } from "./ReportFilterPanel/ReportFilterPanel";
 import { SideMenuHeader } from "./SideMenuHeader/SideMenuHeader";
 import { OpenSideMenuButton } from "./OpenSideMenuButton/OpenSideMenuButton";
 import { SideMenuFooter } from "./SideMenuFooter/SideMenuFooter";
+import { useAppDispatch } from "src/store/store";
+import { setReportId } from "src/store/filtersSlice";
 
 const cx: CX = classnames.bind(styles);
 
@@ -49,6 +51,7 @@ export const SideMenu: FC = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
   const [currentDetail, setCurrentDetail] = useState<IDetails | null>(null);
+  const dispatch = useAppDispatch();
   const { isVisible, position, handleMouseEnter, handleMouseLeave } =
     useHoverPositionVisibility<IDetails>({
       setDetail: setCurrentDetail,
@@ -69,6 +72,10 @@ export const SideMenu: FC = () => {
     setActiveReport(id === activeReport ? null : id);
   };
 
+  const handleOpenReport = (id: number): void => {
+    dispatch(setReportId(id));
+  };
+
   const renderItemDetails = (detail: IDetails, index: number): JSX.Element => {
     return (
       <div key={index} className={cx("detail-item")}>
@@ -83,7 +90,6 @@ export const SideMenu: FC = () => {
       </div>
     );
   };
-
   return (
     <motion.div
       className={cx("side-menu")}
@@ -115,56 +121,58 @@ export const SideMenu: FC = () => {
                 style={{ maxHeight }}
                 className="my-custom-scrollbar-sidebar"
               >
-                {_.map(
-                  filteredList,
-                  ({
-                    id,
-                    name,
-                    details,
-                  }: {
-                    id: number;
-                    name: string;
-                    details: IDetails[];
-                  }) => {
-                    return (
-                      <motion.div
-                        key={id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <div className={cx("reports-item")}>
-                          <span className={cx("reports-name")}>{name}</span>
-                          <button
-                            type="button"
-                            className={cx("reports-open-button")}
-                            onClick={() => handleReportsOpen(id)}
-                            aria-label={"open-report"}
-                          >
-                            <CaretDownIcon
-                              className={cx({
-                                "reports-icon-rotated": activeReport === id,
-                              })}
-                            />
-                          </button>
-                        </div>
-                        {activeReport === id && (
-                          <motion.div
-                            key={id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className={cx("report-details")}
-                          >
-                            {details.map(renderItemDetails)}
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    );
-                  }
-                )}
+                {!_.isEmpty(filteredList) &&
+                  _.map(
+                    filteredList,
+                    ({
+                      id,
+                      name,
+                      details,
+                    }: {
+                      id: number;
+                      name: string;
+                      details: IDetails[];
+                    }) => {
+                      return (
+                        <motion.div
+                          key={id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.5 }}
+                          onClick={() => handleOpenReport(id)}
+                        >
+                          <div className={cx("reports-item")}>
+                            <span className={cx("reports-name")}>{name}</span>
+                            <button
+                              type="button"
+                              className={cx("reports-open-button")}
+                              onClick={() => handleReportsOpen(id)}
+                              aria-label={"open-report"}
+                            >
+                              <CaretDownIcon
+                                className={cx({
+                                  "reports-icon-rotated": activeReport === id,
+                                })}
+                              />
+                            </button>
+                          </div>
+                          {activeReport === id && (
+                            <motion.div
+                              key={id}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.5 }}
+                              className={cx("report-details")}
+                            >
+                              {details.map(renderItemDetails)}
+                            </motion.div>
+                          )}
+                        </motion.div>
+                      );
+                    }
+                  )}
               </SimpleBar>
             </div>
             <SideMenuFooter />

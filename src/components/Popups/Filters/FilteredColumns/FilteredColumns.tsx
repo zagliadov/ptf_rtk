@@ -7,6 +7,7 @@ import { useSearch } from "src/hook/useSearch";
 import { Reorder } from "framer-motion";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 import * as _ from "lodash";
+import { useAppSelector, RootState } from "src/store/store";
 const FiltersItem = lazy(() => import("./FiltersItem/FiltersItem"));
 
 const cx: CX = classnames.bind(styles);
@@ -16,14 +17,18 @@ interface IProps {
   saveFilteredList: IIFilters[];
   setSaveFilteredList: (value: IIFilters[]) => void;
 }
-export const FilteredColumns: FC<IProps> = ({ searchValue, saveFilteredList, setSaveFilteredList }) => {
+export const FilteredColumns: FC<IProps> = ({
+  searchValue,
+  saveFilteredList,
+  setSaveFilteredList,
+}) => {
   const { watch, setValue } = useFormContext<DynamicFormData>();
+  const { reportIsEdit } = useAppSelector((state: RootState) => state.manager);
   const filters: IIFilters[] = watch(EDataKeys.FILTERS);
   const selectedFilters: IIFilters[] = useMemo(
     () => _.filter(filters, (item) => item[EDataKeys.CHECKED1]),
     [filters]
   );
-
   /**
    * Updates the saved list of filters (`saveFilteredList`) based on the changes in selected filters (`selectedFilters`).
    *
@@ -41,7 +46,11 @@ export const FilteredColumns: FC<IProps> = ({ searchValue, saveFilteredList, set
 
   useEffect(() => {
     // Adds new filters to saveFilteredList.
-    const newFilters: IIFilters[] = _.differenceBy(selectedFilters, saveFilteredList, "id");
+    const newFilters: IIFilters[] = _.differenceBy(
+      selectedFilters,
+      saveFilteredList,
+      "id"
+    );
     _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = false));
     if (newFilters.length > 0) {
       setSaveFilteredList(_.union(saveFilteredList, newFilters));
@@ -54,7 +63,6 @@ export const FilteredColumns: FC<IProps> = ({ searchValue, saveFilteredList, set
         selectedFilters,
         "id"
       );
-      console.log(selectedFilters, "selectedFilters");
       setSaveFilteredList(updatedFilters);
     }
   }, [selectedFilters, saveFilteredList, setSaveFilteredList]);

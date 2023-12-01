@@ -2,6 +2,7 @@ import { FC, useCallback, useMemo } from "react";
 import Select from "../BasicSelect/Select";
 import { ChangeAction, Group, Option } from "../BasicSelect/Select";
 import { Person } from "../Person/Person";
+import * as _ from "lodash";
 
 export type Resource = {
   id: number;
@@ -53,45 +54,40 @@ export const RolesPersonsSelect: FC<IProps> = ({
   selectedResources,
   onChange,
 }) => {
+  // An array of unique role strings.
   const roles: string[] = useMemo(
-    () => [
-      ...new Set<string>(
-        resources?.map((item: Resource) => item.role)
-      ).values(),
-    ],
+    () => _.uniq(_.map(resources, (item: Resource) => item.role)),
     [resources]
   );
 
+  // Computes a mapping of resources by their roles.
+  // An object where each key is a role and the value is an array of resources with that role.
   const resourcesByRole: IResourcesByRole = useMemo(() => {
-    return roles.reduce((acc: Record<string, Resource[]>, item: string) => {
-      const newAcc = { ...acc };
-      newAcc[item] = resources.filter(
-        (resource: Resource) => resource.role === item
-      );
-      return newAcc;
-    }, {});
+    return _.reduce(
+      roles,
+      (acc: Record<string, Resource[]>, role: string) => {
+        acc[role] = _.filter(resources, { role: role });
+        return acc;
+      },
+      {}
+    );
   }, [roles, resources]);
 
+  // An array of objects where each object represents a role option with `value` and `label` properties.
   const roleOptions: IRoleOptions[] = useMemo(
-    () =>
-      roles.map((item: string) => ({
-        value: item,
-        label: item,
-      })),
+    () => _.map(roles, (role: string) => ({ value: role, label: role })),
     [roles]
   );
 
+  // Creates an array of resource options for use in a select component.
   const resourcesOptions: IResourcesOptions[] = useMemo(
     () =>
-      resources?.map(
-        (item: Resource) =>
-          ({
-            label: item.fullName,
-            value: item.id.toString(),
-            logoSrc: item.logo,
-            role: item.role,
-          }) || []
-      ),
+      _.map(resources, (resource: Resource) => ({
+        label: resource.fullName,
+        value: resource.id.toString(),
+        logoSrc: resource.logo,
+        role: resource.role,
+      })),
     [resources]
   );
 
@@ -110,12 +106,14 @@ export const RolesPersonsSelect: FC<IProps> = ({
     ];
   }, [roleOptions, resourcesOptions]);
 
+  // An array of resource options that are currently selected.
   const selectedResourcesOptions: IResourcesOptions[] = useMemo(
     () =>
-      resourcesOptions.filter((item: PersonOption) =>
-        selectedResources.find(
+      _.filter<IResourcesOptions>(resourcesOptions, (option: PersonOption) =>
+        _.some(
+          selectedResources,
           (selectedResource: Resource) =>
-            selectedResource.id.toString() === item.value
+            selectedResource.id.toString() === option.value
         )
       ),
     [selectedResources, resourcesOptions]
@@ -155,30 +153,19 @@ export const RolesPersonsSelect: FC<IProps> = ({
         if (selectedResources.length === resources.length) return onChange([]);
         return onChange(resources);
       }
-
-      const changedRole = roleOptions.find(
-        (item: Option) => item.value === option?.value
-      );
+      const changedRole = _.find(roleOptions, { value: option?.value });
 
       if (changedRole) {
         const roleResources = resourcesByRole[changedRole.value];
         if (action === "select-option") {
           const newRoleResources =
-            roleResources?.filter(
-              (item: Resource) =>
-                !selectedResources.find(
-                  (selectedResource: Resource) =>
-                    item.id === selectedResource.id
-                )
-            ) || [];
-
+            _.differenceBy(roleResources, selectedResources, "id") || [];
           return onChange([...selectedResources, ...newRoleResources]);
         } else {
-          const newResources = selectedResources.filter(
-            (item: Resource) =>
-              !roleResources?.find(
-                (roleResource: Resource) => item.id === roleResource.id
-              )
+          const newResources = _.differenceBy(
+            selectedResources,
+            roleResources,
+            "id"
           );
 
           return onChange(newResources);
@@ -186,8 +173,9 @@ export const RolesPersonsSelect: FC<IProps> = ({
       }
 
       return onChange(
-        resources.filter((item: Resource) =>
-          (value as PersonOption[]).find(
+        _.filter(resources, (item: Resource) =>
+          _.some(
+            value as PersonOption[],
             (selectedOption: PersonOption) =>
               item.id.toString() === selectedOption.value
           )
@@ -199,10 +187,7 @@ export const RolesPersonsSelect: FC<IProps> = ({
 
   const getLabel = (): string => {
     let label = `${selectedResources.length} Persons`;
-
-    const fullSelectedRoles = selectedRolesOptions.filter(
-      (item: Option) => !item.halfSelected
-    );
+    const fullSelectedRoles = _.filter(selectedRolesOptions, (item: Option) => !item.halfSelected);
 
     if (fullSelectedRoles.length) {
       label += `, ${fullSelectedRoles.length} Roles`;

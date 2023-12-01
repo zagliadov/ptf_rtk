@@ -92,7 +92,7 @@ const ColumnList: FC<IProps> = ({ searchValue, filters, setFilters }) => {
 
   return (
     <div className={cx("list-item-wrapper")}>
-      {_.map(
+      {!_.isEmpty(filteredList) && _.map(
         filteredList,
         ({ name, checked1, checked2 }: IIFilters, index: number) => (
           <div key={name} className={cx("list-item")}>

@@ -4,9 +4,13 @@
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  div {
+  .popup-title-wrapper {
     display: flex;
     justify-content: space-between;
+
+    .arrow-left-icon {
+      padding-right: 5px;
+    }
   }
   .popup-title {
     font-weight: 700;

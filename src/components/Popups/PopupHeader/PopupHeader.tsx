@@ -13,7 +13,7 @@ interface IProps {
 export const PopupHeader: FC<IProps> = ({ title, onClose, description }) => {
   return (
     <div className={cx("popup-header")}>
-      <div>
+      <div className={cx("popup-title-wrapper")}>
         <span className={cx("popup-title")}>{title}</span>
         <button type="button" onClick={onClose}>
           <CloseIcon />

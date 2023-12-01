@@ -27,6 +27,7 @@ export const PopupManager: FC = () => {
     isFiltersOpen,
     isSaveNewReportOpen,
     isDeleteEntryOpen,
+    isReportEditOpen,
   } = useAppSelector((state: RootState) => state.manager);
 
   const openColumnSelector = useCallback((): void => {
@@ -59,6 +60,11 @@ export const PopupManager: FC = () => {
         )}
         {isSaveNewReportOpen && (
           <Popup open={isSaveNewReportOpen} align={"center"}>
+            <SaveFiltersChanges />
+          </Popup>
+        )}
+        {isReportEditOpen && (
+          <Popup open={isReportEditOpen} align={"center"}>
             <SaveFiltersChanges />
           </Popup>
         )}

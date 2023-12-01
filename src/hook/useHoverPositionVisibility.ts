@@ -11,12 +11,12 @@ interface UseHoverPositionVisibilityProps<IDetail> {
  * @template IDetail The type of detail object to be set on mouse enter.
  * @param setDetail - Optional function to set the detail object when mouse enters.
  * @returns An object containing the following:
- *          - isVisible: A boolean indicating if the hover element is visible.
- *          - position: An object containing the top and left coordinates for the hover element.
- *          - handleMouseEnter: A function to call when the mouse enters the hoverable element.
- *                             It sets the position, makes the hover element visible, and optionally sets the detail.
- *          - handleMouseLeave: A function to call when the mouse leaves the hoverable element.
- *                              It hides the hover element and optionally resets the detail.
+ *  - isVisible: A boolean indicating if the hover element is visible.
+ *  - position: An object containing the top and left coordinates for the hover element.
+ *  - handleMouseEnter: A function to call when the mouse enters the hoverable element.
+ * It sets the position, makes the hover element visible, and optionally sets the detail.
+ *  - handleMouseLeave: A function to call when the mouse leaves the hoverable element.
+ * It hides the hover element and optionally resets the detail.
  */
 
 export const useHoverPositionVisibility = <IDetail extends unknown>({

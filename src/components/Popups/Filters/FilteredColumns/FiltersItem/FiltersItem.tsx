@@ -55,7 +55,7 @@ const FiltersItem: FC<IProps> = ({ filteredList }) => {
 
   return (
     <>
-      {filteredList &&
+      {!_.isEmpty(filteredList) &&
         _.map(filteredList, (item: IIFilters) => {
           const fieldName: string = `${item?.name}`;
           const updatedChoices: UpdatedChoice[] | null = updateChoices(

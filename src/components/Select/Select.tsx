@@ -22,6 +22,7 @@ const Select = forwardRef(
       options,
       onChange,
       value,
+      disabled = false,
       isClearable = false,
       ...rest
     } = props;
@@ -44,6 +45,7 @@ const Select = forwardRef(
           {...rest}
           isClearable={isClearable}
           options={options}
+          isDisabled={disabled}
           styles={{
             control: (
               baseStyles: CSSObjectWithLabel,
@@ -203,6 +205,7 @@ type Props = {
   isClearable?: boolean;
   placeholder?: string;
   error?: string;
+  disabled?: boolean;
 };
 
 export default Select;

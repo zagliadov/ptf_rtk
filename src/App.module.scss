@@ -3,4 +3,11 @@
 .app {
   height: 100vh;
   background-color: color($var-color-app-bg);
+
+  .is-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
 }
