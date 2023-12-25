@@ -1,6 +1,8 @@
+@import "src/styles/colors.scss";
+
 .person {
   display: flex;
-
+  align-items: center;
   white-space: nowrap;
 
   cursor: pointer;
@@ -10,6 +12,16 @@
 
     .name {
       font-weight: 700;
+      font-size: 14px;
+      line-height: 20px;
+      color: color($var-color-app-dark-blue);
+    }
+
+    .position {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 20px;
+      color: color($var-color-app-black-2);
     }
 
     .role {

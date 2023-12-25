@@ -14,9 +14,9 @@ import * as _ from "lodash";
  *
  * This hook maintains the state of a "select all" checkbox and updates the check status of an array of filters
  * based on user interaction. It automatically sets its state based on whether all filters are initially checked.
- * When the "select all" checkbox state changes, it updates all filters' `checked1` property to match the state
+ * When the "select all" checkbox state changes, it updates all filters' `selectedTableCell` property to match the state
  * of the "select all" checkbox. Additionally, the hook provides a `handleResetAll` function to reset the state
- * of all filters, setting their `checked1` and `checked2` properties to false.
+ * of all filters, setting their `selectedTableCell` and `selectedTableFilter` properties to false.
  *
  * `useFormContext` from `react-hook-form` is used to access the form context for state management.
  *
@@ -33,7 +33,7 @@ export const useHandleCheckboxAll = (
   const { setValue, watch } = useFormContext();
 
   const isChecked: boolean = useMemo(
-    () => _.every(initialFilters, "checked1"),
+    () => _.every(initialFilters, "selectedTableCell"),
     [initialFilters]
   );
 
@@ -42,10 +42,17 @@ export const useHandleCheckboxAll = (
       const checked = e.target.checked;
 
       const arr: IIFilters[] = watch(EDataKeys.FILTERS);
+      /**
+       * @description For each filter in `arr`, a new filter object is created that copies
+       * all properties of the existing filter and updates the following properties:
+       * - `selectedTableCell`: Set to the value of `checked`.
+       * - `selectedTableFilter`: Set to `checked` if the filter is not disabled
+       * (`DISABLED` is not true), otherwise set to `false`.
+       */
       const newFilters: IIFilters[] = _.map(arr, (item: IIFilters) => ({
         ...item,
-        checked1: checked,
-        checked2: item.checked1 && false,
+        selectedTableCell: checked,
+        selectedTableFilter: item[EDataKeys.DISABLED] ? false : checked,
       }));
 
       setFilters(newFilters);
@@ -58,8 +65,8 @@ export const useHandleCheckboxAll = (
     const arr: IIFilters[] = watch(EDataKeys.FILTERS);
     const newFilters: IIFilters[] = _.map(arr, (item: IIFilters) => ({
       ...item,
-      checked1: false,
-      checked2: false,
+      selectedTableCell: false,
+      selectedTableFilter: false,
     }));
     setFilters(newFilters);
     setValue(EDataKeys.FILTERS, newFilters);

@@ -1,0 +1,19 @@
+@import "src/styles/colors.scss";
+
+.filter-block {
+  width: 180px;
+  height: 60px;
+  margin-right: 16px;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  .filter-name {
+    font-weight: 400;
+    font-size: 12px;
+    color: color($var-color-app-dark-blue);
+  }
+}

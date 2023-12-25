@@ -1,14 +1,14 @@
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import styles from "./SideMenu.module.scss";
 import classnames from "classnames/bind";
-import { RootState, useAppSelector } from "src/store/store";
+import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import { ReactComponent as CaretDownIcon } from "src/assets/icons/caret-down-icon.svg";
 import { ReactComponent as InfoIcon } from "src/assets/icons/info-icon.svg";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import "./simplebar.scss";
 import { useElementHeight } from "src/hook/useElementHeight";
-import { IDetails, reports } from "./reports";
+import { IDetails } from "./reports";
 import { Tooltip } from "../Tooltip/Tooltip";
 import ReactDOM from "react-dom";
 import { useHoverPositionVisibility } from "src/hook/useHoverPositionVisibility";
@@ -19,8 +19,9 @@ import { ReportFilterPanel } from "./ReportFilterPanel/ReportFilterPanel";
 import { SideMenuHeader } from "./SideMenuHeader/SideMenuHeader";
 import { OpenSideMenuButton } from "./OpenSideMenuButton/OpenSideMenuButton";
 import { SideMenuFooter } from "./SideMenuFooter/SideMenuFooter";
-import { useAppDispatch } from "src/store/store";
-import { setReportId } from "src/store/filtersSlice";
+import { SourceReports } from "src/hook/useSideMenuReports";
+import { setBasicReportData } from "src/store/reportSlice";
+import { EDataKeys } from "src/types";
 
 const cx: CX = classnames.bind(styles);
 
@@ -30,7 +31,7 @@ const sideMenuVariants = {
     transition: { duration: 0.2, ease: "easeIn" },
   },
   closed: {
-    width: "32px",
+    width: "35px",
     paddingTop: "14px",
     transition: { duration: 0.2, ease: "easeIn" },
   },
@@ -47,18 +48,21 @@ const contentVariants = {
   },
 };
 
-export const SideMenu: FC = () => {
+interface IProps {
+  reportsArray: SourceReports[];
+}
+export const SideMenu: FC<IProps> = ({ reportsArray }) => {
   const [searchValue, setSearchValue] = useState<string>("");
+  const dispatch = useAppDispatch();
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
   const [currentDetail, setCurrentDetail] = useState<IDetails | null>(null);
-  const dispatch = useAppDispatch();
   const { isVisible, position, handleMouseEnter, handleMouseLeave } =
     useHoverPositionVisibility<IDetails>({
       setDetail: setCurrentDetail,
     });
-  const [activeReport, setActiveReport] = useState<number | null>(null);
+  const [activeReport, setActiveReport] = useState<string | null>(null);
   const { filteredList } = useReportSearch(
-    reports,
+    reportsArray,
     searchValue,
     resourceFilter
   );
@@ -68,28 +72,36 @@ export const SideMenu: FC = () => {
     (state: RootState) => state.manager
   );
 
-  const handleReportsOpen = (id: number): void => {
-    setActiveReport(id === activeReport ? null : id);
+  const { reportSourceId, reportName } = useAppSelector(
+    (state: RootState) => state.report
+  );
+
+  useEffect(() => {
+    if (reportSourceId && reportName) {
+      setActiveReport(reportSourceId);
+    }
+  }, [reportSourceId, reportName]);
+
+  const handleReportsOpen = (sourceId: string): void => {
+    setActiveReport(sourceId === activeReport ? null : sourceId);
   };
 
-  const handleOpenReport = (id: number): void => {
-    dispatch(setReportId(id));
-  };
-
-  const renderItemDetails = (detail: IDetails, index: number): JSX.Element => {
-    return (
-      <div key={index} className={cx("detail-item")}>
-        <span>{detail.reportName}</span>
-        <div
-          className={cx("info-icon-container")}
-          onMouseEnter={(e) => handleMouseEnter(e, detail)}
-          onMouseLeave={handleMouseLeave}
-        >
-          <InfoIcon />
-        </div>
-      </div>
+  const handleGetReport = (
+    rowId: number,
+    name: string,
+    sourceId: string,
+    reportType: EDataKeys.INTERNAL | EDataKeys.EXTERNAL
+  ): void => {
+    dispatch(
+      setBasicReportData({
+        reportId: rowId,
+        reportName: name,
+        reportSourceId: sourceId,
+        reportType,
+      })
     );
   };
+
   return (
     <motion.div
       className={cx("side-menu")}
@@ -124,51 +136,82 @@ export const SideMenu: FC = () => {
                 {!_.isEmpty(filteredList) &&
                   _.map(
                     filteredList,
-                    ({
-                      id,
-                      name,
-                      details,
-                    }: {
-                      id: number;
-                      name: string;
-                      details: IDetails[];
-                    }) => {
+                    ({ sourceId, reports }: SourceReports) => {
+                      const readableSourceId = decodeURIComponent(sourceId);
                       return (
                         <motion.div
-                          key={id}
+                          key={readableSourceId}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.5 }}
-                          onClick={() => handleOpenReport(id)}
                         >
-                          <div className={cx("reports-item")}>
-                            <span className={cx("reports-name")}>{name}</span>
+                          <div
+                            className={cx("reports-item")}
+                            onClick={() => handleReportsOpen(readableSourceId)}
+                          >
+                            <span className={cx("reports-name")}>
+                              {readableSourceId}
+                            </span>
                             <button
                               type="button"
                               className={cx("reports-open-button")}
-                              onClick={() => handleReportsOpen(id)}
                               aria-label={"open-report"}
                             >
                               <CaretDownIcon
                                 className={cx({
-                                  "reports-icon-rotated": activeReport === id,
+                                  "reports-icon-rotated":
+                                    activeReport === readableSourceId,
                                 })}
                               />
                             </button>
                           </div>
-                          {activeReport === id && (
-                            <motion.div
-                              key={id}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.5 }}
-                              className={cx("report-details")}
-                            >
-                              {details.map(renderItemDetails)}
-                            </motion.div>
-                          )}
+                          {activeReport === readableSourceId &&
+                            _.map(
+                              reports,
+                              (
+                                { name, type, details, "@row.id": rowId },
+                                index
+                              ) => {
+                                return (
+                                  <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                    className={cx("report-details")}
+                                  >
+                                    <div
+                                      key={rowId}
+                                      className={cx(
+                                        "detail-item",
+                                        name === reportName && "active"
+                                      )}
+                                      onClick={() =>
+                                        handleGetReport(
+                                          rowId,
+                                          name,
+                                          sourceId,
+                                          type
+                                        )
+                                      }
+                                    >
+                                      <span>{name}</span>
+                                      <div
+                                        className={cx("info-icon-container")}
+                                        onMouseEnter={(e) =>
+                                          handleMouseEnter(e, details[0])
+                                        }
+                                        onMouseLeave={handleMouseLeave}
+                                      >
+                                        <InfoIcon />
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                );
+                              }
+                            )}
                         </motion.div>
                       );
                     }

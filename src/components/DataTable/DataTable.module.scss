@@ -1,0 +1,74 @@
+@import "src/styles/colors";
+
+.wrapper {
+    height: 100%;
+
+}
+
+.agg-header-cell {
+    padding-left: 9px;
+    padding-right: 5px;
+    background-color: color($var-color-app-blue-grey-1);
+    border: none;
+    cursor: pointer;
+    border: none;
+
+    span {
+        color: color($var-color-app-black);
+    }
+
+    &:hover,
+    &:focus {
+        background-color: color($var-color-app-blue-grey-1) !important;
+    }
+}
+
+.agg-row-cell {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 4px solid color($var-color-app-bg);
+    border-top: 4px solid color($var-color-app-bg);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:focus {
+        border-color: transparent;
+    }
+
+    span {
+        font-size: 13px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+    }
+
+    &>div {
+        --ag-range-selection-border-color: transparent;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        display: block;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        padding: 8px 10px;
+        line-height: 30px;
+        white-space: nowrap;
+
+        &>div {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+    }
+}

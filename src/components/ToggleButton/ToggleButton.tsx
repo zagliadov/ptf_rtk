@@ -9,9 +9,8 @@ interface IProps {
   onChange: (value: EDataKeys.INTERNAL | EDataKeys.EXTERNAL) => void;
   value: EDataKeys.INTERNAL | EDataKeys.EXTERNAL;
   error: string | undefined;
-  disabled: boolean;
 }
-export const ToggleButton: FC<IProps> = ({ onChange, value, error, disabled }) => {
+export const ToggleButton: FC<IProps> = ({ onChange, value, error }) => {
   const handleOptionChange = (option: string, e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     if (Object.values(EDataKeys).includes(option as EDataKeys)) {
@@ -24,7 +23,6 @@ export const ToggleButton: FC<IProps> = ({ onChange, value, error, disabled }) =
   return (
     <div className={cx("toggle-button-wrapper", { 'error-border': isErrorBorder })}>
       <button
-        disabled={disabled}
         className={cx(
           "toggle-button",
           value === EDataKeys.INTERNAL ? "active" : ""
@@ -34,7 +32,6 @@ export const ToggleButton: FC<IProps> = ({ onChange, value, error, disabled }) =
         Internal
       </button>
       <button
-        disabled={disabled}
         className={cx(
           "toggle-button",
           value === EDataKeys.EXTERNAL ? "active" : ""

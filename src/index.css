@@ -1,0 +1,36 @@
+
+
+.ag-body-viewport-wrapper.ag-layout-normal {
+  overflow-x: scroll;
+}
+
+.ag-root-wrapper {
+    border: none!important;
+    border-radius: 8px!important;
+}
+.ag-theme-alpine, .ag-theme-alpine-dark {
+    --ag-alpine-active-color: #D3ECEF;
+    --ag-selected-row-background-color: #D3ECEF;
+    --ag-row-hover-color: #EAF3F4;
+}
+
+.ag-header {
+    border: none!important;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #D3ECEF;
+  border-radius: 20px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #4EB0C2;
+
+  border-radius: 20px;
+  border: 2px solid #D3ECEF;
+}

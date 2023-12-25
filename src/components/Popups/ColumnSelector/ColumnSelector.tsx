@@ -19,7 +19,6 @@ import { EDataKeys, RData } from "src/types";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 import useFilterInitialization from "src/hook/useFilterInitialization";
 import { useHandleCheckboxAll } from "src/hook/useHandleCheckboxAll";
-import * as _ from "lodash";
 const ColumnList = lazy(() => import("./ColumnList/ColumnList"));
 
 const cx: CX = classnames.bind(styles);
@@ -29,8 +28,9 @@ interface IProps {
 }
 
 export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
-  const { register, handleSubmit } = useFormContext<RData>();
+  const { register, handleSubmit, watch } = useFormContext<RData>();
   const [searchValue, setSearchValue] = useState<string>("");
+  const [initialValues, setInitialValues] = useState<any>({});
   const { filters, setFilters, isLoading } = useFilterInitialization();
   const dispatch = useAppDispatch();
   const { isChecked, handleCheckedAll, handleResetAll } = useHandleCheckboxAll(
@@ -38,10 +38,18 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
     setFilters
   );
 
+  useEffect(() => {
+    setInitialValues({
+      filters: watch(EDataKeys.FILTERS),
+    });
+  }, [watch]);
+
   const handleCloseColumnSelector = useCallback(() => {
-    dispatch(setColumnSelectorOpen(false));
-    dispatch(setCreateNewReportOpen(true));
+
+      dispatch(setColumnSelectorOpen(false));
+      dispatch(setCreateNewReportOpen(true));
   }, [dispatch]);
+
 
   useEffect(() => {
     register(EDataKeys.FILTERS);

@@ -4,12 +4,10 @@ import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
-import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
+import { useAppDispatch } from "src/store/store";
 import {
   setIsFiltersOpen,
   setColumnSelectorOpen,
-  setIsSaveNewReportOpen,
-  setIsReportEditOpen,
 } from "src/store/managerSlice";
 import Search from "src/components/Search";
 import SimpleBar from "simplebar-react";
@@ -20,19 +18,17 @@ import { useFormContext } from "react-hook-form";
 import { FilteredColumns } from "./FilteredColumns/FilteredColumns";
 import { DynamicFormData, EDataKeys, IIFilters } from "src/types";
 import * as _ from "lodash";
+import { setSelectedFilters } from "src/store/filtersSlice";
+import { createReport, setIsReportCreated } from "src/store/reportSlice";
 
 const cx: CX = classnames.bind(styles);
 
 export const Filters: FC = () => {
-  const { handleSubmit, watch, setValue } = useFormContext<DynamicFormData>();
+  const { handleSubmit, watch, setValue, reset } =
+    useFormContext<DynamicFormData>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const { reportIsEdit } = useAppSelector((state: RootState) => state.manager);
-  const storedSelectedFiltersRaw = localStorage.getItem("selectedFilters");
-  const storedSelectedFilters: IIFilters[] = storedSelectedFiltersRaw
-    ? JSON.parse(storedSelectedFiltersRaw)
-    : [];
   const [saveFilteredList, setSaveFilteredList] = useState<IIFilters[]>(
-    reportIsEdit ? storedSelectedFilters : watch(EDataKeys.FILTERED_LIST) || []
+    watch(EDataKeys.FILTERED_LIST) || []
   );
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
   const maxHeight: string = useElementHeight(filtersWrapperRef);
@@ -41,19 +37,20 @@ export const Filters: FC = () => {
   const handleCloseFilters = useCallback((): void => {
     dispatch(setIsFiltersOpen(false));
     dispatch(setColumnSelectorOpen(true));
-    dispatch(setIsSaveNewReportOpen(false));
   }, [dispatch]);
 
   const onSubmit = useCallback(
-    (data: DynamicFormData): void => {
-      if (reportIsEdit) {
-        dispatch(setIsReportEditOpen(true));
-      } else {
-        console.log("Form Data:", data);
-        dispatch(setIsSaveNewReportOpen(true));
-      }
+    async (data: DynamicFormData): Promise<void> => {
+      console.log(data, "data");
+      await dispatch(createReport(data)).then(() => {
+        dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
+        dispatch(setIsFiltersOpen(false));
+        reset();
+      }).then(() => {
+        dispatch(setIsReportCreated(false));
+      });
     },
-    [dispatch, reportIsEdit]
+    [dispatch, reset]
   );
 
   /**
@@ -62,7 +59,7 @@ export const Filters: FC = () => {
   const handleResetColumns = useCallback((): void => {
     const filters: IIFilters[] = watch(EDataKeys.FILTERS);
     const updatedFilters = _.chain(filters)
-      .filter(EDataKeys.CHECKED1) // Filter out the filters that are marked.
+      .filter(EDataKeys.SELECTED_TABLE_CELL) // Filter out the filters that are marked.
       .map((item: IIFilters) => ({ ...item, pinToMainView: false, choice: "" })) // Reset 'pinToMainView'.
       .value();
     // Update the list of saved filters.
@@ -111,21 +108,12 @@ export const Filters: FC = () => {
         </div>
         <div className={cx("filters-footer")}>
           <ButtonWrapper shift={"right"}>
-            {reportIsEdit ? (
-              <Button
-                primary
-                title="Edit report"
-                type="submit"
-                style={{ width: "134px" }}
-              />
-            ) : (
-              <Button
-                primary
-                title="Create report"
-                type="submit"
-                style={{ width: "134px" }}
-              />
-            )}
+            <Button
+              primary
+              title="Create report"
+              type="submit"
+              style={{ width: "134px" }}
+            />
             <Button
               title="Reset all"
               onClick={handleResetColumns}

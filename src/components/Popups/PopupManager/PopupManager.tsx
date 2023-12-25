@@ -8,13 +8,20 @@ import {
   setCreateNewReportOpen,
   setColumnSelectorOpen,
   setIsFiltersOpen,
+  setEditColumnSelectorOpen,
+  setReportEditOpen,
+  setIsEditFiltersOpen,
 } from "src/store/managerSlice";
 import { useAppDispatch } from "src/store/store";
-import { SaveFiltersChanges } from "../SaveFiltersChanges/SaveFiltersChanges";
 import { DeleteEntry } from "../DeleteEntry/DeleteEntry";
 import { FormProvider, useForm } from "react-hook-form";
 import { schema } from "src/validation";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { UnsavedChangesPopup } from "../UnsavedChangesPopup/UnsavedChangesPopup";
+import { EditReport } from "../EditReport/EditReport";
+import { EditColumnSelector } from "../EditColumnSelector/EditColumnSelector";
+import { EditFilters } from "../EditFilters/EditFilters";
+import { SaveFiltersChanges } from "../SaveFiltersChanges/SaveFiltersChanges";
 
 export const PopupManager: FC = () => {
   const methods = useForm({
@@ -25,9 +32,12 @@ export const PopupManager: FC = () => {
     isCreateNewReportOpen,
     isColumnSelectorOpen,
     isFiltersOpen,
-    isSaveNewReportOpen,
     isDeleteEntryOpen,
-    isReportEditOpen,
+    isUnsavedChanges,
+    isEditReportOpen,
+    isEditColumnSelectorOpen,
+    isEditFiltersOpen,
+    isSaveFiltersChangesOpen,
   } = useAppSelector((state: RootState) => state.manager);
 
   const openColumnSelector = useCallback((): void => {
@@ -38,6 +48,16 @@ export const PopupManager: FC = () => {
   const openFilterPopup = useCallback((): void => {
     dispatch(setColumnSelectorOpen(false));
     dispatch(setIsFiltersOpen(true));
+  }, [dispatch]);
+
+  const openEditColumnSelector = useCallback((): void => {
+    dispatch(setReportEditOpen(false));
+    dispatch(setEditColumnSelectorOpen(true));
+  }, [dispatch]);
+
+  const openEditFilterPopup = useCallback((): void => {
+    dispatch(setEditColumnSelectorOpen(false));
+    dispatch(setIsEditFiltersOpen(true));
   }, [dispatch]);
 
   return (
@@ -58,19 +78,34 @@ export const PopupManager: FC = () => {
             <Filters />
           </Popup>
         )}
-        {isSaveNewReportOpen && (
-          <Popup open={isSaveNewReportOpen} align={"center"}>
-            <SaveFiltersChanges />
+        {isEditReportOpen && (
+          <Popup open={isEditReportOpen} align={"center"}>
+            <EditReport onContinue={openEditColumnSelector} />
           </Popup>
         )}
-        {isReportEditOpen && (
-          <Popup open={isReportEditOpen} align={"center"}>
-            <SaveFiltersChanges />
+        {isEditColumnSelectorOpen && (
+          <Popup open={isEditColumnSelectorOpen}>
+            <EditColumnSelector onContinue={openEditFilterPopup} />
+          </Popup>
+        )}
+        {isEditFiltersOpen && (
+          <Popup open={isEditFiltersOpen} align={"right"}>
+            <EditFilters />
           </Popup>
         )}
         {isDeleteEntryOpen && (
           <Popup open={isDeleteEntryOpen} align={"center"}>
             <DeleteEntry />
+          </Popup>
+        )}
+        {isUnsavedChanges && (
+          <Popup open={isUnsavedChanges} align={"center"}>
+            <UnsavedChangesPopup />
+          </Popup>
+        )}
+        {isSaveFiltersChangesOpen && (
+          <Popup open={isSaveFiltersChangesOpen} align={"center"}>
+            <SaveFiltersChanges />
           </Popup>
         )}
       </div>

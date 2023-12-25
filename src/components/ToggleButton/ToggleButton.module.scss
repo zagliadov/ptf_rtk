@@ -21,7 +21,10 @@
     transition: all 0.3s ease-in-out;
     color: color($var-color-app-grey-2);
     border-radius: 7px;
-
+    &:hover {
+      background-color: color($var-color-app-blue-grey-1);
+      color: color($var-color-app-blue-main);
+    }
     &.active {
       background-color: color($var-color-app-blue-grey-1);
       color: color($var-color-app-blue-main);

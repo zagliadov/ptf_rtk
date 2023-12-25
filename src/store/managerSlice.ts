@@ -4,26 +4,28 @@ interface IManagerState {
   isCreateNewReportOpen: boolean;
   isColumnSelectorOpen: boolean;
   isFiltersOpen: boolean;
-  isSaveNewReportOpen: boolean;
+  isEditReportOpen: boolean;
+  isEditColumnSelectorOpen: boolean;
+  isEditFiltersOpen: boolean;
   isDeleteEntryOpen: boolean;
   isSideMenuOpen: boolean;
-  isReportsOpen: boolean;
   isDotThreeMenuOpen: boolean;
-  reportIsEdit: boolean;
-  isReportEditOpen: boolean;
+  isUnsavedChanges: boolean;
+  isSaveFiltersChangesOpen: boolean;
 }
 
 const initialState: IManagerState = {
   isCreateNewReportOpen: false,
   isColumnSelectorOpen: false,
   isFiltersOpen: false,
-  isSaveNewReportOpen: false,
+  isEditReportOpen: false,
+  isEditColumnSelectorOpen: false,
+  isEditFiltersOpen: false,
   isDeleteEntryOpen: false,
   isSideMenuOpen: true,
-  isReportsOpen: false,
   isDotThreeMenuOpen: false,
-  reportIsEdit: false,
-  isReportEditOpen: false,
+  isUnsavedChanges: false,
+  isSaveFiltersChangesOpen: false,
 };
 
 const managerSlice = createSlice({
@@ -39,8 +41,14 @@ const managerSlice = createSlice({
     setIsFiltersOpen(state, action: PayloadAction<boolean>) {
       state.isFiltersOpen = action.payload;
     },
-    setIsSaveNewReportOpen(state, action: PayloadAction<boolean>) {
-      state.isSaveNewReportOpen = action.payload;
+    setReportEditOpen(state, action: PayloadAction<boolean>) {
+      state.isEditReportOpen = action.payload;
+    },
+    setEditColumnSelectorOpen(state, action: PayloadAction<boolean>) {
+      state.isEditColumnSelectorOpen = action.payload;
+    },
+    setIsEditFiltersOpen(state, action: PayloadAction<boolean>) {
+      state.isEditFiltersOpen = action.payload;
     },
     setIsDeleteEntryOpen(state, action: PayloadAction<boolean>) {
       state.isDeleteEntryOpen = action.payload;
@@ -48,22 +56,15 @@ const managerSlice = createSlice({
     setIsSideMenuOpen(state, action: PayloadAction<boolean>) {
       state.isSideMenuOpen = action.payload;
     },
-    setIsReportsOpen(state, action: PayloadAction<boolean>) {
-      state.isReportsOpen = action.payload;
-    },
     setIsDotThreeMenuOpen(state, action: PayloadAction<boolean>) {
       state.isDotThreeMenuOpen = action.payload;
     },
-    setReportIsEdit(state, action: PayloadAction<boolean>) {
-      state.reportIsEdit = action.payload;
+    setIsUnsavedChanges(state, action: PayloadAction<boolean>) {
+      state.isUnsavedChanges = action.payload;
     },
-    setIsReportEditOpen(state, action: PayloadAction<boolean>) {
-      state.isReportEditOpen = action.payload;
-    },
-    setReportEditAndSaveNewReport(state, action: PayloadAction<boolean>) {
-      state.isReportEditOpen = action.payload;
-      state.isSaveNewReportOpen = action.payload;
-    },
+    setIsSaveFiltersChangesOpen(state, action: PayloadAction<boolean>) {
+      state.isSaveFiltersChangesOpen = action.payload;
+    }
   },
 
   extraReducers: () => {},
@@ -73,14 +74,14 @@ export const {
   setCreateNewReportOpen,
   setColumnSelectorOpen,
   setIsFiltersOpen,
-  setIsSaveNewReportOpen,
+  setReportEditOpen,
+  setEditColumnSelectorOpen,
+  setIsEditFiltersOpen,
   setIsDeleteEntryOpen,
   setIsSideMenuOpen,
-  setIsReportsOpen,
   setIsDotThreeMenuOpen,
-  setReportIsEdit,
-  setIsReportEditOpen,
-  setReportEditAndSaveNewReport,
+  setIsUnsavedChanges,
+  setIsSaveFiltersChangesOpen,
 } = managerSlice.actions;
 
 export default managerSlice.reducer;

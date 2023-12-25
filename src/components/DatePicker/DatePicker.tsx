@@ -118,7 +118,7 @@ function DatePicker({
         }}
         dateFormat="dd MMM yyyy"
         placeholderText={placeholder}
-        isClearable={false}
+        isClearable={true}
         showPopperArrow={false}
         className={cx({
           error: type === "error",

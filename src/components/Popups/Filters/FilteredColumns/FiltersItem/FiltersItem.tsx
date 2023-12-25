@@ -13,9 +13,9 @@ import {
 import { updateChoices } from "src/utils";
 import { Controller, useFormContext } from "react-hook-form";
 import Select from "src/components/Select";
-import Input from "src/components/Input";
-import Textarea from "src/components/Textarea/Textarea";
 import * as _ from "lodash";
+import { DualInput } from "src/components/DualInput/DualInput";
+import { UInput } from "src/components/UInput/UInput";
 
 const cx: CX = classnames.bind(styles);
 
@@ -23,7 +23,7 @@ interface IProps {
   filteredList: IIFilters[];
 }
 const FiltersItem: FC<IProps> = ({ filteredList }) => {
-  const { control, setValue, register } = useFormContext<DynamicFormData>();
+  const { control, setValue } = useFormContext<DynamicFormData>();
 
   /**
    * Updates the filter value for a specific filter item.
@@ -36,10 +36,11 @@ const FiltersItem: FC<IProps> = ({ filteredList }) => {
    * @param {Function} setValue - Function from useFormContext to update the state of the form.
    */
   const updateFilters = useCallback(
-    (id: number, value: string | null): void => {
+    (id: number, value: any): void => {
       const filter: IIFilters | undefined = _.find(filteredList, { id: id });
+      console.log(filter, "updateFilters FiltersItem")
       if (filter) {
-        filter[EDataKeys.CHOICE] = value;
+        filter[EDataKeys.CHOICE] = JSON.stringify(value);
         setValue(EDataKeys.FILTERED_LIST, filteredList);
       }
     },
@@ -52,133 +53,105 @@ const FiltersItem: FC<IProps> = ({ filteredList }) => {
     );
     setValue(EDataKeys.COLUMN_IDS, idsArray);
   }, [filteredList, setValue]);
-
+  const sortedFilters = _.sortBy(filteredList, "position");
   return (
     <>
-      {!_.isEmpty(filteredList) &&
-        _.map(filteredList, (item: IIFilters) => {
+      {!_.isEmpty(sortedFilters) &&
+        _.map(sortedFilters, (item: IIFilters) => {
           const fieldName: string = `${item?.name}`;
           const updatedChoices: UpdatedChoice[] | null = updateChoices(
             item?.choices as Choice[],
             item?.colorization
           );
+          const isNumeric = item[EDataKeys.TYPE] === EDataKeys.TYPE_NUMERIC;
+          const isDate = item[EDataKeys.TYPE] === EDataKeys.TYPE_DATE;
+          const isTimestamp = item[EDataKeys.TYPE] === EDataKeys.TYPE_TIMESTAMP;
+          const isColorization = item[EDataKeys.COLORIZATION];
+          const isChoices = item[EDataKeys.CHOICES];
+          const selectWithColorization = isChoices && isColorization;
+          const selectWithOutColorization = isChoices && !isColorization;
+          const isURL = item[EDataKeys.TYPE] === EDataKeys.TYPE_URL;
+          const isPhone = item[EDataKeys.TYPE] === EDataKeys.TYPE_PHONE;
+          const isEmail = item[EDataKeys.TYPE] === EDataKeys.TYPE_EMAIL;
+          const isText = item[EDataKeys.TYPE] === EDataKeys.TYPE_TEXT;
+          const inputText = isText && !isChoices;
           return (
             <div key={item?.id} className={cx("filters-item")}>
               <ColumnHeader item={item} filteredList={filteredList} />
-
-              {item?.choices &&
-                item?.type === EDataKeys.TYPE_TEXT &&
-                !item[EDataKeys.COLORIZATION] && (
-                  <Controller
-                    name={fieldName}
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        key={Date.now()}
-                        {...field}
-                        options={updatedChoices as UpdatedChoice[]}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          updateFilters(item?.id, value);
-                        }}
-                        placeholder={item?.name}
-                      />
-                    )}
-                  />
-                )}
-              {item?.choices &&
-                item?.type === EDataKeys.TYPE_TEXT &&
-                item[EDataKeys.COLORIZATION] && (
-                  <Controller
-                    name={fieldName}
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        key={Date.now()}
-                        {...field}
-                        options={updatedChoices as UpdatedChoice[]}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          updateFilters(item?.id, value);
-                        }}
-                        placeholder={item?.name}
-                      />
-                    )}
-                  />
-                )}
-              {!item?.choices && item?.type === EDataKeys.TYPE_TEXT && (
-                <Input
-                  {...register(fieldName)}
-                  onChange={(e) => updateFilters(item?.id, e.target.value)}
+              {selectWithOutColorization && (
+                <Controller
                   name={fieldName}
-                  placeholder={item?.name}
-                  type="text"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      key={Date.now()}
+                      {...field}
+                      options={updatedChoices as UpdatedChoice[]}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        updateFilters(item?.id, value);
+                      }}
+                      placeholder={item?.name}
+                      value={item?.choice ? JSON.parse(item?.choice) : null}
+                    />
+                  )}
                 />
               )}
-              {fieldName && item.type === EDataKeys.TYPE_NUMERIC && (
-                <Input
-                  {...register(fieldName)}
-                  onChange={(e) => updateFilters(item?.id, e.target.value)}
+              {selectWithColorization && (
+                <Controller
                   name={fieldName}
-                  placeholder={item?.name}
-                  type="number"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      key={Date.now()}
+                      {...field}
+                      options={updatedChoices as UpdatedChoice[]}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        updateFilters(item?.id, value);
+                      }}
+                      placeholder={item?.name}
+                      value={item?.choice ? JSON.parse(item?.choice) : null}
+                    />
+                  )}
                 />
               )}
-              {item?.type === EDataKeys.TYPE_URL && (
-                <Input
-                  {...register(fieldName)}
-                  onChange={(e) => updateFilters(item?.id, e.target.value)}
-                  name={fieldName}
-                  placeholder={item?.name}
-                  type="url"
-                  pattern="https://.*"
+              {inputText && (
+                <UInput
+                  item={item}
+                  type={"text"}
+                  updateFilters={updateFilters}
                 />
               )}
-              {item?.type === EDataKeys.TYPE_PHONE && (
-                <Input
-                  {...register(fieldName)}
-                  onChange={(e) => updateFilters(item?.id, e.target.value)}
-                  name={fieldName}
-                  placeholder={item?.name}
-                  type="tel"
-                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+              {isNumeric && (
+                <DualInput updateFilters={updateFilters} item={item} />
+              )}
+              {isURL && (
+                <UInput
+                  item={item}
+                  type={"url"}
+                  updateFilters={updateFilters}
                 />
               )}
-              {item?.type === EDataKeys.TYPE_EMAIL && (
-                <Input
-                  {...register(fieldName)}
-                  onChange={(e) => updateFilters(item?.id, e.target.value)}
-                  name={fieldName}
-                  placeholder={item?.name}
-                  type="email"
-                  pattern=".+@gmail\.com"
+              {isPhone && (
+                <UInput
+                  item={item}
+                  type={"tel"}
+                  updateFilters={updateFilters}
                 />
               )}
-              {item?.type === EDataKeys.TYPE_DATE && (
+              {isEmail && (
+                <UInput
+                  item={item}
+                  type={"email"}
+                  updateFilters={updateFilters}
+                />
+              )}
+              {(isDate || isTimestamp) && (
                 <DateInput
                   updateFilters={updateFilters}
                   fieldName={fieldName}
                   openingDate={new Date()}
-                  item={item}
-                />
-              )}
-              {item?.type === EDataKeys.TYPE_TIMESTAMP && (
-                <DateInput
-                  updateFilters={updateFilters}
-                  fieldName={fieldName}
-                  openingDate={new Date()}
-                  item={item}
-                />
-              )}
-              {item?.type === EDataKeys.TYPE_MULTILINE && (
-                <Textarea
-                  {...register(fieldName)}
-                  onChange={(e) =>
-                    updateFilters(
-                      item?.id,
-                      (e.target as HTMLTextAreaElement).value
-                    )
-                  }
                   item={item}
                 />
               )}

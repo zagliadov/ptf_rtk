@@ -1,0 +1,34 @@
+@import "src/styles/colors.scss";
+
+.edit-column-selector {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 642px;
+  height: 653px;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: color($var-color-app-white);
+  box-shadow: 8px 4px 39px 0px #0000000F;
+
+  .edit-column-wrapper {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    width: 602px;
+    height: 499px;
+
+    .column-list {
+      width: 602px;
+      height: 447px;
+
+      .is-loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 400px;
+      }
+    }
+  }
+}

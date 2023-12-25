@@ -7,7 +7,6 @@ import { useSearch } from "src/hook/useSearch";
 import { Reorder } from "framer-motion";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 import * as _ from "lodash";
-import { useAppSelector, RootState } from "src/store/store";
 const FiltersItem = lazy(() => import("./FiltersItem/FiltersItem"));
 
 const cx: CX = classnames.bind(styles);
@@ -23,10 +22,9 @@ export const FilteredColumns: FC<IProps> = ({
   setSaveFilteredList,
 }) => {
   const { watch, setValue } = useFormContext<DynamicFormData>();
-  const { reportIsEdit } = useAppSelector((state: RootState) => state.manager);
   const filters: IIFilters[] = watch(EDataKeys.FILTERS);
   const selectedFilters: IIFilters[] = useMemo(
-    () => _.filter(filters, (item) => item[EDataKeys.CHECKED1]),
+    () => _.filter(filters, (item) => item[EDataKeys.SELECTED_TABLE_FILTER]),
     [filters]
   );
   /**
@@ -72,6 +70,17 @@ export const FilteredColumns: FC<IProps> = ({
     searchValue
   );
 
+  const handleReorder = (newOrder: IIFilters[]) => {
+    // Updating the order of elements in saveFilteredList
+    setSaveFilteredList(newOrder);
+    // Optional: update the position property of saveFilteredList to match the new order
+    const updatedListWithPosition = newOrder.map((item, index) => ({
+      ...item,
+      position: index,
+    }));
+    setSaveFilteredList(updatedListWithPosition);
+  };
+
   useEffect(() => {
     setValue(EDataKeys.FILTERED_LIST, saveFilteredList);
   }, [filteredList, saveFilteredList, setValue, setFilteredList]);
@@ -81,7 +90,7 @@ export const FilteredColumns: FC<IProps> = ({
       <Reorder.Group
         className={cx("reorder")}
         values={saveFilteredList}
-        onReorder={setSaveFilteredList}
+        onReorder={handleReorder}
       >
         <Suspense
           fallback={
@@ -90,7 +99,7 @@ export const FilteredColumns: FC<IProps> = ({
             </div>
           }
         >
-          <FiltersItem filteredList={filteredList} />
+          <FiltersItem filteredList={saveFilteredList} />
         </Suspense>
       </Reorder.Group>
     </>

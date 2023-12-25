@@ -6,6 +6,13 @@
   align-items: center;
   height: 32px;
 
+  span {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    color: color($var-color-app-dark-blue);
+  }
+
   .arrow-icon-wrapper {
     display: flex;
     justify-content: center;

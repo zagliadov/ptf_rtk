@@ -24,6 +24,7 @@ const Select = forwardRef(
       value,
       disabled = false,
       isClearable = false,
+      isPortalTarget = null,
       ...rest
     } = props;
 
@@ -44,6 +45,8 @@ const Select = forwardRef(
         <ReactSelect
           {...rest}
           isClearable={isClearable}
+          // menuIsOpen={true}
+          menuPortalTarget={isPortalTarget}
           options={options}
           isDisabled={disabled}
           styles={{
@@ -70,12 +73,12 @@ const Select = forwardRef(
                   : "#D9DDE2",
                 boxShadow: state.isFocused ? "none" : "none",
               },
-            }),
+            }) as CSSObjectWithLabel,
             valueContainer: (base: CSSObjectWithLabel) => ({
               ...base,
               paddingLeft: "16px",
               paddingRight: 0,
-            }),
+            }) as CSSObjectWithLabel,
             placeholder: (base: CSSObjectWithLabel) => ({
               ...base,
               fontSize: "14",
@@ -83,7 +86,7 @@ const Select = forwardRef(
               fontWeight: 400,
               whiteSpace: "nowrap",
               margin: 0,
-            }),
+            }) as CSSObjectWithLabel,
             menuList: (base: CSSObjectWithLabel) => ({
               ...base,
               marginTop: 0,
@@ -95,7 +98,7 @@ const Select = forwardRef(
               transition:
                 "all .2s cubic-bezier(.5,0,0,1.25),opacity .15s ease-out",
               transformOrigin: "50% 0",
-            }),
+            }) as CSSObjectWithLabel,
             menu: (base: CSSObjectWithLabel) => {
               return {
                 ...base,
@@ -109,7 +112,7 @@ const Select = forwardRef(
                 borderColor: "#ADB4BD!important",
                 boxShadow: "none",
                 border: "none",
-              };
+              } as CSSObjectWithLabel;
             },
             option: (
               base: CSSObjectWithLabel,
@@ -122,7 +125,7 @@ const Select = forwardRef(
                 ...base,
                 backgroundColor: "#fff",
                 padding: "12px",
-                fontSize: "0.875rem",
+                fontSize: "14px",
                 color: isSelected ? "#202020" : "#ADB4BD",
                 cursor: isDisabled ? "not-allowed" : "default",
                 "&:active": {
@@ -131,7 +134,7 @@ const Select = forwardRef(
                 "&:hover": {
                   color: "#202020",
                 },
-              };
+              }  as CSSObjectWithLabel;
             },
           }}
           isSearchable={false}
@@ -144,7 +147,7 @@ const Select = forwardRef(
             ClearIndicator: ({ ...clearIndicatorProps }) => (
               <components.ClearIndicator {...clearIndicatorProps}>
                 {clearIndicatorProps.children}
-                <div style={{ stroke: "#4a7a8a", cursor: "pointer" }}>
+                <div style={{ stroke: "#4a7a8a", cursor: "pointer", paddingTop: "2px" }}>
                   <CloseIcon />
                 </div>
               </components.ClearIndicator>
@@ -206,6 +209,7 @@ type Props = {
   placeholder?: string;
   error?: string;
   disabled?: boolean;
+  isPortalTarget?: HTMLElement | null | undefined;
 };
 
 export default Select;

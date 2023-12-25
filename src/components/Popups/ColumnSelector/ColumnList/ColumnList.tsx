@@ -30,8 +30,8 @@ const ColumnList: FC<IProps> = ({ searchValue, filters, setFilters }) => {
    *
    * @description
    * This function iterates over an array of filter objects. When it finds the filter item
-   * with the matching name, it updates its `checked1` or `checked2` state based on `checkboxNumber`.
-   * If `checkboxNumber` is 1 and `checked` is false, `checked2` is also set to false.
+   * with the matching name, it updates its `selectedTableCell` or `selectedTableFilter` state based on `checkboxNumber`.
+   * If `checkboxNumber` is 1 and `checked` is false, `selectedTableFilter` is also set to false.
    */
   const CheckboxChange = (
     array: IIFilters[],
@@ -42,12 +42,17 @@ const ColumnList: FC<IProps> = ({ searchValue, filters, setFilters }) => {
     return _.map(array, (item) => {
       if (item[EDataKeys.NAME] === name) {
         const newChecked2 =
-          checkboxNumber === 1 && !checked ? false : item[EDataKeys.CHECKED2];
+          checkboxNumber === 1 && !checked
+            ? false
+            : item[EDataKeys.SELECTED_TABLE_FILTER];
         return {
           ...item,
           ...(checkboxNumber === 1
-            ? { [EDataKeys.CHECKED1]: checked, checked2: newChecked2 }
-            : { [EDataKeys.CHECKED2]: checked }),
+            ? {
+                [EDataKeys.SELECTED_TABLE_CELL]: checked,
+                selectedTableFilter: newChecked2,
+              }
+            : { [EDataKeys.SELECTED_TABLE_FILTER]: checked }),
         };
       }
       return item;
@@ -92,38 +97,50 @@ const ColumnList: FC<IProps> = ({ searchValue, filters, setFilters }) => {
 
   return (
     <div className={cx("list-item-wrapper")}>
-      {!_.isEmpty(filteredList) && _.map(
-        filteredList,
-        ({ name, checked1, checked2 }: IIFilters, index: number) => (
-          <div key={name} className={cx("list-item")}>
-            <div className={cx("filter-item")}>
-              <label htmlFor={name}>
-                <input
-                  id={name}
-                  type="checkbox"
-                  checked={checked1}
-                  onChange={(e) =>
-                    handleCheckboxChange(1, e.target.checked, name)
-                  }
-                />
-                <div className={cx("checkbox-wrapper")}>
-                  <div className={cx("checkbox-icon")}>
-                    <CheckboxIcon />
+      {!_.isEmpty(filteredList) &&
+        _.map(
+          filteredList,
+          (
+            {
+              name,
+              selectedTableCell,
+              selectedTableFilter,
+              disabled,
+            }: IIFilters,
+            index: number
+          ) => (
+            <div key={`${name}-checked`} className={cx("list-item")}>
+              <div className={cx("filter-item")}>
+                <label htmlFor={`${name}-checked`}>
+                  <input
+                    id={`${name}-checked`}
+                    type="checkbox"
+                    checked={selectedTableCell}
+                    onChange={(e) =>
+                      handleCheckboxChange(1, e.target.checked, name)
+                    }
+                  />
+                  <div className={cx("checkbox-wrapper")}>
+                    <div className={cx("checkbox-icon")}>
+                      <CheckboxIcon />
+                    </div>
                   </div>
-                </div>
-                <span>{name}</span>
-              </label>
-            </div>
+                  <span>{name}</span>
+                </label>
+              </div>
 
-            <SlideCheckbox
-              checked={checked2}
-              index={index}
-              checkboxNumber={2}
-              onChange={(checked2) => handleCheckboxChange(2, checked2, name)}
-            />
-          </div>
-        )
-      )}
+              <SlideCheckbox
+                checked={selectedTableFilter}
+                index={index}
+                disabled={disabled}
+                checkboxNumber={2}
+                onChange={(selectedTableFilter) =>
+                  handleCheckboxChange(2, selectedTableFilter, name)
+                }
+              />
+            </div>
+          )
+        )}
     </div>
   );
 };

@@ -3,17 +3,31 @@
 .wrapper {
   display: flex;
   align-items: center;
-  padding: 12px 14px;
+  padding-top: 12px;
+  padding-right: 12px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  font-size: 14px;
+
+  span {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    color: color($var-color-app-dark-blue);
+  }
+
+  div[role="button"] {
+    color: #272937;
+}
   cursor: pointer;
 
   & * {
     color: color($var-color-app-grey-2);
   }
-
   &.selected,
   &:hover {
     & * {
-      color: #202020;
+      color: #454A54;
     }
   }
 

@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect } from "react";
+import { FC, useCallback } from "react";
 import styles from "./CreateNewReport.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
@@ -7,10 +7,10 @@ import Select from "src/components/Select";
 import { ToggleButton } from "src/components/ToggleButton/ToggleButton";
 import { Button } from "src/components/Button/Button";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
-import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
-import { setCreateNewReportOpen } from "src/store/managerSlice";
 import { useFormContext } from "react-hook-form";
 import { EDataKeys, RData } from "src/types";
+import { useAppDispatch } from "src/store/store";
+import { setCreateNewReportOpen } from "src/store/managerSlice";
 
 const cx: CX = classnames.bind(styles);
 
@@ -40,7 +40,7 @@ export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
     formState: { errors },
   } = useFormContext<RData>();
   const dispatch = useAppDispatch();
-  const { reportIsEdit } = useAppSelector((state: RootState) => state.manager);
+
   const onPrimaryChange = useCallback(
     (newValue: string | null): void => {
       if (newValue) {
@@ -63,7 +63,7 @@ export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
 
   const onCancel = useCallback(() => {
     dispatch(setCreateNewReportOpen(false));
-    reset();
+      reset();
   }, [dispatch, reset]);
 
   const onToggleChange = useCallback(
@@ -73,30 +73,10 @@ export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
     [setValue]
   );
 
-  // Test that...
-  useEffect(() => {
-    if (reportIsEdit) {
-      const storedReportTitle = localStorage.getItem("reportTitle");
-      const storedDataSource = localStorage.getItem("dataSource");
-      const storedReportType = localStorage.getItem("reportType") as
-        | EDataKeys.EXTERNAL
-        | EDataKeys.INTERNAL;
-
-      storedReportTitle && setValue(EDataKeys.REPORT_TITLE, storedReportTitle);
-      storedDataSource && setValue(EDataKeys.DATA_SOURCE, storedDataSource);
-      storedReportType && setValue(EDataKeys.REPORT_TYPE, storedReportType);
-    }
-  }, [reportIsEdit, setValue]);
-
-  const title =
-    reportIsEdit && localStorage.getItem("reportTitle")
-      ? `Edit ${localStorage.getItem("reportTitle")}`
-      : "Create New Report";
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className={cx("create-new-report")}>
-        <PopupHeader title={title} onClose={onCancel} />
+        <PopupHeader title={"Create New Report"} onClose={onCancel} />
         <div className={cx("popup-body")}>
           <Input
             {...register(EDataKeys.REPORT_TITLE)}
@@ -104,19 +84,18 @@ export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
             placeholder={EDataKeys.REPORT_TITLE}
             error={errors[EDataKeys.REPORT_TITLE]?.message}
           />
-          <Select
-            options={options}
-            value={watch(EDataKeys.DATA_SOURCE)}
-            onChange={onPrimaryChange}
-            placeholder={EDataKeys.DATA_SOURCE}
-            error={errors[EDataKeys.DATA_SOURCE]?.message}
-            disabled={reportIsEdit}
-          />
+            <Select
+              options={options}
+              value={watch(EDataKeys.DATA_SOURCE)}
+              onChange={onPrimaryChange}
+              placeholder={EDataKeys.DATA_SOURCE}
+              error={errors[EDataKeys.DATA_SOURCE]?.message}
+            />
+
           <ToggleButton
             value={watch(EDataKeys.REPORT_TYPE)}
             onChange={onToggleChange}
             error={errors[EDataKeys.REPORT_TYPE]?.message}
-            disabled={reportIsEdit}
           />
           <ButtonWrapper shift={"right"}>
             <Button

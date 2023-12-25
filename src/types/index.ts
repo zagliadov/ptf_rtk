@@ -17,7 +17,7 @@ export type DynamicFormData = Record<string, any>;
 export type SourceType = Record<EDataKeys.DATA_SOURCE | EDataKeys.API, EDataKeys>;
 
 export enum EDataKeys {
-  REPORT_TITLE = "Report title",
+  REPORT_TITLE = "Report Title",
   REPORT_ID = "Report ID",
   DATA_SOURCE = "Data Source",
   DATA_SOURCE_SITE = "Site",
@@ -31,11 +31,14 @@ export enum EDataKeys {
   REPORT_TYPE = "Report Type",
   PIN_TO_MAIN_VIEW = "pinToMainView",
   FILTERED_LIST = "Filtered List",
-  CHECKED1 = "checked1",
-  CHECKED2 = "checked2",
+  SELECTED_TABLE_CELL = "selectedTableCell",
+  SELECTED_TABLE_FILTER = "selectedTableFilter",
+  DISABLED = "disabled",
   COLORIZATION = "colorization",
   NAME = "name",
   CHOICE = "choice",
+  CHOICES = "choices",
+  TYPE = "type",
   EXTERNAL = "External",
   INTERNAL = "Internal",
   FILTERS = "Filters",
@@ -52,6 +55,9 @@ export enum EDataKeys {
   TYPE_LOCATION = "Location",
   TYPE_RECORD_SET = "RecordSet",
   TYPE_DURATION = "Duration",
+  ALIAS = "alias",
+  DESCRIPTION = "description",
+  POSITION = "position",
 }
 
 export type Colorization = {
@@ -84,10 +90,12 @@ export type  ColumnData = {
 };
 
 export interface IIFilters extends ColumnData {
-  [EDataKeys.CHECKED1]: boolean;
-  [EDataKeys.CHECKED2]: boolean;
+  [EDataKeys.SELECTED_TABLE_CELL]: boolean;
+  [EDataKeys.SELECTED_TABLE_FILTER]: boolean;
+  [EDataKeys.DISABLED]: boolean;
   [EDataKeys.PIN_TO_MAIN_VIEW]: boolean;
   [EDataKeys.CHOICE]: string | null;
+  [EDataKeys.POSITION]: number;
 }
 
 
@@ -99,3 +107,21 @@ export type RData = {
   [EDataKeys.FILTERED_LIST]: IIFilters[];
   [EDataKeys.COLUMN_IDS]: string[];
 };
+
+export const ReportDataKeys =  {
+  ROW_ID: "@row.id",
+  SOURCE_ID: "sourceId",
+  COLUMN_IDS: "columnIds",
+  FILTERS: "filters",
+  TYPE: "type",
+  NAME: "name",
+} as const;
+
+export type ReportData = {
+  [ReportDataKeys.ROW_ID]: number;
+  [ReportDataKeys.SOURCE_ID]: string;
+  [ReportDataKeys.COLUMN_IDS]: string;
+  [ReportDataKeys.FILTERS]: string;
+  [ReportDataKeys.TYPE]: string;
+  [ReportDataKeys.NAME]: string;
+}

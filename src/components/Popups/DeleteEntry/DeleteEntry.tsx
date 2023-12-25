@@ -4,20 +4,43 @@ import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
-import { useAppDispatch } from "src/store/store";
+import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
 import { setIsDeleteEntryOpen } from "src/store/managerSlice";
+import { deleteReport, setIsReportDelete } from "src/store/reportSlice";
+import { useGetReportColumnQuery } from "src/store/services/reportColumnApi";
+import * as _ from "lodash";
 
 const cx: CX = classnames.bind(styles);
 
 export const DeleteEntry: FC = () => {
   const dispatch = useAppDispatch();
+  const { reportId, reportName } = useAppSelector(
+    (state: RootState) => state.report
+  );
+
+  const { data } = useGetReportColumnQuery({});
+
   const handleCloseDeleteEntry = () => {
-    console.log("handleCloseDeleteEntry");
     dispatch(setIsDeleteEntryOpen(false));
   };
-  const handleDeleteEntry = () => {
-    dispatch(setIsDeleteEntryOpen(false));
+
+  const handleDeleteEntry = async () => {
+    const filteredData = _.filter(
+      data,
+      (item) => item["Report Name"] === reportName
+    );
+    const columnIds = _.map(filteredData, "@row.id");
+    if (reportId && !_.isEmpty(columnIds)) {
+      await dispatch(deleteReport({ reportId, columnIds }))
+        .then(() => {
+          dispatch(setIsDeleteEntryOpen(false));
+        })
+        .then(() => {
+          dispatch(setIsReportDelete(false));
+        });
+    }
   };
+
   const handleClosePopup = () => {
     dispatch(setIsDeleteEntryOpen(false));
   };

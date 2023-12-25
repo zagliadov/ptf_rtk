@@ -4,53 +4,59 @@ import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
-import { useAppDispatch } from "src/store/store";
+import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import {
-  setIsFiltersOpen,
-  setReportEditAndSaveNewReport,
+  setIsEditFiltersOpen,
+  setIsSaveFiltersChangesOpen,
 } from "src/store/managerSlice";
 import { DynamicFormData, EDataKeys } from "src/types";
 import { useFormContext } from "react-hook-form";
-import { setSelectedFilters, setReportData, setFilterArray } from "src/store/filtersSlice";
+import { setSelectedFilters } from "src/store/filtersSlice";
+import { useGetReportColumnQuery } from "src/store/services/reportColumnApi";
+import * as _ from "lodash";
+import { createReport, deleteReport } from "src/store/reportSlice";
 
 const cx: CX = classnames.bind(styles);
 export const SaveFiltersChanges: FC = () => {
   const { handleSubmit, reset } = useFormContext<DynamicFormData>();
+  const { data: ReportResult } = useGetReportColumnQuery({});
+  const { reportId, reportName } = useAppSelector(
+    (state: RootState) => state.report
+  );
   const dispatch = useAppDispatch();
 
   const handleCloseSaveFiltersChanges = useCallback((): void => {
-    console.log("handleCloseSaveFiltersChanges");
-    dispatch(setReportEditAndSaveNewReport(false));
-  }, [dispatch]);
+    dispatch(setIsEditFiltersOpen(false));
+    dispatch(setIsSaveFiltersChangesOpen(false));
+    reset();
+  }, [dispatch, reset]);
 
   const onSubmit = useCallback(
-    (data: DynamicFormData): void => {
-      console.log(data, "handleSaveEdits");
-      dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
-      localStorage.setItem("reportTitle", data[EDataKeys.REPORT_TITLE]);
-      localStorage.setItem("dataSource", data[EDataKeys.DATA_SOURCE]);
-      localStorage.setItem("reportType", data[EDataKeys.REPORT_TYPE]);
-      dispatch(
-        setReportData({
-          reportTitle: data[EDataKeys.REPORT_TITLE],
-          dataSource: data[EDataKeys.DATA_SOURCE],
-          reportType: data[EDataKeys.REPORT_TYPE],
-        })
+    async (data: DynamicFormData): Promise<void> => {
+      const filteredData = _.filter(
+        ReportResult,
+        (item) => item["Report Name"] === reportName
       );
-      // test..
-      dispatch(setFilterArray(data[EDataKeys.FILTERS]));
-      //...
-      dispatch(setIsFiltersOpen(false));
-      dispatch(setReportEditAndSaveNewReport(false));
-      reset();
+      const columnIds = _.map(filteredData, "@row.id");
+      if (reportId) {
+        await dispatch(deleteReport({ reportId, columnIds, update: true }))
+          .then(() => {
+            dispatch(createReport(data));
+          })
+          .then(() => {
+            dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
+            dispatch(setIsEditFiltersOpen(false));
+            dispatch(setIsSaveFiltersChangesOpen(false));
+            reset();
+          });
+      }
     },
-    [dispatch, reset]
+    [ReportResult, dispatch, reportId, reportName, reset]
   );
 
   const handleClosePopup = useCallback((): void => {
     console.log("handleClosePopup");
-    dispatch(setReportEditAndSaveNewReport(false));
-  }, [dispatch]);
+  }, []);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -63,7 +69,7 @@ export const SaveFiltersChanges: FC = () => {
             You are going to save edits
           </span>
           <span className={cx("description-text")}>
-            Are you sure? All changes will saved in default view
+            Are you sure? All changes will be saved in default view
           </span>
         </div>
         <ButtonWrapper shift={"center"}>

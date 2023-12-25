@@ -129,7 +129,7 @@ function BasicSelect<T extends Option & Record<string, unknown>>(
     <div className={cx("wrapper")}>
       <ReactSelect<T, typeof isMultiple, GroupBase<T>>
         {...rest}
-        // menuIsOpen
+        // menuIsOpen={true}
         classNamePrefix="select"
         isMulti={isMultiple}
         isClearable={isClearable}
@@ -345,7 +345,7 @@ export function getStyles<T>(
         : "#D9DDE2",
       outline: "none",
       borderRadius: "8px",
-      fontSize: "0.875rem",
+      fontSize: "14px",
       boxShadow: state.isFocused ? "none" : "none",
       height: "40px",
       zIndex: 11,
@@ -359,13 +359,23 @@ export function getStyles<T>(
           : "#D9DDE2",
         boxShadow: state.isFocused ? "none" : "none",
       },
-    }),
+    }) as CSSObjectWithLabel,
     placeholder: (base: CSSObjectWithLabel) => ({
       ...base,
       color: "#ADB4BD",
       fontWeight: 400,
       whiteSpace: "nowrap",
-    }),
+    }) as CSSObjectWithLabel,
+    groupHeading: (base: CSSObjectWithLabel) => ({
+      ...base,
+      textTransform: "none",
+      fontSize: "14px",
+      fontWeight: "700",
+      lineHeight: "20px",
+      color: "#454A54",
+      paddingLeft: "6px",
+      marginBottom: "0px",
+    }) as CSSObjectWithLabel,
     menuList: (base: CSSObjectWithLabel) => ({
       ...base,
       marginTop: 0,
@@ -374,8 +384,7 @@ export function getStyles<T>(
       boxShadow: "none",
       transition: "all .2s cubic-bezier(.5,0,0,1.25),opacity .15s ease-out",
       transformOrigin: "50% 0",
-      padding: "6px",
-    }),
+    }) as CSSObjectWithLabel,
     menu: (base: CSSObjectWithLabel) => {
       return {
         ...base,
@@ -391,7 +400,7 @@ export function getStyles<T>(
         borderColor: "#ADB4BD!important",
         boxShadow: "none",
         border: "none",
-      };
+      } as any;
     },
     option: (
       base: CSSObjectWithLabel,
@@ -415,13 +424,13 @@ export function getStyles<T>(
         "&:hover": {
           color: "#202020",
         },
-      };
+      } as CSSObjectWithLabel;
     },
     valueContainer: (base: CSSObjectWithLabel) => ({
       ...base,
       input: { height: 0 },
       whiteSpace: "nowrap",
-    }),
+    }) as CSSObjectWithLabel,
   };
 }
 

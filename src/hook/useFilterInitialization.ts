@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 import {
   useGetFiltersDescribeDataQuery,
   useGetFiltersSelectDataQuery,
-} from "src/store/services/filtersApi";
+} from "src/store/services/sourceApi";
 import { useAppSelector, RootState } from "src/store/store";
 import { ColumnData, EDataKeys, IIFilters, SourceType } from "src/types";
 import * as _ from "lodash";
@@ -35,12 +35,13 @@ import * as _ from "lodash";
 const useFilterInitialization = () => {
   // useFormContext hook from react-hook-form is used for form state management.
   const { watch, setValue } = useFormContext();
-  const { reportIsEdit } = useAppSelector((state: RootState) => state.manager);
+  const { reportSourceId } = useAppSelector(
+    (state: RootState) => state.report
+  );
   // State to store filter data.
   const [filters, setFilters] = useState<IIFilters[]>([]);
-
   // Watching the data source key from the form state.
-  const dataSource = watch(EDataKeys.DATA_SOURCE);
+  const dataSource = watch(EDataKeys.DATA_SOURCE) || reportSourceId;
 
   // Custom query hook from Redux Toolkit to fetch filter data based on data source.
   const source: SourceType = {
@@ -77,47 +78,32 @@ const useFilterInitialization = () => {
     );
   }, [selectData, describeData]);
 
-  useEffect(() => {
+  const initialFilters = useMemo(() => {
     if (
       !isFetchingSelectData &&
       !isFetchingDescribeData &&
       processedData.length > 0
     ) {
-      const hasData: IIFilters = watch(EDataKeys.FILTERS);
-      const initialFilters: IIFilters[] = hasData
+      const hasData = watch(EDataKeys.FILTERS);
+      return hasData
         ? watch(EDataKeys.FILTERS)
         : _.map(processedData, (item) => ({
-            checked1: false,
-            checked2: false,
-            disabled: false,
+            selectedTableCell: false,
+            selectedTableFilter: false,
+            disabled: item.type === "Multiline",
             pinToMainView: false,
             ...item,
           }));
-
-      //test ....
-      const storedSelectedFiltersRaw = localStorage.getItem("filtersArray");
-      const storedSelectedFilters: IIFilters[] = storedSelectedFiltersRaw
-        ? JSON.parse(storedSelectedFiltersRaw)
-        : [];
-      if (reportIsEdit) {
-        setFilters(storedSelectedFilters);
-        setValue(EDataKeys.FILTERS, storedSelectedFilters);
-      } else {
-        setFilters(initialFilters);
-        setValue(EDataKeys.FILTERS, initialFilters);
-      }
-      //.....
-      // setFilters(initialFilters);
-      // setValue(EDataKeys.FILTERS, initialFilters);
     }
-  }, [
-    processedData,
-    isFetchingSelectData,
-    isFetchingDescribeData,
-    setValue,
-    watch,
-    reportIsEdit,
-  ]);
+    return [];
+  }, [processedData, isFetchingSelectData, isFetchingDescribeData, watch]);
+
+  useEffect(() => {
+    if (initialFilters.length > 0) {
+      setFilters(initialFilters);
+      setValue(EDataKeys.FILTERS, initialFilters);
+    }
+  }, [initialFilters, setFilters, setValue]);
 
   const memoizedFilters = useMemo(() => {
     return filters;

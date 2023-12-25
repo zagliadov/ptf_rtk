@@ -6,10 +6,9 @@ import { ReactComponent as CopyIcon } from "src/assets/icons/copy-report-icon.sv
 import { ReactComponent as DeleteIcon } from "src/assets/icons/delete-report-icon.svg";
 import { useAppDispatch } from "src/store/store";
 import {
-  setCreateNewReportOpen,
+  setReportEditOpen,
   setIsDeleteEntryOpen,
   setIsDotThreeMenuOpen,
-  setReportIsEdit,
 } from "src/store/managerSlice";
 const cx = classnames.bind(styles);
 
@@ -22,8 +21,7 @@ export const DotThreeMenu: FC = () => {
   };
 
   const handleEditReport = () => {
-    dispatch(setCreateNewReportOpen(true));
-    dispatch(setReportIsEdit(true));
+    dispatch(setReportEditOpen(true));
     dispatch(setIsDotThreeMenuOpen(false));
   };
 
