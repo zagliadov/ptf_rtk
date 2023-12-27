@@ -1,4 +1,4 @@
-import { FC, useRef, useState, useMemo } from "react";
+import { FC, useRef, useState, useMemo, useEffect } from "react";
 import styles from "./Main.module.scss";
 import classnames from "classnames/bind";
 import { SideMenu } from "../SideMenu/SideMenu";
@@ -7,7 +7,7 @@ import useSideMenuReports from "src/hook/useSideMenuReports";
 import useReportData from "src/hook/useReportData";
 import DataTable from "../DataTable";
 import { TableRef } from "../DataTable/DataTable";
-import { parse, isWithinInterval } from "date-fns";
+import { parse } from "date-fns";
 
 const cx: CX = classnames.bind(styles);
 
@@ -27,7 +27,15 @@ export const Main: FC = () => {
     }
   };
 
-  const isDateArray = (value: any) => {
+  const isNumericRange = (value: any) => {
+    return (
+      Array.isArray(value) &&
+      value.length === 2 &&
+      value.every((v) => !isNaN(v))
+    );
+  };
+
+  const isDateArray = (value: string) => {
     if (!Array.isArray(value) || value.length !== 2) {
       return false;
     }
@@ -37,11 +45,28 @@ export const Main: FC = () => {
     );
   };
 
+  const processFilters = (filterArray: any) => {
+    const newFilters = {};
+    filterArray.forEach((filter: any) => {
+      if (filter.choice) {
+        const choiceValue = JSON.parse(filter.choice);
+        newFilters[filter.name] = choiceValue;
+      }
+    });
+    return newFilters;
+  };
+
+  const processedFilters = processFilters(finalFilterArray);
+
   const filteredRows = useMemo(() => {
     return rows.filter((row: any) => {
       const matchesFilters = Object.entries(filters).every(
         ([columnName, filterValue]: any) => {
-          if (isDateArray(filterValue)) {
+          if (isNumericRange(filterValue)) {
+            const [min, max] = filterValue.map(Number);
+            const rowValue = Number(row[columnName]);
+            return rowValue >= min && rowValue <= max;
+          } else if (isDateArray(filterValue)) {
             const startDateTimestamp = Date.parse(filterValue[0]);
             const endDateTimestamp = Date.parse(filterValue[1]);
             const rowDate = row[columnName];

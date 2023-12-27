@@ -99,7 +99,7 @@ export const FilteredColumns: FC<IProps> = ({
             </div>
           }
         >
-          <FiltersItem filteredList={saveFilteredList} />
+          <FiltersItem filteredList={filteredList} setSaveFilteredList={setSaveFilteredList} />
         </Suspense>
       </Reorder.Group>
     </>

@@ -2,6 +2,7 @@ import { convertLocalToUTCDate, convertUTCToLocalDate } from "src/utils";
 import { ReactComponent as CalendarIcon } from "src/assets/icons/calendar-icon.svg";
 import { ReactComponent as CaretLeft } from "src/assets/icons/caret-left-icon.svg";
 import { ReactComponent as CaretRight } from "src/assets/icons/caret-right-icon.svg";
+import { ReactComponent as CloseIcon } from "src/assets/icons/close-icon.svg";
 import "./DatePicker.global.scss";
 import styles from "./DatePicker.module.scss";
 import classnames from "classnames/bind";
@@ -27,7 +28,7 @@ const CustomInput = React.forwardRef(
   ) => {
     return (
       <div className={cx("input")}>
-        <label>
+        <label style={{ display: "flex" }}>
           <span className={cx("icon")}>
             <CalendarIcon color={"#4A7A8A"} />
           </span>
@@ -37,6 +38,11 @@ const CustomInput = React.forwardRef(
             {...attributes}
             className={cx({ error: error })}
           />
+          {attributes.value && (
+            <span className={cx("clear-icon")}>
+              <CloseIcon />
+            </span>
+          )}
         </label>
       </div>
     );

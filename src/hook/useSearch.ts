@@ -30,7 +30,6 @@ export const useSearch = (
   searchValue: string
 ): UseSearchResult => {
   const [filteredList, setFilteredList] = useState<IIFilters[]>([]);
-
   useEffect(() => {
     const updatedList = selectedFilters.filter((item) =>
       item.name.toLowerCase().includes(searchValue.toLowerCase())

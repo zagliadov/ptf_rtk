@@ -55,8 +55,8 @@ export const SaveFiltersChanges: FC = () => {
   );
 
   const handleClosePopup = useCallback((): void => {
-    console.log("handleClosePopup");
-  }, []);
+    dispatch(setIsSaveFiltersChangesOpen(false));
+  }, [dispatch]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

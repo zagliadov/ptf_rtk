@@ -12,6 +12,8 @@ interface IManagerState {
   isDotThreeMenuOpen: boolean;
   isUnsavedChanges: boolean;
   isSaveFiltersChangesOpen: boolean;
+  isDeleteReport: boolean;
+  isCreateReport: boolean;
 }
 
 const initialState: IManagerState = {
@@ -26,6 +28,8 @@ const initialState: IManagerState = {
   isDotThreeMenuOpen: false,
   isUnsavedChanges: false,
   isSaveFiltersChangesOpen: false,
+  isDeleteReport: false,
+  isCreateReport: false,
 };
 
 const managerSlice = createSlice({
@@ -64,6 +68,12 @@ const managerSlice = createSlice({
     },
     setIsSaveFiltersChangesOpen(state, action: PayloadAction<boolean>) {
       state.isSaveFiltersChangesOpen = action.payload;
+    },
+    setIsDeleteReport(state, action: PayloadAction<boolean>) {
+      state.isDeleteReport = action.payload;
+    },
+    setIsCreateReport(state, action: PayloadAction<boolean>) {
+      state.isCreateReport = action.payload;
     }
   },
 
@@ -82,6 +92,8 @@ export const {
   setIsDotThreeMenuOpen,
   setIsUnsavedChanges,
   setIsSaveFiltersChangesOpen,
+  setIsDeleteReport,
+  setIsCreateReport,
 } = managerSlice.actions;
 
 export default managerSlice.reducer;

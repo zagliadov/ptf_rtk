@@ -22,6 +22,7 @@ import { EditReport } from "../EditReport/EditReport";
 import { EditColumnSelector } from "../EditColumnSelector/EditColumnSelector";
 import { EditFilters } from "../EditFilters/EditFilters";
 import { SaveFiltersChanges } from "../SaveFiltersChanges/SaveFiltersChanges";
+import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 
 export const PopupManager: FC = () => {
   const methods = useForm({
@@ -38,6 +39,8 @@ export const PopupManager: FC = () => {
     isEditColumnSelectorOpen,
     isEditFiltersOpen,
     isSaveFiltersChangesOpen,
+    isDeleteReport,
+    isCreateReport,
   } = useAppSelector((state: RootState) => state.manager);
 
   const openColumnSelector = useCallback((): void => {
@@ -74,8 +77,8 @@ export const PopupManager: FC = () => {
           </Popup>
         )}
         {isFiltersOpen && (
-          <Popup open={isFiltersOpen} align={"right"}>
-            <Filters />
+          <Popup open={isFiltersOpen} align={isCreateReport ? "center" : "right"}>
+            { isCreateReport ? <DotSpinner /> : <Filters /> }
           </Popup>
         )}
         {isEditReportOpen && (
@@ -95,7 +98,7 @@ export const PopupManager: FC = () => {
         )}
         {isDeleteEntryOpen && (
           <Popup open={isDeleteEntryOpen} align={"center"}>
-            <DeleteEntry />
+            { isDeleteReport ? <DotSpinner /> : <DeleteEntry /> }
           </Popup>
         )}
         {isUnsavedChanges && (

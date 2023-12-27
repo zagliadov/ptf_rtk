@@ -5,7 +5,7 @@ import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
 import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
-import { setIsDeleteEntryOpen } from "src/store/managerSlice";
+import { setIsDeleteEntryOpen, setIsDeleteReport } from "src/store/managerSlice";
 import { deleteReport, setIsReportDelete } from "src/store/reportSlice";
 import { useGetReportColumnQuery } from "src/store/services/reportColumnApi";
 import * as _ from "lodash";
@@ -29,6 +29,7 @@ export const DeleteEntry: FC = () => {
       data,
       (item) => item["Report Name"] === reportName
     );
+    dispatch(setIsDeleteReport(true));
     const columnIds = _.map(filteredData, "@row.id");
     if (reportId && !_.isEmpty(columnIds)) {
       await dispatch(deleteReport({ reportId, columnIds }))
@@ -37,6 +38,7 @@ export const DeleteEntry: FC = () => {
         })
         .then(() => {
           dispatch(setIsReportDelete(false));
+          dispatch(setIsDeleteReport(false));
         });
     }
   };
@@ -60,7 +62,7 @@ export const DeleteEntry: FC = () => {
       <ButtonWrapper shift={"center"}>
         <Button
           primary
-          title="Yes"
+          title={"Yes"}
           onClick={handleDeleteEntry}
           style={{ width: "100px" }}
         />

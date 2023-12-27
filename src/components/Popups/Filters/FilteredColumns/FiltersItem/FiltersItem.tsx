@@ -21,8 +21,9 @@ const cx: CX = classnames.bind(styles);
 
 interface IProps {
   filteredList: IIFilters[];
+  setSaveFilteredList?: any;
 }
-const FiltersItem: FC<IProps> = ({ filteredList }) => {
+const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
   const { control, setValue } = useFormContext<DynamicFormData>();
 
   /**
@@ -37,15 +38,31 @@ const FiltersItem: FC<IProps> = ({ filteredList }) => {
    */
   const updateFilters = useCallback(
     (id: number, value: any): void => {
-      const filter: IIFilters | undefined = _.find(filteredList, { id: id });
-      console.log(filter, "updateFilters FiltersItem")
-      if (filter) {
-        filter[EDataKeys.CHOICE] = JSON.stringify(value);
-        setValue(EDataKeys.FILTERED_LIST, filteredList);
-      }
+      const updatedFilteredList = filteredList.map(filter => {
+        if (filter.id === id) {
+          return { ...filter, [EDataKeys.CHOICE]: JSON.stringify(value) };
+        }
+        return filter;
+      });
+
+      setValue(EDataKeys.FILTERED_LIST, updatedFilteredList);
+      setSaveFilteredList(updatedFilteredList);
     },
-    [filteredList, setValue]
+    [filteredList, setValue, setSaveFilteredList]
   );
+
+  // const updateFilters = useCallback(
+  //   (id: number, value: any): void => {
+  //     const filter: IIFilters | undefined = _.find(filteredList, { id: id });
+  //     console.log(filter, "updateFilters FiltersItem")
+  //     if (filter) {
+  //       filter[EDataKeys.CHOICE] = JSON.stringify(value);
+  //       setValue(EDataKeys.FILTERED_LIST, filteredList);
+  //       setSaveFilteredList(filteredList);
+  //     }
+  //   },
+  //   [filteredList, setValue]
+  // );
 
   useEffect(() => {
     const idsArray: string[] = _.map(filteredList, (item) =>

@@ -4,7 +4,7 @@ import { IIFilters } from "src/types";
 import { formatDate } from "src/utils";
 
 interface IProps {
-  openingDate: Date;
+  openingDate?: Date;
   fieldName: string;
   item: IIFilters;
   updateFilters: (value1: number, value2: [string, string]) => void;
@@ -20,6 +20,7 @@ export const DateInput: FC<IProps> = ({
 }) => {
   const [eDate, setEDate] = useState<Date | null>();
   const [sDate, setSDate] = useState<Date | null>();
+
   useEffect(() => {
     if (item.choice) {
       try {
@@ -32,7 +33,7 @@ export const DateInput: FC<IProps> = ({
         console.error("Error parsing dates from choice:", error);
       }
     }
-  }, [item.choice, openingDate]);
+  }, [item.choice]);
 
   const handleDateChange = (
     dates: Date | [Date | null, Date | null] | null
@@ -54,17 +55,14 @@ export const DateInput: FC<IProps> = ({
             ],
             item.name
           );
+      } else {
+        handleSelectChange && handleSelectChange("", item.name);
       }
     } else if (dates) {
       updateFilters(item.id, [
         formatDate(dates.toISOString()),
         formatDate(dates.toISOString()),
       ]);
-      handleSelectChange &&
-        handleSelectChange(
-          [formatDate(dates.toISOString()), formatDate(dates.toISOString())],
-          item.name
-        );
     }
   };
 

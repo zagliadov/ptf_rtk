@@ -15,7 +15,7 @@ import {
 import { useElementSize } from "src/hook/useElementSize";
 import { FiltersItem } from "./FiltersItem/FiltersItem";
 import { FormProvider, useForm } from "react-hook-form";
-import useCheckOpacity from "src/hook/useCheckVisible";
+// import useCheckOpacity from "src/hook/useCheckVisible";
 import { useHoverPositionVisibility } from "src/hook/useHoverPositionVisibility";
 import { UniPopup } from "../Popups/UniPopup/UniPopup";
 import ReactDOM from "react-dom";
@@ -26,13 +26,12 @@ const cx: CX = classnames.bind(styles);
 interface IProps {
   filterArray: any;
   onFilterChange: any;
-  setSearchValue: any;
-  searchValue: any;
+  setSearchValue: (value: string) => void;
+  searchValue: string;
 }
 export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange, setSearchValue, searchValue }) => {
   const methods = useForm();
   const dispatch = useAppDispatch();
-  // const [searchValue, setSearchValue] = useState<string>("");
   const [filtersAreExpanded, setFiltersAreExpanded] = useState<boolean>(false);
   const [showHideFiltersIconWrapper, setShowHideFiltersIconWrapper] =
     useState(false);
@@ -41,7 +40,7 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
   const { isDotThreeMenuOpen } = useAppSelector(
     (state: RootState) => state.manager
   );
-  const { disabled } = useCheckOpacity(visibleBlocks, filterArray?.length);
+  // const { disabled } = useCheckOpacity(visibleBlocks, filterArray?.length);
   const {
     isVisible: isInfoVisible,
     position: infoPosition,
@@ -121,7 +120,7 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
             />
             <Button
               type="button"
-              disabled={!disabled}
+              // disabled={!disabled}
               aria-label={"filter-button"}
               icon={<FilterIcon />}
               style={{ width: "40px" }}

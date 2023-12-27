@@ -4,12 +4,12 @@ import { useGetGeneralReportsQuery } from "src/store/services/reportSettingsApi"
 import { EDataKeys } from "src/types";
 import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
 import {
-  setBasicReportData,
   setReportId,
   setReportName,
   setReportSourceId,
   setReportType,
 } from "src/store/reportSlice";
+import { setIsCreateReport, setIsFiltersOpen } from "src/store/managerSlice";
 
 export interface ReportRaw {
   "@row.id": number;
@@ -64,11 +64,13 @@ const useSideMenuReports = (): ExtendedSourceReports[] => {
   const [reportsArray, setReportsArray] = useState<ExtendedSourceReports[]>([]);
   const { data, isLoading, refetch } = useGetGeneralReportsQuery(undefined);
   const dispatch = useAppDispatch();
-  const { isReportCreated, isReportDelete, reportSourceId } = useAppSelector(
+  const { isReportCreated, isReportDelete } = useAppSelector(
     (state: RootState) => state.report
   );
   const processedData = useMemo(() => {
     if (!isLoading && data) {
+      dispatch(setIsCreateReport(false));
+      dispatch(setIsFiltersOpen(false));
       return _.chain(data as ReportRaw[])
         .groupBy("sourceId")
         .mapValues((reports) =>
@@ -96,7 +98,7 @@ const useSideMenuReports = (): ExtendedSourceReports[] => {
         .value();
     }
     return [];
-  }, [data, isLoading]);
+  }, [data, dispatch, isLoading]);
 
   useEffect(() => {
     setReportsArray(processedData);

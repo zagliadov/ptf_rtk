@@ -22,8 +22,9 @@ export const FiltersItem: FC<IProps> = ({
   visibleBlocks,
   onFilterChange,
 }) => {
+
   const handleSelectChange = useCallback(
-    (value: any, name?: string) => {
+    (value: string | null, name?: string) => {
       if (name && value !== null) {
         onFilterChange(name, value);
       } else {
@@ -111,9 +112,9 @@ export const FiltersItem: FC<IProps> = ({
                   updateFilters={updateFilters}
                   handleSelectChange={handleSelectChange}
                   fieldName={filter.name}
-                  openingDate={
-                    filter?.choice ? JSON.parse(filter?.choice) : filter?.choice
-                  }
+                  // openingDate={
+                  //   filter?.choice ? JSON.parse(filter?.choice) : filter?.choice
+                  // }
                   item={filter}
                 />
               )}

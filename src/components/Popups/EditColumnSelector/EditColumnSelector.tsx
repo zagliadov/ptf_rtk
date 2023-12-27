@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, lazy, Suspense, useEffect } from "react";
+import { FC, useCallback, useState, lazy, Suspense } from "react";
 import classnames from "classnames/bind";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";

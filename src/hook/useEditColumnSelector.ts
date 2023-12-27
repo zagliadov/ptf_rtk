@@ -47,7 +47,6 @@ export const useEditColumnSelector = () => {
     const selectKeys: string[] = _.keys(_.first(selectData));
     // Retrieve 'columns' array from describeData, or an empty array if not present
     const describeColumns: ColumnData[] = _.get(describeData, "columns", []);
-
     // Filter describeColumns to include only those items whose names are in selectKeys
     return _.filter(describeColumns, (column) =>
       _.includes(selectKeys, column.name)

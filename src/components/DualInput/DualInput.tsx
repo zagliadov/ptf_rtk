@@ -34,7 +34,7 @@ export const DualInput: FC<DualInputProps> = ({
         console.error("Error parsing JSON:", e);
       }
     }
-  }, [choice, max, min]);
+  }, [choice]);
 
   const handleMinChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\s+/g, "");

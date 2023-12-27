@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from "react";
+import { FC, useCallback, useRef, useState, useEffect } from "react";
 import styles from "./EditFilters.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
@@ -20,6 +20,7 @@ import { FilteredColumns } from "../Filters/FilteredColumns/FilteredColumns";
 import { DynamicFormData, EDataKeys, IIFilters } from "src/types";
 import * as _ from "lodash";
 import { setSelectedFilters } from "src/store/filtersSlice";
+import { useEditColumnSelector } from "src/hook/useEditColumnSelector";
 
 const cx: CX = classnames.bind(styles);
 
@@ -27,9 +28,11 @@ export const EditFilters: FC = () => {
   const { handleSubmit, watch, setValue, reset } =
     useFormContext<DynamicFormData>();
   const [searchValue, setSearchValue] = useState<string>("");
+  const { reportFilters } = useEditColumnSelector();
   const [saveFilteredList, setSaveFilteredList] = useState<IIFilters[]>(
-    watch(EDataKeys.FILTERED_LIST) || []
+    reportFilters || []
   );
+
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
   const maxHeight: string = useElementHeight(filtersWrapperRef);
   const dispatch = useAppDispatch();

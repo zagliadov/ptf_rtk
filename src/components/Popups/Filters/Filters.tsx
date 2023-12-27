@@ -8,6 +8,7 @@ import { useAppDispatch } from "src/store/store";
 import {
   setIsFiltersOpen,
   setColumnSelectorOpen,
+  setIsCreateReport,
 } from "src/store/managerSlice";
 import Search from "src/components/Search";
 import SimpleBar from "simplebar-react";
@@ -42,9 +43,10 @@ export const Filters: FC = () => {
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
       console.log(data, "data");
+      dispatch(setIsCreateReport(true));
       await dispatch(createReport(data)).then(() => {
         dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
-        dispatch(setIsFiltersOpen(false));
+        // dispatch(setIsFiltersOpen(false));
         reset();
       }).then(() => {
         dispatch(setIsReportCreated(false));
