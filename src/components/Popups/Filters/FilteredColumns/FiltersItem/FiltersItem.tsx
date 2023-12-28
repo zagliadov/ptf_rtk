@@ -75,6 +75,7 @@ const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
     <>
       {!_.isEmpty(sortedFilters) &&
         _.map(sortedFilters, (item: IIFilters) => {
+          if (item[EDataKeys.SELECTED_TABLE_CELL] === true && item[EDataKeys.SELECTED_TABLE_FILTER] === false) return;
           const fieldName: string = `${item?.name}`;
           const updatedChoices: UpdatedChoice[] | null = updateChoices(
             item?.choices as Choice[],

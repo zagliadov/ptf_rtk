@@ -21,6 +21,7 @@ import { useHandleCheckboxAll } from "src/hook/useHandleCheckboxAll";
 import { ColumnListHeader } from "../ColumnSelector/ColumnListHeader/ColumnListHeader";
 import { useEditColumnSelector } from "src/hook/useEditColumnSelector";
 import * as _ from "lodash";
+import { ColumnSearchHeader } from "../ColumnSelector/ColumnListHeader/ColumnSearchHeader/ColumnSearchHeader";
 const ColumnList = lazy(
   () => import("../ColumnSelector/ColumnList/ColumnList")
 );
@@ -97,25 +98,22 @@ export const EditColumnSelector: FC<IProps> = ({ onContinue }) => {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className={cx("edit-column-selector")}>
         <PopupHeader
-          title={"Edit Column Selector"}
+          title={"Edit Set of Report Columns and Filters"}
           onClose={handleCloseColumnSelector}
         />
         <div className={cx("edit-column-wrapper")}>
           <div className={cx("search-wrapper")}>
-            <Search
-              onChange={handleSearchChange}
-              value={searchValue}
-              placeholder={"Search by Column"}
-              width={"269px"}
+            <ColumnSearchHeader
+              isChecked={isChecked}
+              handleCheckedAll={handleCheckedAll}
+              isLoading={isLoading}
+              handleSearchChange={handleSearchChange}
+              searchValue={searchValue}
             />
           </div>
 
           <div className={cx("column-list")}>
-            <ColumnListHeader
-              handleCheckedAll={handleCheckedAll}
-              isChecked={isChecked}
-              isLoading={isLoading}
-            />
+            <ColumnListHeader />
             <SimpleBar
               style={{ maxHeight: "403px" }}
               className="my-custom-scrollbar-column"

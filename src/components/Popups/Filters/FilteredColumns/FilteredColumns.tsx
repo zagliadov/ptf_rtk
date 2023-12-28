@@ -24,7 +24,7 @@ export const FilteredColumns: FC<IProps> = ({
   const { watch, setValue } = useFormContext<DynamicFormData>();
   const filters: IIFilters[] = watch(EDataKeys.FILTERS);
   const selectedFilters: IIFilters[] = useMemo(
-    () => _.filter(filters, (item) => item[EDataKeys.SELECTED_TABLE_FILTER]),
+    () => _.filter(filters, (item) => item[EDataKeys.SELECTED_TABLE_FILTER] || item[EDataKeys.SELECTED_TABLE_CELL]),
     [filters]
   );
   /**
@@ -49,7 +49,7 @@ export const FilteredColumns: FC<IProps> = ({
       saveFilteredList,
       "id"
     );
-    _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = false));
+    _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = true));
     if (newFilters.length > 0) {
       setSaveFilteredList(_.union(saveFilteredList, newFilters));
     }

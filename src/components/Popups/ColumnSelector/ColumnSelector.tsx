@@ -8,7 +8,6 @@ import {
   setColumnSelectorOpen,
   setCreateNewReportOpen,
 } from "src/store/managerSlice";
-import Search from "src/components/Search";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import styles from "./ColumnSelector.module.scss";
@@ -19,6 +18,7 @@ import { EDataKeys, RData } from "src/types";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 import useFilterInitialization from "src/hook/useFilterInitialization";
 import { useHandleCheckboxAll } from "src/hook/useHandleCheckboxAll";
+import { ColumnSearchHeader } from "./ColumnListHeader/ColumnSearchHeader/ColumnSearchHeader";
 const ColumnList = lazy(() => import("./ColumnList/ColumnList"));
 
 const cx: CX = classnames.bind(styles);
@@ -30,7 +30,7 @@ interface IProps {
 export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
   const { register, handleSubmit, watch } = useFormContext<RData>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const [initialValues, setInitialValues] = useState<any>({});
+  const [ , setInitialValues] = useState<any>({});
   const { filters, setFilters, isLoading } = useFilterInitialization();
   const dispatch = useAppDispatch();
   const { isChecked, handleCheckedAll, handleResetAll } = useHandleCheckboxAll(
@@ -45,7 +45,6 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
   }, [watch]);
 
   const handleCloseColumnSelector = useCallback(() => {
-
       dispatch(setColumnSelectorOpen(false));
       dispatch(setCreateNewReportOpen(true));
   }, [dispatch]);
@@ -79,20 +78,17 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
         />
         <div className={cx("column-wrapper")}>
           <div className={cx("search-wrapper")}>
-            <Search
-              onChange={handleSearchChange}
-              value={searchValue}
-              placeholder={"Search by Column"}
-              width={"269px"}
+          <ColumnSearchHeader
+              isChecked={isChecked}
+              handleCheckedAll={handleCheckedAll}
+              isLoading={isLoading}
+              handleSearchChange={handleSearchChange}
+              searchValue={searchValue}
             />
           </div>
 
           <div className={cx("column-list")}>
-            <ColumnListHeader
-              handleCheckedAll={handleCheckedAll}
-              isChecked={isChecked}
-              isLoading={isLoading}
-            />
+          <ColumnListHeader />
             <SimpleBar
               style={{ maxHeight: "403px" }}
               className="my-custom-scrollbar-column"

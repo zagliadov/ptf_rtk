@@ -7,11 +7,12 @@ import {
 import { useAppSelector, RootState } from "src/store/store";
 import { ColumnData, EDataKeys, IIFilters, SourceType } from "src/types";
 import * as _ from "lodash";
+import { useGetGeneralReportsQuery } from "src/store/services/reportSettingsApi";
 
 export const useEditColumnSelector = () => {
   // useFormContext hook from react-hook-form is used for form state management.
   const { watch, setValue } = useFormContext();
-  const { reportFilters, reportSourceId } = useAppSelector(
+  const { reportFilters, reportSourceId, reportId } = useAppSelector(
     (state: RootState) => state.report
   );
   // State to store filter data.
@@ -27,6 +28,9 @@ export const useEditColumnSelector = () => {
         ? EDataKeys.API_DATA_WAREHOUSE
         : EDataKeys.API_VIEW,
   };
+
+  const { data: reportData, isLoading: isLoadingReports } =
+    useGetGeneralReportsQuery(undefined);
 
   const {
     data: describeData,
@@ -80,11 +84,25 @@ export const useEditColumnSelector = () => {
     hasData,
   ]);
 
+  const processedFilters = useMemo(() => {
+    if (!isLoadingReports && reportData && reportId) {
+      const reportDetails = _.find(reportData, { "@row.id": reportId });
+      if (reportDetails?.filters) {
+        try {
+          return JSON.parse(reportDetails.filters);
+        } catch (error) {
+          console.error("Error parsing filters", error);
+        }
+      }
+    }
+    return [];
+  }, [reportData, isLoadingReports, reportId]);
+
   const updatedInitialFilters = useMemo(() => {
     // We update only if there is no data (hasData === false)
     if (!hasData) {
       return initialFilters.map((filter) => {
-        const reportFilter = _.find(reportFilters, { id: filter.id });
+        const reportFilter = _.find(processedFilters, { id: filter.id });
         return reportFilter
           ? _.assign({}, filter, {
               selectedTableCell: reportFilter.selectedTableCell,
@@ -98,7 +116,7 @@ export const useEditColumnSelector = () => {
     }
     // If hasData === true, return initialFilters unchanged
     return initialFilters;
-  }, [initialFilters, reportFilters, hasData]);
+  }, [hasData, initialFilters, processedFilters]);
 
   useEffect(() => {
     setFilters(updatedInitialFilters);
@@ -109,6 +127,6 @@ export const useEditColumnSelector = () => {
     filters: filters,
     setFilters,
     isLoading: isLoadingDescribeData || isLoadingSelectData,
-    reportFilters,
+    reportFilters: filters,
   };
 };

@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState, useEffect } from "react";
+import { FC, useCallback, useRef, useState } from "react";
 import styles from "./EditFilters.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";

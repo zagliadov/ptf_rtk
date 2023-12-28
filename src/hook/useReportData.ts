@@ -72,13 +72,16 @@ const useReportData = () => {
       if (reportDetails?.filters) {
         try {
           const parsedFilters = JSON.parse(reportDetails.filters);
-          console.log(parsedFilters, "parsedFilters");
-          return parsedFilters.filter((filter: any) => filter.pinToMainView);
+          // console.log(parsedFilters, "parsedFilters");
+          return parsedFilters.filter(
+            (filter: any) => filter.selectedTableFilter
+          );
         } catch (error) {
           console.error("Error parsing filters", error);
-          return [];
+          setFinalFilterArray([]);
         }
       }
+      setFinalFilterArray([]);
     }
     return [];
   }, [reportData, isLoadingReports, reportId]);
@@ -88,6 +91,29 @@ const useReportData = () => {
       processFilters(processedFilters);
     }
   }, [processFilters, processedFilters]);
+
+  const finalColumns = useMemo(() => {
+    if (!isLoadingReports && reportData && reportId) {
+      const reportDetails = _.find(reportData, { "@row.id": reportId });
+      if (reportDetails?.filters) {
+        try {
+          const parsedFilters = JSON.parse(reportDetails.filters);
+          const cells = _.filter(
+            parsedFilters,
+            (item) => item.selectedTableCell
+          );
+
+          // We filter the columns, checking if their name is contained in the cells array.
+          return columns.filter((column) =>
+            cells.some((cell) => cell.name === column.name)
+          );
+        } catch (error) {
+          console.error("Error parsing filters", error);
+        }
+      }
+    }
+    return [];
+  }, [columns, isLoadingReports, reportData, reportId]);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -107,7 +133,7 @@ const useReportData = () => {
     reportId,
     reportSourceId,
     finalFilterArray,
-    columns,
+    columns: finalColumns,
     rows: rowData || [],
   };
 };

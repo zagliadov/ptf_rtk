@@ -1,4 +1,4 @@
-import { FC, useRef, useState, useMemo, useEffect } from "react";
+import { FC, useRef, useState, useMemo } from "react";
 import styles from "./Main.module.scss";
 import classnames from "classnames/bind";
 import { SideMenu } from "../SideMenu/SideMenu";
@@ -48,7 +48,11 @@ export const Main: FC = () => {
   const processFilters = (filterArray: any) => {
     const newFilters = {};
     filterArray.forEach((filter: any) => {
-      if (filter.choice) {
+      // Checking if there is already a value for this filter in the current filters
+      if (filters.hasOwnProperty(filter.name)) {
+        newFilters[filter.name] = filters[filter.name];
+      } else if (filter.choice) {
+        // If there is no value in the current filters, use the value from choice
         const choiceValue = JSON.parse(filter.choice);
         newFilters[filter.name] = choiceValue;
       }
@@ -60,7 +64,7 @@ export const Main: FC = () => {
 
   const filteredRows = useMemo(() => {
     return rows.filter((row: any) => {
-      const matchesFilters = Object.entries(filters).every(
+      const matchesFilters = Object.entries(processedFilters).every(
         ([columnName, filterValue]: any) => {
           if (isNumericRange(filterValue)) {
             const [min, max] = filterValue.map(Number);
@@ -90,7 +94,7 @@ export const Main: FC = () => {
 
       return matchesFilters && matchesSearch;
     });
-  }, [rows, filters, searchValue]);
+  }, [rows, processedFilters, searchValue]);
 
   return (
     <main className={cx("main")}>
