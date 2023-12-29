@@ -57,5 +57,20 @@ export const useHoverPositionVisibility = <IDetail extends unknown>({
     }
   };
 
-  return { isVisible, position, handleMouseEnter, handleMouseLeave };
+  const handleMouseClick = (
+    event: MouseEvent<HTMLElement>,
+  ) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setPosition({
+      top: rect.top + window.scrollY,
+      left: rect.right + window.scrollX,
+    });
+    if (isVisible) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true)
+    }
+  };
+
+  return { isVisible, position, handleMouseEnter, handleMouseLeave, handleMouseClick };
 };

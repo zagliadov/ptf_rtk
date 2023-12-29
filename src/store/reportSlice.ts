@@ -57,8 +57,6 @@ export const createReport = createAsyncThunk(
       const reportResult = await dispatch(
         reportSettingsApi.endpoints.createReportSettings.initiate(reportData)
       ).unwrap();
-      console.log(reportResult, "reportResult createReportSetting");
-
       const columnPromises = data[EDataKeys.COLUMN_IDS].map(
         async (columnId: number) => {
           const filterIndex = data[EDataKeys.FILTERED_LIST].findIndex(

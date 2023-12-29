@@ -10,12 +10,17 @@ import {
   setReportType,
 } from "src/store/reportSlice";
 import { setIsCreateReport, setIsFiltersOpen } from "src/store/managerSlice";
+import { format, parseISO } from 'date-fns';
+
 
 export interface ReportRaw {
   "@row.id": number;
   sourceId: string | null;
   name: string;
   type: EDataKeys.INTERNAL | EDataKeys.EXTERNAL;
+  "Date Created": string;
+  "Date Modified": string | null;
+  "Created By": string;
 }
 
 export interface Report {
@@ -31,13 +36,9 @@ export interface SourceReports {
 }
 export interface ReportDetail {
   reportName: string;
-  content: string;
-  creator: string;
-  department: string;
-  role: string;
   dateCreated: string;
-  dateUpdated: string;
-  purpose: string;
+  dateModified: string | null;
+  createdBy: string;
 }
 
 interface ExtendedReport extends Report {
@@ -74,20 +75,16 @@ const useSideMenuReports = (): ExtendedSourceReports[] => {
       return _.chain(data as ReportRaw[])
         .groupBy("sourceId")
         .mapValues((reports) =>
-          reports.map(({ "@row.id": rowId, name, type }) => ({
+          reports.map(({ "@row.id": rowId, name, type, "Date Created": dateCreated, "Date Modified": dateModified, "Created By": createdBy }) => ({
             "@row.id": rowId,
             name,
             type,
             details: [
               {
-                reportName: "Site Report A",
-                content: "Site Report Content A",
-                creator: "Jack Young",
-                department: "Design",
-                role: "Designer",
-                dateCreated: "30.10.2023",
-                dateUpdated: "31.10.2023",
-                purpose: "Site Analysis",
+                reportName: name,
+                createdBy,
+                dateCreated: dateCreated ? format(parseISO(dateCreated), 'dd.MM.yyyy') as string : "",
+                dateModified: dateModified ? format(parseISO(dateModified), 'dd.MM.yyyy') as string : null,
               },
             ],
           }))

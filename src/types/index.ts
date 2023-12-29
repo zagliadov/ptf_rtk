@@ -115,6 +115,9 @@ export const ReportDataKeys =  {
   FILTERS: "filters",
   TYPE: "type",
   NAME: "name",
+  DATE_CREATED: "Date Created",
+  DATE_MODIFIED: "Date Modified",
+  CREATED_BY: "Created By",
 } as const;
 
 export type ReportData = {
@@ -124,4 +127,7 @@ export type ReportData = {
   [ReportDataKeys.FILTERS]: string;
   [ReportDataKeys.TYPE]: string;
   [ReportDataKeys.NAME]: string;
+  [ReportDataKeys.DATE_CREATED]: string;
+  [ReportDataKeys.DATE_MODIFIED]: string | null;
+  [ReportDataKeys.CREATED_BY]: string;
 }

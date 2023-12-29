@@ -18,7 +18,7 @@ import classNames from "classnames/bind";
 import styles from "./DataTable.module.scss";
 import Tooltip from "./Tooltip";
 import exportToExcel from "./exportExcel";
-
+import exportToPdf from "./exportPDF";
 
 const cx: CX = classNames.bind(styles);
 
@@ -28,16 +28,18 @@ type Props<T> = {
     onRowClick: (data: T) => unknown,
     onRecordsNumberChanged: (recordsNumber: number) => void
     defaultSortModel?: ColumnState[],
-    excelName?: string
+    excelName?: string,
+    pdfName?: string,
 }
 
 export type TableRef = {
     resetFilters: () => void,
-    exportExcel: () => void
+    exportExcel: () => void,
+    exportPdf: () => void
 }
 
 function DataTable<T>(props: Props<T>, ref: React.ForwardedRef<TableRef>) {
-    const { columnDefs, rows, onRowClick, onRecordsNumberChanged, excelName } = props;
+    const { columnDefs, rows, onRowClick, onRecordsNumberChanged, excelName, pdfName } = props;
 
     const gridRef = useRef<AgGridReact<T>>();
 
@@ -53,7 +55,12 @@ function DataTable<T>(props: Props<T>, ref: React.ForwardedRef<TableRef>) {
                     void exportToExcel(gridRef.current, { sheetName: excelName, fileName: excelName });
                 }
             },
-        }), [excelName]);
+            exportPdf: () => {
+                if (gridRef.current) {
+                    void exportToPdf(gridRef.current, { fileName: `${pdfName}.pdf` });
+                }
+            },
+        }), [excelName, pdfName]);
 
     const defaultColDef = useMemo<ColDef<T, unknown>>(() => ({
         sortable: true,

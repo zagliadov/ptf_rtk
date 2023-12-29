@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, RefObject, useCallback } from "react";
 import styles from "./AppHeader.module.scss";
 import classnames from "classnames/bind";
 import { Button } from "../Button/Button";
@@ -6,13 +6,27 @@ import { ReactComponent as LinkIcon } from "src/assets/icons/link-icon.svg";
 import { ReactComponent as GetFilePDFIcon } from "src/assets/icons/get-file-pdf-icon.svg";
 import { ReactComponent as ExcelTableIcon } from "src/assets/icons/excel-table-icon.svg";
 import { RootState, useAppSelector } from "src/store/store";
+import { TableRef } from "../DataTable/DataTable";
 
 const cx: CX = classnames.bind(styles);
-export const AppHeader: FC = () => {
+
+interface IProps {
+  dataTableRef: RefObject<TableRef>;
+}
+
+export const AppHeader: FC<IProps> = ({ dataTableRef }) => {
   const { reportName, reportSourceId, reportType, reportId } = useAppSelector((state: RootState) => state.report);
   const handleGetApiUrl = useCallback(async () => {
     console.log("handleGetApiUrl");
   }, []);
+
+  const handleExportExcel = useCallback(() => {
+    dataTableRef.current?.exportExcel();
+  }, [dataTableRef]);
+
+  const handleExportPdf = useCallback(() => {
+    dataTableRef.current?.exportPdf();
+  }, [dataTableRef]);
 
 
   return (
@@ -40,14 +54,14 @@ export const AppHeader: FC = () => {
             primary
             icon={<GetFilePDFIcon />}
             title="PDF"
-            onClick={handleGetApiUrl}
+            onClick={handleExportPdf}
             style={{ width: "83px" }}
           />
           <Button
             primary
             icon={<ExcelTableIcon />}
             title="Excel"
-            onClick={handleGetApiUrl}
+            onClick={handleExportExcel}
             style={{ width: "91px" }}
           />
         </div>

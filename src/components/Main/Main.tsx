@@ -1,4 +1,4 @@
-import { FC, useRef, useState, useMemo } from "react";
+import { FC, useState, useMemo, RefObject } from "react";
 import styles from "./Main.module.scss";
 import classnames from "classnames/bind";
 import { SideMenu } from "../SideMenu/SideMenu";
@@ -11,10 +11,12 @@ import { parse } from "date-fns";
 
 const cx: CX = classnames.bind(styles);
 
-export const Main: FC = () => {
+interface IProps {
+  dataTableRef: RefObject<TableRef>;
+}
+export const Main: FC<IProps> = ({ dataTableRef }) => {
   const reportsArray = useSideMenuReports();
   const [searchValue, setSearchValue] = useState<string>("");
-  const dataTableRef = useRef<TableRef>(null);
   const { finalFilterArray, rows, columns } = useReportData();
   const [filters, setFilters] = useState({});
 
@@ -116,6 +118,7 @@ export const Main: FC = () => {
               onRowClick={() => {}}
               onRecordsNumberChanged={() => {}}
               excelName="Report"
+              pdfName="Report"
               ref={dataTableRef as any}
             />
           </div>

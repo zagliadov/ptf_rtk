@@ -8,7 +8,6 @@ import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import "./simplebar.scss";
 import { useElementHeight } from "src/hook/useElementHeight";
-import { IDetails } from "./reports";
 import { Tooltip } from "../Tooltip/Tooltip";
 import ReactDOM from "react-dom";
 import { useHoverPositionVisibility } from "src/hook/useHoverPositionVisibility";
@@ -51,11 +50,17 @@ const contentVariants = {
 interface IProps {
   reportsArray: SourceReports[];
 }
+export interface IDetails {
+  reportName: string;
+  dateCreated: string;
+  dateModified: string | null;
+  createdBy: string;
+}
 export const SideMenu: FC<IProps> = ({ reportsArray }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const dispatch = useAppDispatch();
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
-  const [currentDetail, setCurrentDetail] = useState<IDetails | null>(null);
+  const [currentDetail, setCurrentDetail] = useState<any | null>(null);
   const { isVisible, position, handleMouseEnter, handleMouseLeave } =
     useHoverPositionVisibility<IDetails>({
       setDetail: setCurrentDetail,
@@ -230,11 +235,11 @@ export const SideMenu: FC<IProps> = ({ reportsArray }) => {
           <Tooltip
             position={position}
             content={[
-              `Creator: ${currentDetail.creator}`,
-              `Department: ${currentDetail.department}`,
+              `Created By: ${currentDetail.createdBy}`,
+              // `Department: ${currentDetail.department}`,
               `Date Created: ${currentDetail.dateCreated}`,
-              `Date Updated: ${currentDetail.dateUpdated}`,
-              `Purpose: ${currentDetail.purpose}`,
+              `Date Modified: ${currentDetail.dateModified}`,
+              // `Purpose: ${currentDetail.purpose}`,
             ]}
           />,
           document.body

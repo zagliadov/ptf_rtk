@@ -9,6 +9,7 @@ import { DateInput } from "src/components/Popups/Filters/FilteredColumns/compone
 import { DualInput } from "src/components/DualInput/DualInput";
 import { UInput } from "../../UInput/UInput";
 import { USelect } from "src/components/USelect/USelect";
+import { MUSelect } from "../../MUSelect/MUSelect";
 
 const cx: CX = classnames.bind(styles);
 
@@ -87,11 +88,12 @@ export const FiltersItem: FC<IProps> = ({
                 />
               )}
               {inputText && (
-                <UInput
-                  item={filter}
-                  type={"text"}
-                  handleSelectChange={handleSelectChange}
-                />
+                <MUSelect />
+                // <UInput
+                //   item={filter}
+                //   type={"text"}
+                //   handleSelectChange={handleSelectChange}
+                // />
               )}
               {isNumeric && (
                 <DualInput
