@@ -1,24 +1,30 @@
-import { FC, useState, useMemo, RefObject } from "react";
+import { FC, useState, useMemo, RefObject, useEffect } from "react";
 import styles from "./Main.module.scss";
 import classnames from "classnames/bind";
 import { SideMenu } from "../SideMenu/SideMenu";
 import { AppliedFiltersOverview } from "../AppliedFiltersOverview/AppliedFiltersOverview";
-import useSideMenuReports from "src/hook/useSideMenuReports";
 import useReportData from "src/hook/useReportData";
 import DataTable from "../DataTable";
 import { TableRef } from "../DataTable/DataTable";
 import { parse } from "date-fns";
+import { RootState, useAppSelector } from "src/store/store";
 
 const cx: CX = classnames.bind(styles);
 
 interface IProps {
   dataTableRef: RefObject<TableRef>;
+  reportsArray: any;
 }
-export const Main: FC<IProps> = ({ dataTableRef }) => {
-  const reportsArray = useSideMenuReports();
+export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const { finalFilterArray, rows, columns } = useReportData();
+  console.log(reportsArray, "reportsArray")
   const [filters, setFilters] = useState({});
+  const { reportName } = useAppSelector((state: RootState) => state.report);
+
+  useEffect(() => {
+    setFilters({});
+  }, [reportName])
 
   const handleFilterChange = (columnName: any, filterValue: any) => {
     if (columnName && filterValue !== null) {
@@ -30,11 +36,10 @@ export const Main: FC<IProps> = ({ dataTableRef }) => {
   };
 
   const isNumericRange = (value: any) => {
-    return (
-      Array.isArray(value) &&
-      value.length === 2 &&
-      value.every((v) => !isNaN(v))
-    );
+    if (!Array.isArray(value) || value.length !== 2) {
+      return false;
+    }
+    return value.every(v => !isNaN(Number(v)));
   };
 
   const isDateArray = (value: string) => {

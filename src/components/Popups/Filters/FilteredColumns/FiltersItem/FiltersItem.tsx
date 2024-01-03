@@ -15,7 +15,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import Select from "src/components/Select";
 import * as _ from "lodash";
 import { DualInput } from "src/components/DualInput/DualInput";
-import { UInput } from "src/components/UInput/UInput";
+import { MUSelect } from "src/components/MUSelect/MUSelect";
 
 const cx: CX = classnames.bind(styles);
 
@@ -38,7 +38,7 @@ const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
    */
   const updateFilters = useCallback(
     (id: number, value: any): void => {
-      const updatedFilteredList = filteredList.map(filter => {
+      const updatedFilteredList = filteredList.map((filter) => {
         if (filter.id === id) {
           return { ...filter, [EDataKeys.CHOICE]: JSON.stringify(value) };
         }
@@ -75,7 +75,11 @@ const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
     <>
       {!_.isEmpty(sortedFilters) &&
         _.map(sortedFilters, (item: IIFilters) => {
-          if (item[EDataKeys.SELECTED_TABLE_CELL] === true && item[EDataKeys.SELECTED_TABLE_FILTER] === false) return;
+          if (
+            item[EDataKeys.SELECTED_TABLE_CELL] === true &&
+            item[EDataKeys.SELECTED_TABLE_FILTER] === false
+          )
+            return;
           const fieldName: string = `${item?.name}`;
           const updatedChoices: UpdatedChoice[] | null = updateChoices(
             item?.choices as Choice[],
@@ -93,6 +97,10 @@ const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
           const isEmail = item[EDataKeys.TYPE] === EDataKeys.TYPE_EMAIL;
           const isText = item[EDataKeys.TYPE] === EDataKeys.TYPE_TEXT;
           const inputText = isText && !isChoices;
+          const isUser = item[EDataKeys.TYPE] === EDataKeys.TYPE_USER;
+          const isAutonumber = item[EDataKeys.TYPE] === EDataKeys.TYPE_AUTONUMBER;
+          const isCheckbox = item[EDataKeys.TYPE] === EDataKeys.TYPE_CHECKBOX;
+          if (isCheckbox) return
           return (
             <div key={item?.id} className={cx("filters-item")}>
               <ColumnHeader item={item} filteredList={filteredList} />
@@ -135,35 +143,75 @@ const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
                 />
               )}
               {inputText && (
-                <UInput
+                <MUSelect
                   item={item}
-                  type={"text"}
                   updateFilters={updateFilters}
+                  top={44}
+                  right={17}
+                  width={"363px"}
+                />
+                // <UInput
+                //   item={item}
+                //   type={"text"}
+                //   updateFilters={updateFilters}
+                // />
+              )}
+              {isAutonumber && (
+                <DualInput updateFilters={updateFilters} item={item} />
+              )}
+              {isUser && (
+                <MUSelect
+                  item={item}
+                  updateFilters={updateFilters}
+                  top={44}
+                  right={17}
+                  width={"363px"}
                 />
               )}
               {isNumeric && (
                 <DualInput updateFilters={updateFilters} item={item} />
               )}
               {isURL && (
-                <UInput
+                <MUSelect
                   item={item}
-                  type={"url"}
                   updateFilters={updateFilters}
+                  top={44}
+                  right={17}
+                  width={"363px"}
                 />
+                // <UInput
+                //   item={item}
+                //   type={"url"}
+                //   updateFilters={updateFilters}
+                // />
               )}
               {isPhone && (
-                <UInput
+                <MUSelect
                   item={item}
-                  type={"tel"}
                   updateFilters={updateFilters}
+                  top={44}
+                  right={17}
+                  width={"363px"}
                 />
+                // <UInput
+                //   item={item}
+                //   type={"tel"}
+                //   updateFilters={updateFilters}
+                // />
               )}
               {isEmail && (
-                <UInput
+                <MUSelect
                   item={item}
-                  type={"email"}
                   updateFilters={updateFilters}
+                  top={44}
+                  right={17}
+                  width={"363px"}
                 />
+                // <UInput
+                //   item={item}
+                //   type={"email"}
+                //   updateFilters={updateFilters}
+                // />
               )}
               {(isDate || isTimestamp) && (
                 <DateInput

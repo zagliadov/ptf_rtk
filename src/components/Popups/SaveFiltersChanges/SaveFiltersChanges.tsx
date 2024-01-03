@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useState } from "react";
 import styles from "./SaveFiltersChanges.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
@@ -19,7 +19,7 @@ import { createReport, deleteReport } from "src/store/reportSlice";
 const cx: CX = classnames.bind(styles);
 export const SaveFiltersChanges: FC = () => {
   const { handleSubmit, reset } = useFormContext<DynamicFormData>();
-  const { data: ReportResult } = useGetReportColumnQuery({});
+  const { refetch } = useGetReportColumnQuery({});
   const { reportId, reportName } = useAppSelector(
     (state: RootState) => state.report
   );
@@ -33,10 +33,12 @@ export const SaveFiltersChanges: FC = () => {
 
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
+      const newReportResult = await refetch();
       const filteredData = _.filter(
-        ReportResult,
+        newReportResult.data,
         (item) => item["Report Name"] === reportName
       );
+
       const columnIds = _.map(filteredData, "@row.id");
       if (reportId) {
         await dispatch(deleteReport({ reportId, columnIds, update: true }))
@@ -51,7 +53,7 @@ export const SaveFiltersChanges: FC = () => {
           });
       }
     },
-    [ReportResult, dispatch, reportId, reportName, reset]
+    [dispatch, refetch, reportId, reportName, reset]
   );
 
   const handleClosePopup = useCallback((): void => {

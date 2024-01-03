@@ -52,6 +52,7 @@ export enum EDataKeys {
   TYPE_EMAIL = "Email",
   TYPE_MULTILINE = "Multiline",
   TYPE_AUTONUMBER = "Autonumber",
+  TYPE_CHECKBOX = "Checkbox",
   TYPE_LOCATION = "Location",
   TYPE_RECORD_SET = "RecordSet",
   TYPE_DURATION = "Duration",
@@ -76,7 +77,7 @@ export type  ColumnData = {
   [EDataKeys.NAME]: string;
   alias: string;
   description?: string;
-  type: 'Html' | 'Numeric' | 'Text' | 'URL' | 'Date' | 'User' | 'Attachment' | 'Phone' | 'Timestamp' | 'Email' | 'Multiline' | 'Autonumber' | 'Location' | 'RecordSet' | 'Duration';
+  type: 'Html' | 'Numeric' | 'Text' | 'URL' | 'Date' | 'Checkbox' | 'User' | 'Attachment' | 'Phone' | 'Timestamp' | 'Email' | 'Multiline' | 'Autonumber' | 'Location' | 'RecordSet' | 'Duration';
   kind: 'Formula' | 'Updatable' | 'Lookup' | 'LastModifiedBy' | 'DateModified' | 'Summary' | 'Key' | 'RecordOwner' | 'CreatedBy' | 'DateCreated';
   displayOptions: string;
   format?: string;

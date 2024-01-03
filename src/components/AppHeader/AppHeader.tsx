@@ -5,7 +5,6 @@ import { Button } from "../Button/Button";
 import { ReactComponent as LinkIcon } from "src/assets/icons/link-icon.svg";
 import { ReactComponent as GetFilePDFIcon } from "src/assets/icons/get-file-pdf-icon.svg";
 import { ReactComponent as ExcelTableIcon } from "src/assets/icons/excel-table-icon.svg";
-import { RootState, useAppSelector } from "src/store/store";
 import { TableRef } from "../DataTable/DataTable";
 
 const cx: CX = classnames.bind(styles);
@@ -15,7 +14,6 @@ interface IProps {
 }
 
 export const AppHeader: FC<IProps> = ({ dataTableRef }) => {
-  const { reportName, reportSourceId, reportType, reportId } = useAppSelector((state: RootState) => state.report);
   const handleGetApiUrl = useCallback(async () => {
     console.log("handleGetApiUrl");
   }, []);
@@ -34,12 +32,6 @@ export const AppHeader: FC<IProps> = ({ dataTableRef }) => {
       <div className={cx("app-header-content-wrapper")}>
         <div className={cx("app-header-content-wrapper-logo")}>
           <h1>Report Builder</h1>
-          <div>
-            <span>reportName: {reportName}| </span>
-            <span>reportSourceId: {reportSourceId}| </span>
-            <span>reportType: {reportType}| </span>
-            <span>reportId: {reportId}| </span>
-          </div>
         </div>
 
         <div className={cx("app-header-content-wrapper-button")}>

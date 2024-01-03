@@ -14,6 +14,7 @@ import Input from "src/components/Input";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { setIsUnsavedChanges, setReportEditOpen } from "src/store/managerSlice";
 import ReactDOM from "react-dom";
+import * as _ from "lodash";
 
 const cx: CX = classnames.bind(styles);
 
@@ -30,14 +31,16 @@ const options: IOptions[] = [
 
 interface IProps {
   onContinue: () => void;
+  refetchReportsArray: any;
 }
 
-export const EditReport: FC<IProps> = ({ onContinue }) => {
+export const EditReport: FC<IProps> = ({ onContinue, refetchReportsArray }) => {
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    setError,
     reset,
     formState: { errors },
   } = useFormContext<RData>();
@@ -53,11 +56,23 @@ export const EditReport: FC<IProps> = ({ onContinue }) => {
   } = useHoverPositionVisibility({});
 
   const onSubmit = useCallback(
-    (data: RData) => {
-      console.log("Form Data:", data);
+    async (data: RData) => {
+      if (reportName !== data[EDataKeys.REPORT_TITLE]) {
+        const reportsArray = await refetchReportsArray();
+        const isDuplicateName = _.some(reportsArray.data, {
+          name: data[EDataKeys.REPORT_TITLE],
+        });
+        if (isDuplicateName) {
+          setError(EDataKeys.REPORT_TITLE, {
+            type: "manual",
+            message: "Such report already exists, please use another name",
+          });
+          return;
+        }
+      }
       onContinue();
     },
-    [onContinue]
+    [onContinue, refetchReportsArray, reportName, setError]
   );
 
   const onCancel = useCallback(() => {

@@ -1,7 +1,7 @@
 const SourceTypes = {
     PROJECT: 'Project',
     SITE: 'Site',
-    TRAVEL_REQUEST: 'Travel request',
+    TRAVEL_REQUEST: 'Travel%20Request',
     TICKET: 'Ticket',
 } as const
 
@@ -26,7 +26,7 @@ export const sourceByType: Record<SourceType, Source> = {
     },
     [SourceTypes.TRAVEL_REQUEST]: {
         name: SourceTypes.TRAVEL_REQUEST,
-        tableName: 'TravelRequest',
+        tableName: 'Travel%20Request',
         viewName: 'API View',
     },
     [SourceTypes.TICKET]: {

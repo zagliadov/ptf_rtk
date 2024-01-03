@@ -4,6 +4,12 @@
     width: 100%;
     position: relative;
 
+    .error-message {
+        position: absolute;
+        left: 10px;
+        color: color($var-color-app-orange);
+        font-size: 11px;
+    }
     .icon {
         position: absolute;
         top: 0.75rem;

@@ -9,7 +9,7 @@ import {
   setReportSourceId,
   setReportType,
 } from "src/store/reportSlice";
-import { setIsCreateReport, setIsFiltersOpen } from "src/store/managerSlice";
+import { setIsFiltersOpen } from "src/store/managerSlice";
 import { format, parseISO } from 'date-fns';
 
 
@@ -61,7 +61,7 @@ interface ExtendedSourceReports {
  * const reportsArray = useProcessedReports();
  * Use reportsArray in your component
  */
-const useSideMenuReports = (): ExtendedSourceReports[] => {
+const useSideMenuReports = (): ExtendedSourceReports[] | any => {
   const [reportsArray, setReportsArray] = useState<ExtendedSourceReports[]>([]);
   const { data, isLoading, refetch } = useGetGeneralReportsQuery(undefined);
   const dispatch = useAppDispatch();
@@ -70,7 +70,6 @@ const useSideMenuReports = (): ExtendedSourceReports[] => {
   );
   const processedData = useMemo(() => {
     if (!isLoading && data) {
-      dispatch(setIsCreateReport(false));
       dispatch(setIsFiltersOpen(false));
       return _.chain(data as ReportRaw[])
         .groupBy("sourceId")
@@ -102,10 +101,10 @@ const useSideMenuReports = (): ExtendedSourceReports[] => {
   }, [processedData]);
 
   useEffect(() => {
-    if (isReportCreated || isReportDelete) {
+    if (isReportDelete || isReportCreated) {
       refetch();
     }
-  }, [isReportCreated, isReportDelete, refetch]);
+  }, [isReportDelete, isReportCreated, refetch]);
 
   useEffect(() => {
     if (reportsArray.length > 0 && isReportDelete) {
@@ -127,7 +126,7 @@ const useSideMenuReports = (): ExtendedSourceReports[] => {
     }
   }, [dispatch, isReportDelete, reportsArray]);
 
-  return reportsArray;
+  return { reportsArray, refetch };
 };
 
 export default useSideMenuReports;

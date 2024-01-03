@@ -24,7 +24,11 @@ import { EditFilters } from "../EditFilters/EditFilters";
 import { SaveFiltersChanges } from "../SaveFiltersChanges/SaveFiltersChanges";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 
-export const PopupManager: FC = () => {
+interface IProps {
+  refetchReportsArray: any;
+};
+
+export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
   const methods = useForm({
     resolver: yupResolver(schema),
   });
@@ -68,7 +72,7 @@ export const PopupManager: FC = () => {
       <div>
         {isCreateNewReportOpen && (
           <Popup open={isCreateNewReportOpen}>
-            <CreateNewReport onContinue={openColumnSelector} />
+            <CreateNewReport onContinue={openColumnSelector} refetchReportsArray={refetchReportsArray} />
           </Popup>
         )}
         {isColumnSelectorOpen && (
@@ -83,7 +87,7 @@ export const PopupManager: FC = () => {
         )}
         {isEditReportOpen && (
           <Popup open={isEditReportOpen} align={"center"}>
-            <EditReport onContinue={openEditColumnSelector} />
+            <EditReport onContinue={openEditColumnSelector} refetchReportsArray={refetchReportsArray} />
           </Popup>
         )}
         {isEditColumnSelectorOpen && (

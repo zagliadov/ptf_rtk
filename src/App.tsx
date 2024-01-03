@@ -6,10 +6,12 @@ import { AppHeader } from "./components/AppHeader/AppHeader";
 import { Main } from "./components/Main/Main";
 import { DotSpinner } from "./components/DotSpinner/DotSpinner";
 import { TableRef } from "./components/DataTable/DataTable";
+import useSideMenuReports from "./hook/useSideMenuReports";
 
 const cx: CX = classnames.bind(styles);
 export const App: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const { reportsArray, refetch } = useSideMenuReports();
   const dataTableRef = useRef<TableRef>(null);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -28,8 +30,8 @@ export const App: FC = () => {
       {!isLoading && (
         <>
           <AppHeader dataTableRef={dataTableRef} />
-          <Main dataTableRef={dataTableRef} />
-          <PopupManager />
+          <Main dataTableRef={dataTableRef} reportsArray={reportsArray} />
+          <PopupManager refetchReportsArray={refetch} />
         </>
       )}
     </div>

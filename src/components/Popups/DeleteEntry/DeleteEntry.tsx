@@ -5,7 +5,10 @@ import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
 import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
-import { setIsDeleteEntryOpen, setIsDeleteReport } from "src/store/managerSlice";
+import {
+  setIsDeleteEntryOpen,
+  setIsDeleteReport,
+} from "src/store/managerSlice";
 import { deleteReport, setIsReportDelete } from "src/store/reportSlice";
 import { useGetReportColumnQuery } from "src/store/services/reportColumnApi";
 import * as _ from "lodash";
@@ -18,18 +21,18 @@ export const DeleteEntry: FC = () => {
     (state: RootState) => state.report
   );
 
-  const { data } = useGetReportColumnQuery({});
-
+  const { refetch } = useGetReportColumnQuery({});
   const handleCloseDeleteEntry = () => {
     dispatch(setIsDeleteEntryOpen(false));
   };
 
   const handleDeleteEntry = async () => {
+    const newReportResult = await refetch();
     const filteredData = _.filter(
-      data,
+      newReportResult.data,
       (item) => item["Report Name"] === reportName
     );
-    dispatch(setIsDeleteReport(true));
+    await dispatch(setIsDeleteReport(true));
     const columnIds = _.map(filteredData, "@row.id");
     if (reportId && !_.isEmpty(columnIds)) {
       await dispatch(deleteReport({ reportId, columnIds }))

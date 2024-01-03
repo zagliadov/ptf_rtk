@@ -25,6 +25,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, ref: ForwardedRef
         type={type}
         {...rest}
       />
+      {error && <span className={cx("error-message")}>{error}</span>}
     </div>
   );
 });

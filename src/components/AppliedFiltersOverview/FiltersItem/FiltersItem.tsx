@@ -7,7 +7,6 @@ import { Choice, EDataKeys, UpdatedChoice } from "src/types";
 import { updateChoices } from "src/utils";
 import { DateInput } from "src/components/Popups/Filters/FilteredColumns/components/DateInput/DateInput";
 import { DualInput } from "src/components/DualInput/DualInput";
-import { UInput } from "../../UInput/UInput";
 import { USelect } from "src/components/USelect/USelect";
 import { MUSelect } from "../../MUSelect/MUSelect";
 
@@ -23,7 +22,6 @@ export const FiltersItem: FC<IProps> = ({
   visibleBlocks,
   onFilterChange,
 }) => {
-
   const handleSelectChange = useCallback(
     (value: string | null, name?: string) => {
       if (name && value !== null) {
@@ -38,13 +36,17 @@ export const FiltersItem: FC<IProps> = ({
   const updateFilters = () => {
     console.log("updateFilters");
   };
-
+  const sortedFilters = _.orderBy(
+    selectedFilters,
+    [(filter) => filter.position === undefined, "position"],
+    ["desc", "asc"]
+  );
   const visibleNum =
     selectedFilters.length <= 2 ? visibleBlocks - 2 : visibleBlocks;
   return (
     <>
-      {!_.isEmpty(selectedFilters) &&
-        _.slice(selectedFilters, 0, visibleNum).map((filter, index) => {
+      {!_.isEmpty(sortedFilters) &&
+        _.slice(sortedFilters, 0, visibleNum).map((filter, index) => {
           const updatedChoices: UpdatedChoice[] | null = updateChoices(
             filter?.choices as Choice[],
             filter?.colorization
@@ -62,6 +64,12 @@ export const FiltersItem: FC<IProps> = ({
           const selectWithColorization = isChoices && isColorization;
           const selectWithOutColorization = isChoices && !isColorization;
           const inputText = isText && !isChoices;
+          const isUser = filter[EDataKeys.TYPE] === EDataKeys.TYPE_USER;
+          const isAutonumber =
+          filter[EDataKeys.TYPE] === EDataKeys.TYPE_AUTONUMBER;
+          const isCheckbox = filter[EDataKeys.TYPE] === EDataKeys.TYPE_CHECKBOX;
+          if (isCheckbox) return false
+          if (isUser) console.log(filter, "filter")
           return (
             <motion.div
               key={`filter-block-${filter.id}`}
@@ -87,8 +95,29 @@ export const FiltersItem: FC<IProps> = ({
                   handleSelectChange={handleSelectChange}
                 />
               )}
+              {isAutonumber && (
+                <DualInput
+                  updateFilters={updateFilters}
+                  handleSelectChange={handleSelectChange}
+                  item={filter}
+                />
+              )}
+              {isUser && (
+                // <UInput
+                //   item={filter}
+                //   type={"text"}
+                //   handleSelectChange={handleSelectChange}
+                // />
+                <MUSelect
+                  item={filter}
+                  handleSelectChange={handleSelectChange}
+                />
+              )}
               {inputText && (
-                <MUSelect />
+                <MUSelect
+                  item={filter}
+                  handleSelectChange={handleSelectChange}
+                />
                 // <UInput
                 //   item={filter}
                 //   type={"text"}
@@ -103,11 +132,15 @@ export const FiltersItem: FC<IProps> = ({
                 />
               )}
               {isEmail && (
-                <UInput
+                <MUSelect
                   item={filter}
-                  type={"email"}
                   handleSelectChange={handleSelectChange}
                 />
+                // <UInput
+                //   item={filter}
+                //   type={"email"}
+                //   handleSelectChange={handleSelectChange}
+                // />
               )}
               {(isDate || isTimestamp) && (
                 <DateInput
@@ -121,18 +154,26 @@ export const FiltersItem: FC<IProps> = ({
                 />
               )}
               {isPhone && (
-                <UInput
+                <MUSelect
                   item={filter}
-                  type={"tel"}
                   handleSelectChange={handleSelectChange}
                 />
+                // <UInput
+                //   item={filter}
+                //   type={"tel"}
+                //   handleSelectChange={handleSelectChange}
+                // />
               )}
               {isURL && (
-                <UInput
+                <MUSelect
                   item={filter}
-                  type={"url"}
                   handleSelectChange={handleSelectChange}
                 />
+                // <UInput
+                //   item={filter}
+                //   type={"url"}
+                //   handleSelectChange={handleSelectChange}
+                // />
               )}
             </motion.div>
           );

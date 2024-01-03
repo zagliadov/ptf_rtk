@@ -77,18 +77,23 @@ export const SideMenu: FC<IProps> = ({ reportsArray }) => {
     (state: RootState) => state.manager
   );
 
-  const { reportSourceId, reportName } = useAppSelector(
+  const { reportSourceId, reportId } = useAppSelector(
     (state: RootState) => state.report
   );
 
   useEffect(() => {
-    if (reportSourceId && reportName) {
-      setActiveReport(reportSourceId);
+    if (reportSourceId && reportId) {
+      setActiveReport(decodeURIComponent(reportSourceId));
     }
-  }, [reportSourceId, reportName]);
+  }, [reportSourceId, reportId]);
 
   const handleReportsOpen = (sourceId: string): void => {
-    setActiveReport(sourceId === activeReport ? null : sourceId);
+    console.log(sourceId, activeReport, "sourceId")
+    if (activeReport) {
+      setActiveReport(
+        sourceId === decodeURIComponent(activeReport) ? null : sourceId
+      );
+    }
   };
 
   const handleGetReport = (
@@ -191,7 +196,7 @@ export const SideMenu: FC<IProps> = ({ reportsArray }) => {
                                       key={rowId}
                                       className={cx(
                                         "detail-item",
-                                        name === reportName && "active"
+                                        rowId === reportId && "active"
                                       )}
                                       onClick={() =>
                                         handleGetReport(

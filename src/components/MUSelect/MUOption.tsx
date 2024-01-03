@@ -1,7 +1,6 @@
 import { CSSProperties, FC } from "react";
 import classNames from "classnames/bind";
 import styles from "./MUSelect.module.scss";
-import Search from "src/components/Search";
 import BasicCheckbox from "src/components/BasicCheckbox/BasicCheckbox";
 
 const cx = classNames.bind(styles);
@@ -12,6 +11,13 @@ interface IProps {
   logSelectedCheckboxes: any;
   searchValue: string;
   checkboxState: any;
+  isVisible: boolean;
+  top?: number;
+  right?: number;
+  width?: string;
+  name?: string;
+  id?: any;
+  // handleMouseLeave: any;
 }
 export const MUOption: FC<IProps> = ({
   position,
@@ -20,20 +26,38 @@ export const MUOption: FC<IProps> = ({
   logSelectedCheckboxes,
   searchValue,
   checkboxState,
+  isVisible,
+  top = 44,
+  right,
+  width,
+  name,
+  id,
+  // handleMouseLeave,
 }) => {
+
   const style: CSSProperties = {
-    top: position.top + 45,
-    left: position.left - 180,
+    top: position.top + top,
+    ...(right !== undefined ? { right } : { left: position.left - 180 }),
     position: "absolute",
+    zIndex: 150,
+    width
   };
+
   return (
-    <div className={cx("custom-menu-list")} style={style}>
-      <Search
-        onChange={handleSearchChange}
-        value={searchValue}
-        placeholder="Search"
-        width="100%"
-      />
+    <div
+      className={cx("custom-menu-list", isVisible && "active")}
+      style={style}
+    >
+      <div className={cx("wrapper")}>
+        <input
+          id={String(id)}
+          name={name}
+          type={"text"}
+          placeholder={name}
+          value={searchValue}
+          onChange={handleSearchChange}
+        />
+      </div>
 
       <div className={cx("clear-all-button-wrapper")}>
         <button

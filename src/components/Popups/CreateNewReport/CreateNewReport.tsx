@@ -11,6 +11,7 @@ import { useFormContext } from "react-hook-form";
 import { EDataKeys, RData } from "src/types";
 import { useAppDispatch } from "src/store/store";
 import { setCreateNewReportOpen } from "src/store/managerSlice";
+import * as _ from "lodash";
 
 const cx: CX = classnames.bind(styles);
 
@@ -27,12 +28,17 @@ const options: IOptions[] = [
 
 interface IProps {
   onContinue: () => void;
+  refetchReportsArray: any;
 }
-export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
+export const CreateNewReport: FC<IProps> = ({
+  onContinue,
+  refetchReportsArray,
+}) => {
   const {
     register,
     handleSubmit,
     setValue,
+    setError,
     unregister,
     watch,
     clearErrors,
@@ -54,16 +60,26 @@ export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
   );
 
   const onSubmit = useCallback(
-    (data: RData) => {
+    async (data: RData) => {
       console.log("Form Data:", data);
-      onContinue();
+      const reportsArray = await refetchReportsArray();
+      const isDuplicateName = _.some(reportsArray.data, {
+        name: data[EDataKeys.REPORT_TITLE],
+      });
+      if (isDuplicateName) {
+        setError(EDataKeys.REPORT_TITLE, {
+          type: "manual",
+          message: "Such report already exists, please use another name"
+        });
+      }
+      if (!isDuplicateName) onContinue();
     },
-    [onContinue]
+    [onContinue, refetchReportsArray, setError]
   );
 
   const onCancel = useCallback(() => {
     dispatch(setCreateNewReportOpen(false));
-      reset();
+    reset();
   }, [dispatch, reset]);
 
   const onToggleChange = useCallback(
@@ -84,13 +100,13 @@ export const CreateNewReport: FC<IProps> = ({ onContinue }) => {
             placeholder={EDataKeys.REPORT_TITLE}
             error={errors[EDataKeys.REPORT_TITLE]?.message}
           />
-            <Select
-              options={options}
-              value={watch(EDataKeys.DATA_SOURCE)}
-              onChange={onPrimaryChange}
-              placeholder={EDataKeys.DATA_SOURCE}
-              error={errors[EDataKeys.DATA_SOURCE]?.message}
-            />
+          <Select
+            options={options}
+            value={watch(EDataKeys.DATA_SOURCE)}
+            onChange={onPrimaryChange}
+            placeholder={EDataKeys.DATA_SOURCE}
+            error={errors[EDataKeys.DATA_SOURCE]?.message}
+          />
 
           <ToggleButton
             value={watch(EDataKeys.REPORT_TYPE)}

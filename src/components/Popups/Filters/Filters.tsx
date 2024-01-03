@@ -44,13 +44,16 @@ export const Filters: FC = () => {
     async (data: DynamicFormData): Promise<void> => {
       console.log(data, "data");
       dispatch(setIsCreateReport(true));
-      await dispatch(createReport(data)).then(() => {
-        dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
-        // dispatch(setIsFiltersOpen(false));
-        reset();
-      }).then(() => {
-        dispatch(setIsReportCreated(false));
-      });
+      await dispatch(createReport(data))
+        .then(() => {
+          dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
+          dispatch(setIsFiltersOpen(false));
+          reset();
+        })
+        .then(() => {
+          dispatch(setIsReportCreated(false));
+          dispatch(setIsCreateReport(false));
+        });
     },
     [dispatch, reset]
   );
@@ -98,7 +101,7 @@ export const Filters: FC = () => {
 
         <div ref={filtersWrapperRef} className={cx("filters-wrapper")}>
           <SimpleBar
-            style={{ maxHeight }}
+            style={{ maxHeight, minHeight: "100%"}}
             className="my-custom-scrollbar-filters"
           >
             <FilteredColumns

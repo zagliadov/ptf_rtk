@@ -5,6 +5,7 @@ import { ReactComponent as CheckIcon } from "src/assets/icons/check-icon.svg";
 import { ReactComponent as ClearIcon } from "src/assets/icons/clean-icon.svg";
 import { Button } from "../Button/Button";
 import { IIFilters } from "src/types";
+import { RootState, useAppSelector } from "src/store/store";
 
 const cx = classnames.bind(styles);
 
@@ -21,6 +22,12 @@ export const DualInput: FC<DualInputProps> = ({
 }) => {
   const [min, setMin] = useState<string>("");
   const [max, setMax] = useState<string>("");
+  const { reportName } = useAppSelector((state: RootState) => state.report);
+
+  useEffect(() => {
+    setMin("");
+    setMax("");
+  }, [reportName]);
 
   useEffect(() => {
     if (choice) {
@@ -33,8 +40,11 @@ export const DualInput: FC<DualInputProps> = ({
       } catch (e) {
         console.error("Error parsing JSON:", e);
       }
+    } else {
+      setMin("");
+      setMax("");
     }
-  }, [choice]);
+  }, [choice, reportName]);
 
   const handleMinChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\s+/g, "");

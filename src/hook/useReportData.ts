@@ -16,11 +16,10 @@ import { Source, sourceByType } from "src/constants/sources";
  * @returns {Object} Object containing report data and functions to manage it.
  */
 const useReportData = () => {
-  const { reportId, reportSourceId, isReportCreated, isReportDelete } =
+  const { reportId, reportSourceId } =
     useAppSelector((state: RootState) => state.report);
   const [finalFilterArray, setFinalFilterArray] = useState<IIFilters[]>([]);
   const dispatch = useAppDispatch();
-
   const {
     data: reportData,
     isLoading: isLoadingReports,
@@ -115,19 +114,21 @@ const useReportData = () => {
     return [];
   }, [columns, isLoadingReports, reportData, reportId]);
 
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      refetchReports();
-    }, 2000);
-    return () => clearTimeout(timerId);
-  }, [refetchReports, isReportCreated]);
+  // useEffect(() => {
+  //   const timerId = setTimeout(() => {
+  //     refetchReports();
+  //     refetchSource();
+  //   }, 2000);
+  //   return () => clearTimeout(timerId);
+  // }, [refetchReports, isReportCreated, refetchSource]);
 
-  useEffect(() => {
-    if (isReportCreated || isReportDelete) {
-      refetchReports();
-      refetchSource();
-    }
-  }, [isReportCreated, isReportDelete, refetchReports, refetchSource]);
+  // useEffect(() => {
+  //   if (isReportCreated || isReportDelete) {
+  //     console.log(isLoadingReports, "isLoading useReportData")
+  //     refetchReports();
+  //     refetchSource();
+  //   }
+  // }, [isLoadingReports, isReportCreated, isReportDelete, refetchReports, refetchSource]);
 
   return {
     reportId,
@@ -135,131 +136,9 @@ const useReportData = () => {
     finalFilterArray,
     columns: finalColumns,
     rows: rowData || [],
+    refetchReports,
+    refetchSource,
   };
 };
 
 export default useReportData;
-
-// import { useState, useEffect, useCallback, useMemo } from "react";
-// import * as _ from "lodash";
-// import { EDataKeys, IIFilters } from "src/types";
-// import {
-//   useGetSourceInfoDataQuery,
-//   useGetSourceItemsDataQuery,
-// } from "src/store/services/sourceApi";
-// import { useGetGeneralReportsQuery } from "src/store/services/reportSettingsApi";
-// import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
-// import { setReportFilters } from "src/store/reportSlice";
-// import { Source, sourceByType } from "src/constants/sources";
-
-// /**
-//  * Custom hook to manage and process report data.
-//  *
-//  * @returns {Object} Object containing report data and functions to manage it.
-//  */
-// const useReportData = () => {
-//   const { reportId, reportSourceId, isReportCreated, isReportDelete } =
-//     useAppSelector((state: RootState) => state.report);
-//   const [finalFilterArray, setFinalFilterArray] = useState<IIFilters[]>([]);
-//   const dispatch = useAppDispatch();
-
-//   const {
-//     data,
-//     isLoading: isLoadingReports,
-//     refetch,
-//   } = useGetGeneralReportsQuery(undefined);
-
-//   const source: Source = sourceByType[reportSourceId];
-
-//   const { data: rowData, refetch: refetchSource } = useGetSourceItemsDataQuery(
-//     source,
-//     {
-//       skip: !source,
-//     }
-//   );
-
-//   const { data: describeData, isLoading: isLoadingDescribeData } =
-//     useGetSourceInfoDataQuery(source, { skip: !source });
-
-//   const columns = useMemo(() => {
-//     const reportData = _.find(data, { "@row.id": reportId });
-
-//     const reportColumnIds: string[] = JSON.parse(
-//       _.get(reportData, EDataKeys.COLUMN_IDS, "") || "[]"
-//     );
-
-//     return describeData?.columns
-//       .filter((column) => reportColumnIds.includes(column.id.toString()))
-//       .map((column) => ({
-//         ...column,
-//         field: column.name,
-//         cellRenderer: (params: any) => params.value,
-//       }));
-//   }, [data, describeData, reportId]);
-
-//   /**
-//    * Processes filters by extending them with additional data from describeData.
-//    *
-//    * @param {IIFilters[]} filters - Array of filters to be processed.
-//    */
-//   const processFilters = useCallback(
-//     (filters: IIFilters[]) => {
-//       console.log(!!isLoadingDescribeData && filters && describeData, "describeColumns Hello")
-//       if (!isLoadingDescribeData && filters && describeData) {
-//         const describeColumns = _.get(describeData, "columns", []);
-//         const extendedFilters = _.map(filters, (filterItem) => {
-//           const generalArrayItem = _.find(describeColumns, {
-//             name: filterItem.name,
-//           });
-//           return _.assign({}, filterItem, generalArrayItem);
-//         });
-//         setFinalFilterArray(extendedFilters);
-//         dispatch(setReportFilters(extendedFilters));
-//       }
-//     },
-//     [isLoadingDescribeData, describeData, dispatch]
-//   );
-
-//   const processedFilters = useMemo(() => {
-//     if (!isLoadingReports && data && reportId) {
-//       const reportData = _.find(data, { "@row.id": reportId });
-//       try {
-//         console.log(reportData, "reportData processedFilters")
-//         if (reportData) {
-//           const parsedFilters = JSON.parse(reportData?.filters) || "[]";
-//           console.log(parsedFilters, "parsedFilters JSON.parse");
-//           return parsedFilters;
-//         }
-//       } catch (error) {
-//         console.error("Error parsing filters", error);
-//       }
-//     }
-//     return [];
-//   }, [data, isLoadingReports, reportId]);
-
-//   useEffect(() => {
-//     console.log(processedFilters, "describeColumns")
-//     if (processedFilters.length > 0) {
-//       processFilters(processedFilters);
-//     }
-//   }, [processFilters, processedFilters]);
-
-//   useEffect(() => {
-//     if (isReportCreated) {
-//       refetch();
-//       refetchSource();
-//       console.log(isReportCreated, "refetch is report created");
-//     }
-//     console.log(isReportCreated, "isReportCreated");
-//   }, [isReportCreated, refetch, refetchSource]);
-
-//   return {
-//     reportId,
-//     reportSourceId,
-//     finalFilterArray,
-//     columns: columns || [],
-//     rows: rowData || [],
-//   };
-// };
-
-// export default useReportData;

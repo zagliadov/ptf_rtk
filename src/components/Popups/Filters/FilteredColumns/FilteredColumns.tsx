@@ -70,6 +70,20 @@ export const FilteredColumns: FC<IProps> = ({
     searchValue
   );
 
+  useEffect(() => {
+    // Обновляем saveFilteredList с учетом порядка в selectedFilters
+    console.log(selectedFilters, "selectedFilters")
+    const updatedList = selectedFilters.map(filter => {
+      // Находим соответствующий фильтр в saveFilteredList
+      const existingFilter = saveFilteredList.find(f => f.id === filter.id);
+      console.log(existingFilter?.position, existingFilter?.name, "existingFilter")
+      // Если фильтр найден, сохраняем его свойства, обновляем position
+      // return existingFilter ? { ...existingFilter, position: selectedFilters.indexOf(filter) } : filter;
+    });
+
+    // setSaveFilteredList(updatedList);
+  }, [selectedFilters, saveFilteredList, setSaveFilteredList]);
+
   const handleReorder = (newOrder: IIFilters[]) => {
     // Updating the order of elements in saveFilteredList
     setSaveFilteredList(newOrder);

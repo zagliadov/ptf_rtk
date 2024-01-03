@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import DatePicker from "src/components/DatePicker/DatePicker";
+import { RootState, useAppSelector } from "src/store/store";
 import { IIFilters } from "src/types";
 import { formatDate } from "src/utils";
 
@@ -20,6 +21,12 @@ export const DateInput: FC<IProps> = ({
 }) => {
   const [eDate, setEDate] = useState<Date | null>();
   const [sDate, setSDate] = useState<Date | null>();
+  const { reportName } = useAppSelector((state: RootState) => state.report);
+
+  useEffect(() => {
+    setSDate(null);
+    setEDate(null);
+  }, [reportName]);
 
   useEffect(() => {
     if (item.choice) {

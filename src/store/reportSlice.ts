@@ -57,6 +57,7 @@ export const createReport = createAsyncThunk(
       const reportResult = await dispatch(
         reportSettingsApi.endpoints.createReportSettings.initiate(reportData)
       ).unwrap();
+
       const columnPromises = data[EDataKeys.COLUMN_IDS].map(
         async (columnId: number) => {
           const filterIndex = data[EDataKeys.FILTERED_LIST].findIndex(
@@ -78,15 +79,15 @@ export const createReport = createAsyncThunk(
               type: filterData[EDataKeys.TYPE],
               position: filterIndex,
             };
-            const dispatchResult = dispatch(
+            return dispatch(
               reportColumnApi.endpoints.createReportColumn.initiate(columnData)
             ).unwrap();
-            return { reportData, dispatchResult };
           }
+          return null;
         }
       );
 
-      const columnResults = await Promise.all(columnPromises);
+      const columnResults = await Promise.all(columnPromises.filter(Boolean));
       console.log("All Columns Created Successfully:", columnResults);
 
       return reportResult;
@@ -100,25 +101,27 @@ export const createReport = createAsyncThunk(
 export const deleteReport = createAsyncThunk(
   "report/deleteReport",
   async (
-    { reportId, columnIds, update = false }: { reportId: number; columnIds: number[], update?: boolean },
+    {
+      reportId,
+      columnIds,
+      update = false,
+    }: { reportId: number; columnIds: number[]; update?: boolean },
     { dispatch, rejectWithValue }
   ) => {
     try {
+      const deleteColumnPromises = columnIds.map((columnId: number) => {
+        return dispatch(
+          reportColumnApi.endpoints.deleteReportColumn.initiate(columnId)
+        ).unwrap();
+      });
+
+      const deleteColumnResults = await Promise.all(deleteColumnPromises);
+      console.log("All columns deleted:", deleteColumnResults);
       const deleteResult = await dispatch(
         reportSettingsApi.endpoints.deleteReportSettings.initiate(reportId)
       ).unwrap();
-
-      if (deleteResult[0].status === 200) {
-        const deleteColumnPromises = columnIds.map((columnId: number) => {
-          return dispatch(
-            reportColumnApi.endpoints.deleteReportColumn.initiate(columnId)
-          ).unwrap();
-        });
-
-        const deleteColumnResults = await Promise.all(deleteColumnPromises);
-        console.log("All columns deleted:", deleteColumnResults);
-      }
-      return update
+      console.log(deleteResult, "delete result");
+      return update;
     } catch (error) {
       console.error("Error in deleteReport", error);
       return rejectWithValue(error);
@@ -183,7 +186,6 @@ const reportSlice = createSlice({
         state.reportName = action?.meta?.arg[EDataKeys.REPORT_TITLE];
         state.reportSourceId = action?.meta?.arg[EDataKeys.DATA_SOURCE];
         state.reportType = action?.meta?.arg[EDataKeys.REPORT_TYPE];
-
         state.isReportCreated = true;
       })
       .addCase(createReport.rejected, (state, action) => {
