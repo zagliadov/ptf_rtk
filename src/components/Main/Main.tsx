@@ -18,7 +18,6 @@ interface IProps {
 export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const { finalFilterArray, rows, columns } = useReportData();
-  console.log(reportsArray, "reportsArray")
   const [filters, setFilters] = useState({});
   const { reportName } = useAppSelector((state: RootState) => state.report);
 

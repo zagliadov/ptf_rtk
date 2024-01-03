@@ -10,7 +10,7 @@ import { DotThreeMenu } from "../Popups/DotThreeMenu/DotThreeMenu";
 import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import {
   setIsDotThreeMenuOpen,
-  setIsFiltersOpen,
+  setIsEditFiltersOpen,
 } from "src/store/managerSlice";
 import { useElementSize } from "src/hook/useElementSize";
 import { FiltersItem } from "./FiltersItem/FiltersItem";
@@ -92,7 +92,7 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
   }, [filtersAreExpanded]);
 
   const handleOpenAllFilters = () => {
-    dispatch(setIsFiltersOpen(true));
+    dispatch(setIsEditFiltersOpen(true));
   };
 
   return (
@@ -173,7 +173,7 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
         ReactDOM.createPortal(
           <UniPopup
             position={infoPosition}
-            description={"Show all favorites filters"}
+            description={"Configure favorite filters"}
             top={45}
             left={200}
             customStyle={{

@@ -77,7 +77,7 @@ export const createReport = createAsyncThunk(
               alias: filterData[EDataKeys.ALIAS],
               description: filterData[EDataKeys.DESCRIPTION],
               type: filterData[EDataKeys.TYPE],
-              position: filterIndex,
+              position: filterData?.position ? filterData?.position : filterIndex,
             };
             return dispatch(
               reportColumnApi.endpoints.createReportColumn.initiate(columnData)
