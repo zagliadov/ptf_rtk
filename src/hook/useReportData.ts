@@ -70,8 +70,9 @@ const useReportData = () => {
       const reportDetails = _.find(reportData, { "@row.id": reportId });
       if (reportDetails?.filters) {
         try {
-          const parsedFilters = JSON.parse(reportDetails.filters);
-          // console.log(parsedFilters, "parsedFilters");
+          // ========================> The problem lies in how nested arrays and objects are encoded.
+          const reportFilters = reportDetails.filters;
+          const parsedFilters = JSON.parse(reportFilters);
           return parsedFilters.filter(
             (filter: any) => filter.selectedTableFilter
           );
@@ -113,22 +114,6 @@ const useReportData = () => {
     }
     return [];
   }, [columns, isLoadingReports, reportData, reportId]);
-
-  // useEffect(() => {
-  //   const timerId = setTimeout(() => {
-  //     refetchReports();
-  //     refetchSource();
-  //   }, 2000);
-  //   return () => clearTimeout(timerId);
-  // }, [refetchReports, isReportCreated, refetchSource]);
-
-  // useEffect(() => {
-  //   if (isReportCreated || isReportDelete) {
-  //     console.log(isLoadingReports, "isLoading useReportData")
-  //     refetchReports();
-  //     refetchSource();
-  //   }
-  // }, [isLoadingReports, isReportCreated, isReportDelete, refetchReports, refetchSource]);
 
   return {
     reportId,

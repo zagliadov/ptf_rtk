@@ -1,26 +1,40 @@
 import { useState, FC, useEffect, ChangeEvent } from "react";
 import classNames from "classnames/bind";
-import styles from "./MUSelect.module.scss";
+import styles from "./MUCSelect.module.scss";
 import ReactDOM from "react-dom";
 import { useHoverPositionVisibility } from "src/hook/useHoverPositionVisibility";
-import { MUOption } from "./MUOption";
+import { MUCOption } from "./MUCOption";
 import { ReactComponent as CloseIcon } from "src/assets/icons/close-icon.svg";
 import { ReactComponent as CaretBottomIcon } from "src/assets/icons/caret-down-icon.svg";
 import { RootState, useAppSelector } from "src/store/store";
+import { UpdatedChoice } from "src/types";
 const cx = classNames.bind(styles);
+
+interface Colorization {
+  pattern: string;
+  color: string;
+}
+
+interface SelectedItem {
+  value: string;
+  label: string;
+  colorization: Colorization[];
+}
 
 interface IProps {
   item: any;
   updateFilters?: (id: number, value: any) => void;
   handleSelectChange?: any;
+  updatedChoices?: UpdatedChoice[] | null;
   top?: number;
   right?: number;
   width?: string;
 }
-export const MUSelect: FC<IProps> = ({
+export const MUCSelect: FC<IProps> = ({
   item: { name, choice, id },
   handleSelectChange,
   updateFilters,
+  updatedChoices,
   top,
   right,
   width,
@@ -28,67 +42,65 @@ export const MUSelect: FC<IProps> = ({
   const { isVisible, position, handleMouseClick, handleMouseLeave } =
     useHoverPositionVisibility({});
   const { reportName } = useAppSelector((state: RootState) => state.report);
-  const [checkboxState, setCheckboxState] = useState({
-    "All event types": false,
-    Travel: false,
-    "Resource Activity": false,
-    Opening: false,
-  });
-
   const [searchValue, setSearchValue] = useState("");
+  const [filteredChoice, setFilteredChoice] = useState<any>(updatedChoices);
+  const [selectedItems, setSelectedItems] = useState<any>([]);
 
   useEffect(() => {
     setSearchValue("");
   }, [reportName]);
 
-  const toggleCheckbox = (key: string) => {
-    setCheckboxState((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
-  };
-
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchValue(value);
-    updateFilters && updateFilters(id, value);
-    handleSelectChange && handleSelectChange(value, name);
-  };
+    if (value.length === 0) {
+      setFilteredChoice(updatedChoices);
+    }
 
-  const logSelectedCheckboxes = () => {
-    const selectedCheckboxes = Object.entries(checkboxState)
-      .filter(([_, value]) => value)
-      .map(([key]) => key);
-    console.log("Selected Checkboxes:", selectedCheckboxes);
-    console.log("Search Value:", searchValue);
-    setCheckboxState({
-      "All event types": false,
-      Travel: false,
-      "Resource Activity": false,
-      Opening: false,
-    });
-    setSearchValue("");
+    const choices = updatedChoices?.filter((choice) =>
+      choice.label.toLowerCase().includes(value.toLowerCase())
+    );
+    if (choices) {
+      setFilteredChoice(choices);
+    }
   };
 
   useEffect(() => {
-    if (choice && typeof choice === "string") {
+    if (choice) {
       try {
-        const choiceItem: string = JSON.parse(choice);
-        setSearchValue(choiceItem);
+        const choiceItem = JSON.parse(choice);
+        if (typeof choiceItem === "string") {
+          const choices = updatedChoices?.filter((item) =>
+            item.label.toLowerCase().includes(choiceItem.toLowerCase())
+          );
+          setSelectedItems(choices);
+        } else if (Array.isArray(choiceItem)) {
+          const choices = updatedChoices?.filter((item) =>
+            choiceItem.includes(item.label)
+          );
+          setSelectedItems(choices);
+        }
       } catch (e) {
         console.error("Error parsing JSON:", e);
       }
     } else {
       setSearchValue("");
+      setFilteredChoice(updatedChoices);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [choice]);
 
   const handleClear = () => {
     handleSelectChange && handleSelectChange("", name);
-    updateFilters && updateFilters(id, "");
+    updateFilters && updateFilters(id, filteredLabels);
     setSearchValue("");
-  }
+    setFilteredChoice(updatedChoices);
+    setSelectedItems([]);
+  };
 
+  const filteredLabels = selectedItems
+    ?.map((choice: any) => choice.label)
+    .join(", ");
   return (
     <div className={cx("mu-select")} onMouseLeave={handleMouseLeave}>
       <div
@@ -96,13 +108,12 @@ export const MUSelect: FC<IProps> = ({
         onClick={handleMouseClick}
       >
         <div className={cx("search-value-wrapper")}>
-          <span>{searchValue}</span>
+          <span>{filteredLabels}</span>
         </div>
         <div className={cx("control-wrapper")}>
+          {`(${selectedItems?.length})`}
           <div className={cx("mu-select-close-icon")}>
-            {searchValue.length > 0 && (
-              <CloseIcon onClick={handleClear} />
-            )}
+            {selectedItems.length > 0 && <CloseIcon onClick={handleClear} />}
           </div>
           <div className={cx("mu-select-drop-icon")}>
             {isVisible ? (
@@ -117,19 +128,21 @@ export const MUSelect: FC<IProps> = ({
       </div>
       {isVisible &&
         ReactDOM.createPortal(
-          <MUOption
+          <MUCOption
             position={position}
-            toggleCheckbox={toggleCheckbox}
             handleSearchChange={handleSearchChange}
-            logSelectedCheckboxes={logSelectedCheckboxes}
             searchValue={searchValue}
-            checkboxState={checkboxState}
             isVisible={isVisible}
+            updatedChoices={filteredChoice}
             top={top}
             right={right}
             width={width}
             name={name}
             id={id}
+            handleSelectChange={handleSelectChange}
+            updateFilters={updateFilters}
+            setSelectedItems={setSelectedItems}
+            selectedItems={selectedItems}
           />,
           document.body
         )}

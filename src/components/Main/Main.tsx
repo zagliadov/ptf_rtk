@@ -8,24 +8,34 @@ import DataTable from "../DataTable";
 import { TableRef } from "../DataTable/DataTable";
 import { parse } from "date-fns";
 import { RootState, useAppSelector } from "src/store/store";
+import { SourceReports } from "src/hook/useSideMenuReports";
+import { IIFilters } from "src/types";
 
 const cx: CX = classnames.bind(styles);
 
 interface IProps {
   dataTableRef: RefObject<TableRef>;
-  reportsArray: any;
+  reportsArray: SourceReports[];
 }
+
+interface Filter {
+  [key: string]: string | string[];
+}
+
 export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const { finalFilterArray, rows, columns } = useReportData();
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<Filter>({});
   const { reportName } = useAppSelector((state: RootState) => state.report);
 
   useEffect(() => {
     setFilters({});
-  }, [reportName])
+  }, [reportName]);
 
-  const handleFilterChange = (columnName: any, filterValue: any) => {
+  const handleFilterChange = (
+    columnName: string,
+    filterValue: string[] | string | null
+  ) => {
     if (columnName && filterValue !== null) {
       setFilters((prevFilters) => ({
         ...prevFilters,
@@ -34,11 +44,18 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
     }
   };
 
-  const isNumericRange = (value: any) => {
+  const isNumericRange = (value: string[]) => {
     if (!Array.isArray(value) || value.length !== 2) {
       return false;
     }
-    return value.every(v => !isNaN(Number(v)));
+    // Checks that both values are either numbers or empty strings
+    return value.every((v) => v === "" || !isNaN(Number(v)));
+  };
+
+  const isStringArray = (value: string | string[] | null) => {
+    return (
+      Array.isArray(value) && value.every((item) => typeof item === "string")
+    );
   };
 
   const isDateArray = (value: string) => {
@@ -51,30 +68,34 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
     );
   };
 
-  const processFilters = (filterArray: any) => {
+  const processFilters = (filterArray: IIFilters[]) => {
     const newFilters = {};
-    filterArray.forEach((filter: any) => {
-      // Checking if there is already a value for this filter in the current filters
-      if (filters.hasOwnProperty(filter.name)) {
-        newFilters[filter.name] = filters[filter.name];
-      } else if (filter.choice) {
-        // If there is no value in the current filters, use the value from choice
-        const choiceValue = JSON.parse(filter.choice);
-        newFilters[filter.name] = choiceValue;
+    filterArray.forEach((filter) => {
+      if (filter.pinToMainView) {
+        // Checking if there is already a value for this filter in the current filters
+        if (filters.hasOwnProperty(filter.name)) {
+          newFilters[filter.name] = filters[filter.name];
+        } else if (filter.choice && filter.choice !== "[]") {
+          // If there is no value in the current filters, use the value from choice
+          const choiceValue = JSON.parse(filter.choice);
+          newFilters[filter.name] = choiceValue;
+        }
       }
     });
     return newFilters;
   };
 
-  const processedFilters = processFilters(finalFilterArray);
+  const processedFilters: Filter = processFilters(finalFilterArray);
 
   const filteredRows = useMemo(() => {
-    return rows.filter((row: any) => {
+    return rows.filter((row: Record<string, any>) => {
       const matchesFilters = Object.entries(processedFilters).every(
         ([columnName, filterValue]: any) => {
           if (isNumericRange(filterValue)) {
-            const [min, max] = filterValue.map(Number);
+            const [minStr, maxStr] = filterValue;
             const rowValue = Number(row[columnName]);
+            const min = minStr === "" ? -Infinity : Number(minStr);
+            const max = maxStr === "" ? Infinity : Number(maxStr);
             return rowValue >= min && rowValue <= max;
           } else if (isDateArray(filterValue)) {
             const startDateTimestamp = Date.parse(filterValue[0]);
@@ -89,6 +110,8 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
               rowDateTimestamp >= startDateTimestamp &&
               rowDateTimestamp <= endDateTimestamp
             );
+          } else if (isStringArray(filterValue)) {
+            return filterValue.includes(row[columnName]);
           }
           return row[columnName]?.toString().includes(filterValue);
         }

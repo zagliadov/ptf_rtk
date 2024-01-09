@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import styles from "./CreateNewReport.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
@@ -46,6 +46,23 @@ export const CreateNewReport: FC<IProps> = ({
     formState: { errors },
   } = useFormContext<RData>();
   const dispatch = useAppDispatch();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingText, setLoadingText] = useState<string>("Loading");
+
+  const updateLoadingText = useCallback(() => {
+    setLoadingText(prev => {
+      const dots = prev.replace("Loading", "");
+      return dots.length < 3 ? prev + "." : "Loading";
+    });
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      interval = setInterval(updateLoadingText, 300);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading, updateLoadingText]);
 
   const onPrimaryChange = useCallback(
     (newValue: string | null): void => {
@@ -61,7 +78,7 @@ export const CreateNewReport: FC<IProps> = ({
 
   const onSubmit = useCallback(
     async (data: RData) => {
-      console.log("Form Data:", data);
+      setIsLoading(true);
       const reportsArray = await refetchReportsArray();
       const isDuplicateName = _.some(reportsArray.data, {
         name: data[EDataKeys.REPORT_TITLE],
@@ -72,7 +89,10 @@ export const CreateNewReport: FC<IProps> = ({
           message: "Such report already exists, please use another name"
         });
       }
-      if (!isDuplicateName) onContinue();
+      if (!isDuplicateName) {
+        setIsLoading(false);
+        onContinue();
+      }
     },
     [onContinue, refetchReportsArray, setError]
   );
@@ -117,7 +137,7 @@ export const CreateNewReport: FC<IProps> = ({
             <Button
               primary
               type="submit"
-              title="Continue"
+              title={isLoading ? loadingText : "Continue"}
               style={{ width: "134px" }}
             />
             <Button

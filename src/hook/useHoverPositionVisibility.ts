@@ -57,6 +57,10 @@ export const useHoverPositionVisibility = <IDetail extends unknown>({
     }
   };
 
+  const handleClickOutside = (value: boolean) => {
+    setIsVisible(value);
+  }
+
   const handleMouseClick = (
     event: MouseEvent<HTMLElement>,
   ) => {
@@ -72,5 +76,5 @@ export const useHoverPositionVisibility = <IDetail extends unknown>({
     }
   };
 
-  return { isVisible, position, handleMouseEnter, handleMouseLeave, handleMouseClick };
+  return { isVisible, position, handleMouseEnter, handleMouseLeave, handleMouseClick, handleClickOutside };
 };

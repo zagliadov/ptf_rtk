@@ -173,11 +173,14 @@ const reportSlice = createSlice({
     setIsReportDelete(state, action: PayloadAction<boolean>) {
       state.isReportDelete = action.payload;
     },
+    setIsCreateReportLoading(state, action: PayloadAction<boolean>) {
+      state.createReportLoading = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
       .addCase(createReport.pending, (state) => {
-        state.createReportLoading = true;
+        // state.createReportLoading = true;
         state.isReportCreated = false;
       })
       .addCase(createReport.fulfilled, (state, action) => {
@@ -222,6 +225,7 @@ export const {
   setReportId,
   setReportSourceId,
   setReportType,
+  setIsCreateReportLoading,
 } = reportSlice.actions;
 
 export default reportSlice.reducer;

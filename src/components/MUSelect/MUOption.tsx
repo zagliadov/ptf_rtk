@@ -17,7 +17,6 @@ interface IProps {
   width?: string;
   name?: string;
   id?: any;
-  // handleMouseLeave: any;
 }
 export const MUOption: FC<IProps> = ({
   position,
@@ -32,15 +31,14 @@ export const MUOption: FC<IProps> = ({
   width,
   name,
   id,
-  // handleMouseLeave,
 }) => {
 
   const style: CSSProperties = {
     top: position.top + top,
     ...(right !== undefined ? { right } : { left: position.left - 180 }),
     position: "absolute",
-    zIndex: 150,
-    width
+    zIndex: 100,
+    width,
   };
 
   return (

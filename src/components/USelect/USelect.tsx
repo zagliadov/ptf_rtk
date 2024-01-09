@@ -33,7 +33,7 @@ export const USelect: FC<IProps> = ({
       options={updatedChoices as UpdatedChoice[]}
       onChange={(value) => {
         setValue(value);
-        handleSelectChange &&handleSelectChange(value, name);
+        handleSelectChange && handleSelectChange(value, name);
       }}
       placeholder={name}
       value={value}

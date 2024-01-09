@@ -75,7 +75,6 @@ export const EditColumnSelector: FC<IProps> = ({ onContinue }) => {
 
   const onSubmit = useCallback(
     (data: RData) => {
-      console.log(data);
       onContinue();
     },
     [onContinue]

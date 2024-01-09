@@ -10,12 +10,11 @@ import { DotThreeMenu } from "../Popups/DotThreeMenu/DotThreeMenu";
 import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import {
   setIsDotThreeMenuOpen,
-  setIsEditFiltersOpen,
+  setIsShowAllFiltersOpen,
 } from "src/store/managerSlice";
 import { useElementSize } from "src/hook/useElementSize";
 import { FiltersItem } from "./FiltersItem/FiltersItem";
 import { FormProvider, useForm } from "react-hook-form";
-// import useCheckOpacity from "src/hook/useCheckVisible";
 import { useHoverPositionVisibility } from "src/hook/useHoverPositionVisibility";
 import { UniPopup } from "../Popups/UniPopup/UniPopup";
 import ReactDOM from "react-dom";
@@ -40,7 +39,6 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
   const { isDotThreeMenuOpen } = useAppSelector(
     (state: RootState) => state.manager
   );
-  // const { disabled } = useCheckOpacity(visibleBlocks, filterArray?.length);
   const {
     isVisible: isInfoVisible,
     position: infoPosition,
@@ -92,7 +90,7 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
   }, [filtersAreExpanded]);
 
   const handleOpenAllFilters = () => {
-    dispatch(setIsEditFiltersOpen(true));
+    dispatch(setIsShowAllFiltersOpen(true));
   };
 
   return (

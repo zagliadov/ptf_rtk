@@ -52,6 +52,7 @@
   }
 }
 
+
 .custom-menu-list {
   width: 180px;
   padding: 6px;
@@ -79,6 +80,7 @@
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
+
 
     &:focus {
       border-color: color($var-color-app-grey-2);
@@ -108,5 +110,45 @@
     line-height: 20px;
     color: color($var-color-app-grey-2);
     padding-left: 10px;
+  }
+}
+
+.choices-wrapper {
+  max-height: 190px;
+  min-height: 190px;
+  overflow: auto;
+  padding-top: 5px;
+
+  .options-wrapper {
+    display: flex;
+    align-items: center;
+    padding-top: 5px;
+    padding-right: 0px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+
+    .options-colorization {
+      width: 10px;
+      height: 10px;
+      margin-right: 10px;
+    }
+
+    .options-label {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+      color: color($var-color-app-grey-2);
+
+      &:hover {
+        border-radius: 4px;
+        color: color($var-color-app-black);
+        cursor: pointer;
+      }
+
+      &.active {
+        border-radius: 4px;
+        color: color($var-color-app-black);
+      }
+    }
   }
 }

@@ -24,9 +24,16 @@ export const FilteredColumns: FC<IProps> = ({
   const { watch, setValue } = useFormContext<DynamicFormData>();
   const filters: IIFilters[] = watch(EDataKeys.FILTERS);
   const selectedFilters: IIFilters[] = useMemo(
-    () => _.filter(filters, (item) => item[EDataKeys.SELECTED_TABLE_FILTER] || item[EDataKeys.SELECTED_TABLE_CELL]),
+    () =>
+      _.filter(
+        filters,
+        (item) =>
+          item[EDataKeys.SELECTED_TABLE_FILTER] ||
+          item[EDataKeys.SELECTED_TABLE_CELL]
+      ),
     [filters]
   );
+
   /**
    * Updates the saved list of filters (`saveFilteredList`) based on the changes in selected filters (`selectedFilters`).
    *
@@ -42,28 +49,63 @@ export const FilteredColumns: FC<IProps> = ({
    *   while preserving the order in `saveFilteredList`.
    */
 
-  useEffect(() => {
-    // Adds new filters to saveFilteredList.
-    const newFilters: IIFilters[] = _.differenceBy(
+  // useEffect(() => {
+  //   // Adds new filters to saveFilteredList.
+  //   const newFilters: IIFilters[] = _.differenceBy(
+  //     selectedFilters,
+  //     saveFilteredList,
+  //     "id"
+  //   );
+  //   _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = true));
+  //   if (newFilters.length > 0) {
+  //     setSaveFilteredList(_.union(saveFilteredList, newFilters));
+  //   }
+
+  //   // Removes filters from saveFilteredList that are not found in selectedFilters.
+  //   if (selectedFilters.length < saveFilteredList.length) {
+  //     const updatedFilters: IIFilters[] = _.intersectionBy(
+  //       saveFilteredList,
+  //       selectedFilters,
+  //       "id"
+  //     );
+  //     console.log(updatedFilters, "updatedFilters")
+  //     setSaveFilteredList(updatedFilters);
+  //   }
+  // }, [selectedFilters, saveFilteredList, setSaveFilteredList]);
+
+  const computedSaveFilteredList = useMemo(() => {
+    const updatedSaveFilteredList = saveFilteredList.map((savedItem) => {
+      const selectedItem = selectedFilters.find(
+        (item) => item.id === savedItem.id
+      );
+      if (selectedItem) {
+        return {
+          ...savedItem,
+          [EDataKeys.SELECTED_TABLE_FILTER]: selectedItem[EDataKeys.SELECTED_TABLE_FILTER],
+          [EDataKeys.SELECTED_TABLE_CELL]: selectedItem[EDataKeys.SELECTED_TABLE_CELL],
+        };
+      }
+      return savedItem;
+    });
+  
+    const newFilters = _.differenceBy(selectedFilters, saveFilteredList, "id");
+    _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = true));
+  
+    const filteredSaveFilteredList = _.intersectionBy(
+      updatedSaveFilteredList,
       selectedFilters,
-      saveFilteredList,
       "id"
     );
-    _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = true));
-    if (newFilters.length > 0) {
-      setSaveFilteredList(_.union(saveFilteredList, newFilters));
+  
+    return [...filteredSaveFilteredList, ...newFilters];
+  }, [selectedFilters, saveFilteredList]);
+  
+  useEffect(() => {
+    if (!_.isEqual(computedSaveFilteredList, saveFilteredList)) {
+      setSaveFilteredList(computedSaveFilteredList);
     }
-
-    // Removes filters from saveFilteredList that are not found in selectedFilters.
-    if (selectedFilters.length < saveFilteredList.length) {
-      const updatedFilters: IIFilters[] = _.intersectionBy(
-        saveFilteredList,
-        selectedFilters,
-        "id"
-      );
-      setSaveFilteredList(updatedFilters);
-    }
-  }, [selectedFilters, saveFilteredList, setSaveFilteredList]);
+  }, [computedSaveFilteredList, saveFilteredList, setSaveFilteredList, setValue]);
+  
 
   const { filteredList, setFilteredList } = useSearch(
     saveFilteredList,
@@ -71,18 +113,15 @@ export const FilteredColumns: FC<IProps> = ({
   );
 
   useEffect(() => {
-    // Обновляем saveFilteredList с учетом порядка в selectedFilters
-    console.log(selectedFilters, "selectedFilters")
-    const updatedList = selectedFilters.map(filter => {
-      // Находим соответствующий фильтр в saveFilteredList
-      const existingFilter = saveFilteredList.find(f => f.id === filter.id);
-      console.log(existingFilter?.position, existingFilter?.name, "existingFilter")
-      // Если фильтр найден, сохраняем его свойства, обновляем position
-      // return existingFilter ? { ...existingFilter, position: selectedFilters.indexOf(filter) } : filter;
-    });
-
-    // setSaveFilteredList(updatedList);
-  }, [selectedFilters, saveFilteredList, setSaveFilteredList]);
+    if (saveFilteredList.length > 0 && saveFilteredList[0].position === undefined) {
+      const updatedList = saveFilteredList.map((item, index) => ({
+        ...item,
+        position: index,
+      }));
+      setSaveFilteredList(updatedList);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleReorder = (newOrder: IIFilters[]) => {
     // Updating the order of elements in saveFilteredList
@@ -113,7 +152,10 @@ export const FilteredColumns: FC<IProps> = ({
             </div>
           }
         >
-          <FiltersItem filteredList={filteredList} setSaveFilteredList={setSaveFilteredList} />
+          <FiltersItem
+            filteredList={filteredList}
+            setSaveFilteredList={setSaveFilteredList}
+          />
         </Suspense>
       </Reorder.Group>
     </>

@@ -1,14 +1,13 @@
-import { FC, useCallback, useRef, useState } from "react";
-import styles from "./Filters.module.scss";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
+import styles from "./ShowAllFilters.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
-import { useAppDispatch } from "src/store/store";
+import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import {
-  setIsFiltersOpen,
-  setColumnSelectorOpen,
-  setIsCreateReport,
+  setIsSaveFiltersChangesOpen,
+  setIsShowAllFiltersOpen,
 } from "src/store/managerSlice";
 import Search from "src/components/Search";
 import SimpleBar from "simplebar-react";
@@ -16,45 +15,47 @@ import "simplebar/dist/simplebar.min.css";
 import "./simplebar.scss";
 import { useElementHeight } from "src/hook/useElementHeight";
 import { useFormContext } from "react-hook-form";
-import { FilteredColumns } from "./FilteredColumns/FilteredColumns";
+import { FilteredColumns } from "../Filters/FilteredColumns/FilteredColumns";
 import { DynamicFormData, EDataKeys, IIFilters } from "src/types";
 import * as _ from "lodash";
 import { setSelectedFilters } from "src/store/filtersSlice";
-import { createReport, setIsReportCreated } from "src/store/reportSlice";
+import { useEditColumnSelector } from "src/hook/useEditColumnSelector";
 
 const cx: CX = classnames.bind(styles);
 
-export const Filters: FC = () => {
+export const ShowAllFilters: FC = () => {
   const { handleSubmit, watch, setValue, reset } =
     useFormContext<DynamicFormData>();
   const [searchValue, setSearchValue] = useState<string>("");
+  const { reportFilters } = useEditColumnSelector();
+  const { reportName, reportSourceId, reportType } = useAppSelector((state: RootState) => state.report);
   const [saveFilteredList, setSaveFilteredList] = useState<IIFilters[]>(
-    watch(EDataKeys.FILTERED_LIST) || []
+    reportFilters || []
   );
+
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
   const maxHeight: string = useElementHeight(filtersWrapperRef);
   const dispatch = useAppDispatch();
 
   const handleCloseFilters = useCallback((): void => {
-    dispatch(setIsFiltersOpen(false));
-    dispatch(setColumnSelectorOpen(true));
-  }, [dispatch]);
+    dispatch(setIsShowAllFiltersOpen(false));
+    reset();
+  }, [dispatch, reset]);
+
+  useEffect(() => {
+    setValue(EDataKeys.REPORT_TITLE, reportName);
+    setValue(EDataKeys.REPORT_TYPE, reportType);
+    setValue(EDataKeys.DATA_SOURCE, reportSourceId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
-      dispatch(setIsCreateReport(true));
-      await dispatch(createReport(data))
-        .then(() => {
-          dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
-          dispatch(setIsFiltersOpen(false));
-          reset();
-        })
-        .then(() => {
-          dispatch(setIsReportCreated(false));
-          dispatch(setIsCreateReport(false));
-        });
+      console.log(data," data")
+      dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
+      dispatch(setIsSaveFiltersChangesOpen(true));
     },
-    [dispatch, reset]
+    [dispatch]
   );
 
   /**
@@ -79,10 +80,10 @@ export const Filters: FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className={cx("filters")}>
-        <div className={cx("filters-header-wrapper")}>
+      <div className={cx("show-all-filters")}>
+        <div className={cx("show-all-filters-header-wrapper")}>
           <PopupHeader
-            title={"Filters"}
+            title={"All Filters"}
             description={
               "Apply filters, set the order and select favorites to build report"
             }
@@ -98,10 +99,10 @@ export const Filters: FC = () => {
           </div>
         </div>
 
-        <div ref={filtersWrapperRef} className={cx("filters-wrapper")}>
+        <div ref={filtersWrapperRef} className={cx("show-all-filters-wrapper")}>
           <SimpleBar
-            style={{ maxHeight, minHeight: "100%"}}
-            className="my-custom-scrollbar-filters"
+            style={{ maxHeight }}
+            className="my-custom-scrollbar-show-all-filters"
           >
             <FilteredColumns
               searchValue={searchValue}
@@ -110,11 +111,11 @@ export const Filters: FC = () => {
             />
           </SimpleBar>
         </div>
-        <div className={cx("filters-footer")}>
+        <div className={cx("show-all-filters-footer")}>
           <ButtonWrapper shift={"right"}>
             <Button
               primary
-              title="Create report"
+              title="Save report"
               type="submit"
               style={{ width: "134px" }}
             />

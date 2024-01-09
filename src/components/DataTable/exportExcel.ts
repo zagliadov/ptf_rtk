@@ -12,7 +12,6 @@ async function exportToExcel<T>(gridOptions: AgGridReact<T>, options: { sheetNam
     const workbook: ExcelProper.Workbook = new Workbook();
     const worksheet = workbook.addWorksheet(options.sheetName);
     worksheet.columns = colDefs.map((column) => {
-        console.log(column, "column.headerName");
         const headerCol: Partial<Column> = {
             header: column.colId,
             key: column.colId,

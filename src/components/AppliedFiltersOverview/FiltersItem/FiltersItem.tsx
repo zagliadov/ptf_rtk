@@ -7,8 +7,8 @@ import { Choice, EDataKeys, UpdatedChoice } from "src/types";
 import { updateChoices } from "src/utils";
 import { DateInput } from "src/components/Popups/Filters/FilteredColumns/components/DateInput/DateInput";
 import { DualInput } from "src/components/DualInput/DualInput";
-import { USelect } from "src/components/USelect/USelect";
 import { MUSelect } from "../../MUSelect/MUSelect";
+import { MUCSelect } from "src/components/MUCSelect/MUCSelect";
 
 const cx: CX = classnames.bind(styles);
 
@@ -23,8 +23,8 @@ export const FiltersItem: FC<IProps> = ({
   onFilterChange,
 }) => {
   const handleSelectChange = useCallback(
-    (value: string | null, name?: string) => {
-      if (name && value !== null) {
+    (value: string | null | any, name?: string) => {
+      if (name && value !== null && !_.isEmpty(value)) {
         onFilterChange(name, value);
       } else {
         onFilterChange(name, "");
@@ -66,10 +66,10 @@ export const FiltersItem: FC<IProps> = ({
           const inputText = isText && !isChoices;
           const isUser = filter[EDataKeys.TYPE] === EDataKeys.TYPE_USER;
           const isAutonumber =
-          filter[EDataKeys.TYPE] === EDataKeys.TYPE_AUTONUMBER;
+            filter[EDataKeys.TYPE] === EDataKeys.TYPE_AUTONUMBER;
           const isCheckbox = filter[EDataKeys.TYPE] === EDataKeys.TYPE_CHECKBOX;
-          if (isCheckbox) return false
-          if (isUser) console.log(filter, "filter")
+          if (isCheckbox) return false;
+          if (!filter.pinToMainView) return false;
           return (
             <motion.div
               key={`filter-block-${filter.id}`}
@@ -82,15 +82,15 @@ export const FiltersItem: FC<IProps> = ({
             >
               <span className={cx("filter-name")}>{filter.name}</span>
               {selectWithColorization && (
-                <USelect
-                  filter={filter}
+                <MUCSelect
+                  item={filter}
                   updatedChoices={updatedChoices}
                   handleSelectChange={handleSelectChange}
                 />
               )}
               {selectWithOutColorization && (
-                <USelect
-                  filter={filter}
+                <MUCSelect
+                  item={filter}
                   updatedChoices={updatedChoices}
                   handleSelectChange={handleSelectChange}
                 />
@@ -103,11 +103,6 @@ export const FiltersItem: FC<IProps> = ({
                 />
               )}
               {isUser && (
-                // <UInput
-                //   item={filter}
-                //   type={"text"}
-                //   handleSelectChange={handleSelectChange}
-                // />
                 <MUSelect
                   item={filter}
                   handleSelectChange={handleSelectChange}
@@ -118,11 +113,6 @@ export const FiltersItem: FC<IProps> = ({
                   item={filter}
                   handleSelectChange={handleSelectChange}
                 />
-                // <UInput
-                //   item={filter}
-                //   type={"text"}
-                //   handleSelectChange={handleSelectChange}
-                // />
               )}
               {isNumeric && (
                 <DualInput
@@ -136,20 +126,12 @@ export const FiltersItem: FC<IProps> = ({
                   item={filter}
                   handleSelectChange={handleSelectChange}
                 />
-                // <UInput
-                //   item={filter}
-                //   type={"email"}
-                //   handleSelectChange={handleSelectChange}
-                // />
               )}
               {(isDate || isTimestamp) && (
                 <DateInput
                   updateFilters={updateFilters}
                   handleSelectChange={handleSelectChange}
                   fieldName={filter.name}
-                  // openingDate={
-                  //   filter?.choice ? JSON.parse(filter?.choice) : filter?.choice
-                  // }
                   item={filter}
                 />
               )}
@@ -158,22 +140,12 @@ export const FiltersItem: FC<IProps> = ({
                   item={filter}
                   handleSelectChange={handleSelectChange}
                 />
-                // <UInput
-                //   item={filter}
-                //   type={"tel"}
-                //   handleSelectChange={handleSelectChange}
-                // />
               )}
               {isURL && (
                 <MUSelect
                   item={filter}
                   handleSelectChange={handleSelectChange}
                 />
-                // <UInput
-                //   item={filter}
-                //   type={"url"}
-                //   handleSelectChange={handleSelectChange}
-                // />
               )}
             </motion.div>
           );

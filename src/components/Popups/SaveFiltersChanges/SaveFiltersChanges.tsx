@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback } from "react";
 import styles from "./SaveFiltersChanges.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
@@ -7,14 +7,16 @@ import { Button } from "src/components/Button/Button";
 import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import {
   setIsEditFiltersOpen,
+  setIsReportUpdate,
   setIsSaveFiltersChangesOpen,
+  setIsShowAllFiltersOpen,
 } from "src/store/managerSlice";
 import { DynamicFormData, EDataKeys } from "src/types";
 import { useFormContext } from "react-hook-form";
 import { setSelectedFilters } from "src/store/filtersSlice";
 import { useGetReportColumnQuery } from "src/store/services/reportColumnApi";
 import * as _ from "lodash";
-import { createReport, deleteReport } from "src/store/reportSlice";
+import { createReport, deleteReport, setIsCreateReportLoading } from "src/store/reportSlice";
 
 const cx: CX = classnames.bind(styles);
 export const SaveFiltersChanges: FC = () => {
@@ -33,6 +35,9 @@ export const SaveFiltersChanges: FC = () => {
 
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
+      console.log(data, "data")
+      dispatch(setIsReportUpdate(true));
+      dispatch(setIsCreateReportLoading(true))
       const newReportResult = await refetch();
       const filteredData = _.filter(
         newReportResult.data,
@@ -49,7 +54,9 @@ export const SaveFiltersChanges: FC = () => {
             dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
             dispatch(setIsEditFiltersOpen(false));
             dispatch(setIsSaveFiltersChangesOpen(false));
+            dispatch(setIsShowAllFiltersOpen(false));
             reset();
+            dispatch(setIsReportUpdate(false));
           });
       }
     },
@@ -91,3 +98,4 @@ export const SaveFiltersChanges: FC = () => {
     </form>
   );
 };
+

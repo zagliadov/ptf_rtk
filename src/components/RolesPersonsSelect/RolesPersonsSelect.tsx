@@ -199,7 +199,7 @@ export const RolesPersonsSelect: FC<IProps> = ({
   return (
     <Select<PersonOption & RoleOption>
       options={rolesResourcesOptions}
-      placeholder="Role & Persons"
+      placeholder="Created by (Role & Persons)"
       isMultiple
       value={[...selectedResourcesOptions, ...selectedRolesOptions]}
       onChange={handleChange}

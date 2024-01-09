@@ -23,6 +23,7 @@ import { EditColumnSelector } from "../EditColumnSelector/EditColumnSelector";
 import { EditFilters } from "../EditFilters/EditFilters";
 import { SaveFiltersChanges } from "../SaveFiltersChanges/SaveFiltersChanges";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
+import { ShowAllFilters } from "../ShowAllFilters/ShowAllFilters";
 
 interface IProps {
   refetchReportsArray: any;
@@ -45,7 +46,9 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
     isSaveFiltersChangesOpen,
     isDeleteReport,
     isCreateReport,
+    isShowAllFiltersOpen,
   } = useAppSelector((state: RootState) => state.manager);
+  const { createReportLoading } = useAppSelector((state: RootState) => state.report);
 
   const openColumnSelector = useCallback((): void => {
     dispatch(setCreateNewReportOpen(false));
@@ -110,9 +113,14 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
             <UnsavedChangesPopup />
           </Popup>
         )}
+        {isShowAllFiltersOpen && (
+          <Popup open={isShowAllFiltersOpen} align={"right"}>
+            <ShowAllFilters />
+          </Popup>
+        )}
         {isSaveFiltersChangesOpen && (
           <Popup open={isSaveFiltersChangesOpen} align={"center"}>
-            <SaveFiltersChanges />
+            {createReportLoading ? <DotSpinner /> : <SaveFiltersChanges /> }
           </Popup>
         )}
       </div>

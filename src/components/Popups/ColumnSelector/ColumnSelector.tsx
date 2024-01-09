@@ -28,9 +28,9 @@ interface IProps {
 }
 
 export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
-  const { register, handleSubmit, watch } = useFormContext<RData>();
+  const { register, handleSubmit } = useFormContext<RData>();
   const [searchValue, setSearchValue] = useState<string>("");
-  const [ , setInitialValues] = useState<any>({});
+  // const [ , setInitialValues] = useState<any>({});
   const { filters, setFilters, isLoading } = useFilterInitialization();
   const dispatch = useAppDispatch();
   const { isChecked, handleCheckedAll, handleResetAll } = useHandleCheckboxAll(
@@ -38,11 +38,11 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
     setFilters
   );
 
-  useEffect(() => {
-    setInitialValues({
-      filters: watch(EDataKeys.FILTERS),
-    });
-  }, [watch]);
+  // useEffect(() => {
+  //   setInitialValues({
+  //     filters: watch(EDataKeys.FILTERS),
+  //   });
+  // }, [watch]);
 
   const handleCloseColumnSelector = useCallback(() => {
       dispatch(setColumnSelectorOpen(false));
