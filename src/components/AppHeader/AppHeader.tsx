@@ -15,8 +15,8 @@ interface IProps {
 
 export const AppHeader: FC<IProps> = ({ dataTableRef }) => {
   const handleGetApiUrl = useCallback(async () => {
-    console.log("handleGetApiUrl");
-  }, []);
+    dataTableRef.current?.exportJSON();
+  }, [dataTableRef]);
 
   const handleExportExcel = useCallback(() => {
     dataTableRef.current?.exportExcel();

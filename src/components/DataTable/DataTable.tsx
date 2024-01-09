@@ -19,6 +19,7 @@ import styles from "./DataTable.module.scss";
 import Tooltip from "./Tooltip";
 import exportToExcel from "./exportExcel";
 import exportToPdf from "./exportPDF";
+import exportToJson from "./exportJSON";
 
 const cx: CX = classNames.bind(styles);
 
@@ -35,7 +36,8 @@ type Props<T> = {
 export type TableRef = {
     resetFilters: () => void,
     exportExcel: () => void,
-    exportPdf: () => void
+    exportPdf: () => void,
+    exportJSON: () => void,
 }
 
 function DataTable<T>(props: Props<T>, ref: React.ForwardedRef<TableRef>) {
@@ -58,6 +60,12 @@ function DataTable<T>(props: Props<T>, ref: React.ForwardedRef<TableRef>) {
             exportPdf: () => {
                 if (gridRef.current) {
                     void exportToPdf(gridRef.current, { fileName: `${pdfName}.pdf` });
+                }
+            },
+            exportJSON: () => {
+                if (gridRef.current) {
+                    console.log(gridRef.current, "gridRef.current")
+                    void exportToJson(gridRef.current, { fileName: "report" });
                 }
             },
         }), [excelName, pdfName]);
