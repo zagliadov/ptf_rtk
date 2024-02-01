@@ -90,7 +90,7 @@ const useFilterInitialization = () => {
         : _.map(processedData, (item) => ({
             selectedTableCell: false,
             selectedTableFilter: false,
-            disabled: item.type === "Multiline",
+            disabled: item.type === "Multiline" || item.type === "Duration",
             pinToMainView: false,
             ...item,
           }));

@@ -5,10 +5,14 @@ import {
   useGetSourceInfoDataQuery,
   useGetSourceItemsDataQuery,
 } from "src/store/services/sourceApi";
-import { useGetGeneralReportsQuery } from "src/store/services/reportSettingsApi";
+import { useGetGeneralReportsQuery } from "src/store/services/customReportApi";
 import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import { setReportFilters } from "src/store/reportSlice";
 import { Source, sourceByType } from "src/constants/sources";
+import { parseISO, format } from "date-fns";
+import fetchCustomData from "./ItemsData";
+
+
 
 /**
  * Custom hook to manage and process report data.
@@ -16,8 +20,9 @@ import { Source, sourceByType } from "src/constants/sources";
  * @returns {Object} Object containing report data and functions to manage it.
  */
 const useReportData = () => {
-  const { reportId, reportSourceId } =
-    useAppSelector((state: RootState) => state.report);
+  const { reportId, reportSourceId } = useAppSelector(
+    (state: RootState) => state.report
+  );
   const [finalFilterArray, setFinalFilterArray] = useState<IIFilters[]>([]);
   const dispatch = useAppDispatch();
   const {
@@ -30,8 +35,24 @@ const useReportData = () => {
     source,
     { skip: !source }
   );
+
   const { data: describeData, isLoading: isLoadingDescribeData } =
     useGetSourceInfoDataQuery(source, { skip: !source });
+  const formatDate = (dateString: string) => {
+    try {
+      const date = parseISO(dateString);
+      return format(date, "dd MMM yyyy");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
+  const isISO8601Date = (value: string) => {
+    const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)$/;
+    return regex.test(value);
+  };
+  
 
   const columns = useMemo(() => {
     if (!isLoadingDescribeData && describeData && reportData) {
@@ -44,7 +65,12 @@ const useReportData = () => {
         .map((column) => ({
           ...column,
           field: column.name,
-          cellRenderer: (params: any) => params.value,
+          cellRenderer: (params: any) => {
+            if (isISO8601Date(params.value)) {
+              return formatDate(params.value);
+            }
+            return params.value;
+          },
         }));
     }
     return [];
@@ -71,11 +97,15 @@ const useReportData = () => {
       if (reportDetails?.filters) {
         try {
           // ========================> The problem lies in how nested arrays and objects are encoded.
-          const reportFilters = reportDetails.filters;
-          const parsedFilters = JSON.parse(reportFilters);
-          return parsedFilters.filter(
-            (filter: any) => filter.selectedTableFilter
-          );
+          const reportFilters = reportDetails?.filters;
+          try {
+            const parsedFilters = JSON?.parse(reportFilters);
+            return parsedFilters.filter(
+              (filter: any) => filter.selectedTableFilter
+            );
+          } catch (error) {
+            console.log(error, "error");
+          }
         } catch (error) {
           console.error("Error parsing filters", error);
           setFinalFilterArray([]);

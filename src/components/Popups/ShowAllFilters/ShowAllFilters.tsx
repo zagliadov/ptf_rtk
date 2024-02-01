@@ -20,6 +20,7 @@ import { DynamicFormData, EDataKeys, IIFilters } from "src/types";
 import * as _ from "lodash";
 import { setSelectedFilters } from "src/store/filtersSlice";
 import { useEditColumnSelector } from "src/hook/useEditColumnSelector";
+import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 
 const cx: CX = classnames.bind(styles);
 
@@ -28,7 +29,9 @@ export const ShowAllFilters: FC = () => {
     useFormContext<DynamicFormData>();
   const [searchValue, setSearchValue] = useState<string>("");
   const { reportFilters } = useEditColumnSelector();
-  const { reportName, reportSourceId, reportType } = useAppSelector((state: RootState) => state.report);
+  const { reportName, reportSourceId, reportType } = useAppSelector(
+    (state: RootState) => state.report
+  );
   const [saveFilteredList, setSaveFilteredList] = useState<IIFilters[]>(
     reportFilters || []
   );
@@ -46,12 +49,11 @@ export const ShowAllFilters: FC = () => {
     setValue(EDataKeys.REPORT_TITLE, reportName);
     setValue(EDataKeys.REPORT_TYPE, reportType);
     setValue(EDataKeys.DATA_SOURCE, reportSourceId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
-      console.log(data," data")
       dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
       dispatch(setIsSaveFiltersChangesOpen(true));
     },
@@ -108,9 +110,11 @@ export const ShowAllFilters: FC = () => {
               searchValue={searchValue}
               saveFilteredList={saveFilteredList}
               setSaveFilteredList={setSaveFilteredList}
+              isEdit={true}
             />
           </SimpleBar>
         </div>
+
         <div className={cx("show-all-filters-footer")}>
           <ButtonWrapper shift={"right"}>
             <Button

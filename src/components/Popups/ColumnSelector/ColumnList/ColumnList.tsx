@@ -7,6 +7,8 @@ import { useFormContext } from "react-hook-form";
 import { EDataKeys, IIFilters } from "src/types";
 import { useSearch } from "src/hook/useSearch";
 import * as _ from "lodash";
+import { isNameExcluded } from "src/utils/helpers";
+import { RootState, useAppSelector } from "src/store/store";
 
 const cx: CX = classnames.bind(styles);
 
@@ -18,6 +20,7 @@ interface IProps {
 const ColumnList: FC<IProps> = ({ searchValue, filters, setFilters }) => {
   const { setValue } = useFormContext();
   const { filteredList, setFilteredList } = useSearch(filters, searchValue);
+  const { reportSourceId } = useAppSelector((state: RootState) => state.report);
 
   /**
    * Modifies an array of filters based on a specific checkbox change.
@@ -108,38 +111,41 @@ const ColumnList: FC<IProps> = ({ searchValue, filters, setFilters }) => {
               disabled,
             }: IIFilters,
             index: number
-          ) => (
-            <div key={`${name}-checked`} className={cx("list-item")}>
-              <div className={cx("filter-item")}>
-                <label htmlFor={`${name}-checked`}>
-                  <input
-                    id={`${name}-checked`}
-                    type="checkbox"
-                    checked={selectedTableCell}
-                    onChange={(e) =>
-                      handleCheckboxChange(1, e.target.checked, name)
-                    }
-                  />
-                  <div className={cx("checkbox-wrapper")}>
-                    <div className={cx("checkbox-icon")}>
-                      <CheckboxIcon />
+          ) => {
+            if(isNameExcluded(name, reportSourceId)) return;
+            return (
+              <div key={`${name}-checked`} className={cx("list-item")}>
+                <div className={cx("filter-item")}>
+                  <label htmlFor={`${name}-checked`}>
+                    <input
+                      id={`${name}-checked`}
+                      type="checkbox"
+                      checked={selectedTableCell}
+                      onChange={(e) =>
+                        handleCheckboxChange(1, e.target.checked, name)
+                      }
+                    />
+                    <div className={cx("checkbox-wrapper")}>
+                      <div className={cx("checkbox-icon")}>
+                        <CheckboxIcon />
+                      </div>
                     </div>
-                  </div>
-                  <span>{name}</span>
-                </label>
-              </div>
+                    <span>{name}</span>
+                  </label>
+                </div>
 
-              <SlideCheckbox
-                checked={selectedTableFilter}
-                index={index}
-                disabled={disabled}
-                checkboxNumber={2}
-                onChange={(selectedTableFilter) =>
-                  handleCheckboxChange(2, selectedTableFilter, name)
-                }
-              />
-            </div>
-          )
+                <SlideCheckbox
+                  checked={selectedTableFilter}
+                  index={index}
+                  disabled={disabled}
+                  checkboxNumber={2}
+                  onChange={(selectedTableFilter) =>
+                    handleCheckboxChange(2, selectedTableFilter, name)
+                  }
+                />
+              </div>
+            );
+          }
         )}
     </div>
   );

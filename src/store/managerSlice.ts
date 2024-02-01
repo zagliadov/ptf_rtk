@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 interface IManagerState {
   isCreateNewReportOpen: boolean;
+  isCreateCopyReportOpen: boolean;
   isColumnSelectorOpen: boolean;
   isFiltersOpen: boolean;
   isEditReportOpen: boolean;
@@ -16,10 +17,13 @@ interface IManagerState {
   isCreateReport: boolean;
   isReportUpdate: boolean;
   isShowAllFiltersOpen: boolean;
+  isFilterChanges: boolean,
+  isNotReportCreator: boolean,
 }
 
 const initialState: IManagerState = {
   isCreateNewReportOpen: false,
+  isCreateCopyReportOpen: false,
   isColumnSelectorOpen: false,
   isFiltersOpen: false,
   isEditReportOpen: false,
@@ -34,6 +38,8 @@ const initialState: IManagerState = {
   isCreateReport: false,
   isReportUpdate: false,
   isShowAllFiltersOpen: false,
+  isFilterChanges: false,
+  isNotReportCreator: false,
 };
 
 const managerSlice = createSlice({
@@ -42,6 +48,9 @@ const managerSlice = createSlice({
   reducers: {
     setCreateNewReportOpen(state, action: PayloadAction<boolean>) {
       state.isCreateNewReportOpen = action.payload;
+    },
+    setCreateCopyReportOpen(state, action: PayloadAction<boolean>) {
+      state.isCreateCopyReportOpen = action.payload;
     },
     setColumnSelectorOpen(state, action: PayloadAction<boolean>) {
       state.isColumnSelectorOpen = action.payload;
@@ -84,6 +93,12 @@ const managerSlice = createSlice({
     },
     setIsShowAllFiltersOpen(state, action: PayloadAction<boolean>) {
       state.isShowAllFiltersOpen = action.payload;
+    },
+    confirmFilterChanges(state, action: PayloadAction<boolean>) {
+      state.isFilterChanges = action.payload;
+    },
+    setIsNotReportCreator(state, action: PayloadAction<boolean>) {
+      state.isNotReportCreator = action.payload;
     }
   },
 
@@ -92,6 +107,7 @@ const managerSlice = createSlice({
 
 export const {
   setCreateNewReportOpen,
+  setCreateCopyReportOpen,
   setColumnSelectorOpen,
   setIsFiltersOpen,
   setReportEditOpen,
@@ -105,7 +121,9 @@ export const {
   setIsDeleteReport,
   setIsCreateReport,
   setIsReportUpdate,
-  setIsShowAllFiltersOpen
+  setIsShowAllFiltersOpen,
+  confirmFilterChanges,
+  setIsNotReportCreator,
 } = managerSlice.actions;
 
 export default managerSlice.reducer;

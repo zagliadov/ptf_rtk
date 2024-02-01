@@ -15,14 +15,17 @@ interface IProps {
   searchValue: string;
   saveFilteredList: IIFilters[];
   setSaveFilteredList: (value: IIFilters[]) => void;
+  isEdit?: boolean;
 }
 export const FilteredColumns: FC<IProps> = ({
   searchValue,
   saveFilteredList,
   setSaveFilteredList,
+  isEdit = false,
 }) => {
   const { watch, setValue } = useFormContext<DynamicFormData>();
   const filters: IIFilters[] = watch(EDataKeys.FILTERS);
+
   const selectedFilters: IIFilters[] = useMemo(
     () =>
       _.filter(
@@ -49,30 +52,13 @@ export const FilteredColumns: FC<IProps> = ({
    *   while preserving the order in `saveFilteredList`.
    */
 
-  // useEffect(() => {
-  //   // Adds new filters to saveFilteredList.
-  //   const newFilters: IIFilters[] = _.differenceBy(
-  //     selectedFilters,
-  //     saveFilteredList,
-  //     "id"
-  //   );
-  //   _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = true));
-  //   if (newFilters.length > 0) {
-  //     setSaveFilteredList(_.union(saveFilteredList, newFilters));
-  //   }
-
-  //   // Removes filters from saveFilteredList that are not found in selectedFilters.
-  //   if (selectedFilters.length < saveFilteredList.length) {
-  //     const updatedFilters: IIFilters[] = _.intersectionBy(
-  //       saveFilteredList,
-  //       selectedFilters,
-  //       "id"
-  //     );
-  //     console.log(updatedFilters, "updatedFilters")
-  //     setSaveFilteredList(updatedFilters);
-  //   }
-  // }, [selectedFilters, saveFilteredList, setSaveFilteredList]);
-
+  /**
+   * Computes a new list of saved filters by merging selected filters with existing saved filters.
+   * @description
+   * This hook combines the `selectedFilters` with the `saveFilteredList`, updating the existing saved filters with any new selections,
+   * and adding new filters that are selected but not yet saved. It ensures that each filter's `SELECTED_TABLE_FILTER` and
+   * `SELECTED_TABLE_CELL` properties are updated based on the current selection. Additionally, any new filters are marked as pinned to the main view.
+   */
   const computedSaveFilteredList = useMemo(() => {
     const updatedSaveFilteredList = saveFilteredList.map((savedItem) => {
       const selectedItem = selectedFilters.find(
@@ -81,47 +67,61 @@ export const FilteredColumns: FC<IProps> = ({
       if (selectedItem) {
         return {
           ...savedItem,
-          [EDataKeys.SELECTED_TABLE_FILTER]: selectedItem[EDataKeys.SELECTED_TABLE_FILTER],
-          [EDataKeys.SELECTED_TABLE_CELL]: selectedItem[EDataKeys.SELECTED_TABLE_CELL],
+          [EDataKeys.SELECTED_TABLE_FILTER]:
+            selectedItem[EDataKeys.SELECTED_TABLE_FILTER],
+          [EDataKeys.SELECTED_TABLE_CELL]:
+            selectedItem[EDataKeys.SELECTED_TABLE_CELL],
         };
       }
       return savedItem;
     });
-  
+
     const newFilters = _.differenceBy(selectedFilters, saveFilteredList, "id");
-    _.forEach(newFilters, (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = true));
-  
+    if (!isEdit) {
+      _.forEach(
+        newFilters,
+        (item) => (item[EDataKeys.PIN_TO_MAIN_VIEW] = true)
+      );
+    }
+
     const filteredSaveFilteredList = _.intersectionBy(
       updatedSaveFilteredList,
       selectedFilters,
       "id"
     );
-  
+
     return [...filteredSaveFilteredList, ...newFilters];
-  }, [selectedFilters, saveFilteredList]);
-  
+  }, [saveFilteredList, selectedFilters, isEdit]);
+
   useEffect(() => {
     if (!_.isEqual(computedSaveFilteredList, saveFilteredList)) {
       setSaveFilteredList(computedSaveFilteredList);
     }
-  }, [computedSaveFilteredList, saveFilteredList, setSaveFilteredList, setValue]);
-  
+  }, [
+    computedSaveFilteredList,
+    saveFilteredList,
+    setSaveFilteredList,
+    setValue,
+  ]);
 
   const { filteredList, setFilteredList } = useSearch(
     saveFilteredList,
     searchValue
   );
 
-  useEffect(() => {
-    if (saveFilteredList.length > 0 && saveFilteredList[0].position === undefined) {
-      const updatedList = saveFilteredList.map((item, index) => ({
-        ...item,
-        position: index,
-      }));
-      setSaveFilteredList(updatedList);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   if (
+  //     saveFilteredList.length > 0 &&
+  //     saveFilteredList[0].position === undefined
+  //   ) {
+  //     const updatedList = saveFilteredList.map((item, index) => ({
+  //       ...item,
+  //       position: index,
+  //     }));
+  //     setSaveFilteredList(updatedList);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const handleReorder = (newOrder: IIFilters[]) => {
     // Updating the order of elements in saveFilteredList
@@ -134,9 +134,22 @@ export const FilteredColumns: FC<IProps> = ({
     setSaveFilteredList(updatedListWithPosition);
   };
 
+  const updateReportFilters = useMemo(() => {
+    const sortedList = _.sortBy(saveFilteredList, "position");
+    return _.map(sortedList, (item, index) => ({
+      ...item,
+      position: index,
+    }));
+  }, [saveFilteredList]);
+
   useEffect(() => {
-    setValue(EDataKeys.FILTERED_LIST, saveFilteredList);
-  }, [filteredList, saveFilteredList, setValue, setFilteredList]);
+    setSaveFilteredList(updateReportFilters);
+  }, []);
+
+  useEffect(() => {
+    setValue(EDataKeys.FILTERED_LIST, updateReportFilters);
+    console.log(updateReportFilters);
+  }, [setValue, updateReportFilters]);
 
   return (
     <>
@@ -152,10 +165,16 @@ export const FilteredColumns: FC<IProps> = ({
             </div>
           }
         >
-          <FiltersItem
-            filteredList={filteredList}
-            setSaveFilteredList={setSaveFilteredList}
-          />
+          {filteredList.length > 0 ? (
+            <FiltersItem
+              filteredList={filteredList}
+              setSaveFilteredList={setSaveFilteredList}
+            />
+          ) : (
+            <div className={cx("is-loading")}>
+              <DotSpinner />
+            </div>
+          )}
         </Suspense>
       </Reorder.Group>
     </>

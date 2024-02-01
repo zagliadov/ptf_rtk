@@ -1,21 +1,18 @@
-import { FC, useCallback, useEffect } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import styles from "./FiltersItem.module.scss";
 import classnames from "classnames/bind";
 import { ColumnHeader } from "../ColumnHeader/ColumnHeader";
 import { DateInput } from "../components/DateInput/DateInput";
-import {
-  Choice,
-  DynamicFormData,
-  EDataKeys,
-  IIFilters,
-  UpdatedChoice,
-} from "src/types";
-import { updateChoices } from "src/utils";
+import { DynamicFormData, EDataKeys, IIFilters } from "src/types";
+// import { updateChoicesCheckbox } from "src/utils";
 import { useFormContext } from "react-hook-form";
 import * as _ from "lodash";
 import { DualInput } from "src/components/DualInput/DualInput";
 import { MUSelect } from "src/components/MUSelect/MUSelect";
-import { MUCSelect } from "src/components/MUCSelect/MUCSelect";
+import { isNameExcluded } from "src/utils/helpers";
+import { RootState, useAppSelector } from "src/store/store";
+import { useGetSourceItemsDataQuery } from "src/store/services/sourceApi";
+import { Source, sourceByType } from "src/constants/sources";
 
 const cx: CX = classnames.bind(styles);
 
@@ -24,7 +21,64 @@ interface IProps {
   setSaveFilteredList?: any;
 }
 const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
-  const { setValue } = useFormContext<DynamicFormData>();
+  const { setValue, watch } = useFormContext<DynamicFormData>();
+  const dataSource = watch(EDataKeys.DATA_SOURCE);
+  const { reportSourceId } = useAppSelector((state: RootState) => state.report);
+  const source: Source = sourceByType[dataSource];
+  const { data: rowData } = useGetSourceItemsDataQuery(source, {
+    skip: !source,
+  });
+
+  const mapColumnNamesToRowValues = (columns: any, rows: any) => {
+    const result = _.reduce(
+      columns,
+      (acc, column) => {
+        acc[column.name] = [];
+        return acc;
+      },
+      {}
+    );
+
+    _.forEach(rows, (row) => {
+      _.forEach(row, (value, key) => {
+        if (_.has(result, key) && !_.isNull(value)) {
+          result[key].push(value);
+        }
+      });
+    });
+
+    return result;
+  };
+
+  const filtersValue = mapColumnNamesToRowValues(filteredList, rowData);
+
+  const memoizedFiltersData = useMemo(() => {
+    return filteredList.reduce((acc, filter) => {
+      const filterValues = _.has(filtersValue, filter.name)
+        ? filtersValue[filter.name]
+        : [];
+
+      const extractData = _.chain(filterValues)
+        .uniq()
+        .map((item) => {
+          const nameOnly = typeof item === 'string' ? item.replace(/<.*?>/, "").trim() : "";
+          return nameOnly;
+        })
+        .reduce((acc, item) => {
+          acc[item] = false;
+          return acc;
+        }, {})
+        .value();
+
+      acc[filter.name] = {
+        filterValues,
+        extractData,
+      };
+
+      return acc;
+    }, {});
+  }, [filteredList, filtersValue]);
+
   /**
    * Updates the filter value for a specific filter item.
    * This function finds a filter by its ID in the filtered list and updates its value.
@@ -67,10 +121,6 @@ const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
           )
             return;
           const fieldName: string = `${item?.name}`;
-          const updatedChoices: UpdatedChoice[] | null = updateChoices(
-            item?.choices as Choice[],
-            item?.colorization
-          );
           const isNumeric = item[EDataKeys.TYPE] === EDataKeys.TYPE_NUMERIC;
           const isDate = item[EDataKeys.TYPE] === EDataKeys.TYPE_DATE;
           const isTimestamp = item[EDataKeys.TYPE] === EDataKeys.TYPE_TIMESTAMP;
@@ -82,46 +132,65 @@ const FiltersItem: FC<IProps> = ({ filteredList, setSaveFilteredList }) => {
           const isPhone = item[EDataKeys.TYPE] === EDataKeys.TYPE_PHONE;
           const isEmail = item[EDataKeys.TYPE] === EDataKeys.TYPE_EMAIL;
           const isText = item[EDataKeys.TYPE] === EDataKeys.TYPE_TEXT;
-          const inputText = isText && !isChoices;
           const isUser = item[EDataKeys.TYPE] === EDataKeys.TYPE_USER;
           const isAutonumber =
             item[EDataKeys.TYPE] === EDataKeys.TYPE_AUTONUMBER;
           const isCheckbox = item[EDataKeys.TYPE] === EDataKeys.TYPE_CHECKBOX;
           if (isCheckbox) return;
+          if (isNameExcluded(item.name, reportSourceId)) return;
+          const { extractData } = memoizedFiltersData[item.name] || {};
+
+          let extractDataFunction;
+          if (
+            item[EDataKeys.TYPE] === EDataKeys.TYPE_TEXT ||
+            item[EDataKeys.TYPE] === EDataKeys.TYPE_EMAIL ||
+            item[EDataKeys.TYPE] === EDataKeys.TYPE_USER ||
+            item[EDataKeys.TYPE] === EDataKeys.TYPE_PHONE
+          ) {
+            extractDataFunction = extractData;
+          } else {
+            extractDataFunction = {};
+          }
           return (
             <div key={item?.id} className={cx("filters-item")}>
               <ColumnHeader item={item} filteredList={filteredList} />
               {selectWithOutColorization && (
-                <MUCSelect
+                <MUSelect
                   item={item}
-                  updatedChoices={updatedChoices}
                   updateFilters={updateFilters}
+                  extractData={extractDataFunction}
                   width={"363px"}
                   right={17}
                 />
               )}
               {selectWithColorization && (
-                <MUCSelect
+                <MUSelect
                   item={item}
-                  updatedChoices={updatedChoices}
                   updateFilters={updateFilters}
+                  extractData={extractDataFunction}
                   width={"363px"}
                   right={17}
                 />
               )}
-              {(inputText || isUser || isURL || isEmail || isPhone) && (
+              {(isEmail ||
+                isUser ||
+                (isText && !isChoices) ||
+                (isURL && !isChoices) ||
+                (isPhone && !isChoices)) && (
                 <MUSelect
                   item={item}
                   updateFilters={updateFilters}
-                  // top={-140}
-                  // right={0}
+                  extractData={extractDataFunction}
                   top={44}
                   right={17}
                   width={"363px"}
                 />
               )}
               {(isAutonumber || isNumeric) && (
-                <DualInput updateFilters={updateFilters} item={item} />
+                <DualInput
+                  updateFilters={updateFilters}
+                  item={item}
+                />
               )}
               {(isDate || isTimestamp) && (
                 <DateInput

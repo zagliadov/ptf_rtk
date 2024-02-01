@@ -7,12 +7,12 @@ import {
 import { useAppSelector, RootState } from "src/store/store";
 import { ColumnData, EDataKeys, IIFilters, SourceType } from "src/types";
 import * as _ from "lodash";
-import { useGetGeneralReportsQuery } from "src/store/services/reportSettingsApi";
+import { useGetGeneralReportsQuery } from "src/store/services/customReportApi";
 
 export const useEditColumnSelector = () => {
   // useFormContext hook from react-hook-form is used for form state management.
   const { watch, setValue } = useFormContext();
-  const { reportFilters, reportSourceId, reportId } = useAppSelector(
+  const { reportSourceId, reportId } = useAppSelector(
     (state: RootState) => state.report
   );
   // State to store filter data.
@@ -70,7 +70,7 @@ export const useEditColumnSelector = () => {
         : _.map(processedData, (item) => ({
             selectedTableCell: false,
             selectedTableFilter: false,
-            disabled: item.type === "Multiline",
+            disabled: item.type === "Multiline" || item.type === "Duration",
             pinToMainView: false,
             ...item,
           }));

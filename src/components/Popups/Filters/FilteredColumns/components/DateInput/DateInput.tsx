@@ -1,6 +1,8 @@
 import { FC, useEffect, useState } from "react";
 import DatePicker from "src/components/DatePicker/DatePicker";
-import { RootState, useAppSelector } from "src/store/store";
+import { setFilterChoice } from "src/store/filtersSlice";
+import { confirmFilterChanges } from "src/store/managerSlice";
+import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import { IIFilters } from "src/types";
 import { formatDate } from "src/utils";
 
@@ -8,7 +10,7 @@ interface IProps {
   openingDate?: Date;
   fieldName: string;
   item: IIFilters;
-  updateFilters: (value1: number, value2: [string, string]) => void;
+  updateFilters: (value1: number, value2: any) => void;
   handleSelectChange?: any;
 }
 
@@ -22,6 +24,10 @@ export const DateInput: FC<IProps> = ({
   const [eDate, setEDate] = useState<Date | null>();
   const [sDate, setSDate] = useState<Date | null>();
   const { reportName } = useAppSelector((state: RootState) => state.report);
+  const { isEditFiltersOpen } = useAppSelector(
+    (state: RootState) => state.manager
+  );
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     setSDate(null);
@@ -50,10 +56,11 @@ export const DateInput: FC<IProps> = ({
       setSDate(dates[0]);
       const [startDate, endDate] = dates;
       if (startDate && endDate) {
-        updateFilters(item.id, [
-          formatDate(startDate.toISOString()),
-          formatDate(endDate.toISOString()),
-        ]);
+        updateFilters &&
+          updateFilters(item.id, [
+            formatDate(startDate.toISOString()),
+            formatDate(endDate.toISOString()),
+          ]);
         handleSelectChange &&
           handleSelectChange(
             [
@@ -62,14 +69,41 @@ export const DateInput: FC<IProps> = ({
             ],
             item.name
           );
+        if (!isEditFiltersOpen) {
+          dispatch(confirmFilterChanges(true));
+          dispatch(
+            setFilterChoice({
+              choice: [
+                formatDate(startDate.toISOString()),
+                formatDate(endDate.toISOString()),
+              ],
+              filterName: fieldName,
+              reportName,
+            })
+          );
+        }
       } else {
+        updateFilters && updateFilters(item.id, "");
         handleSelectChange && handleSelectChange("", item.name);
       }
+      if (!endDate && !startDate) {
+        if (!isEditFiltersOpen) {
+          dispatch(confirmFilterChanges(true));
+          dispatch(
+            setFilterChoice({
+              choice: [],
+              filterName: fieldName,
+              reportName,
+            })
+          );
+        }
+      }
     } else if (dates) {
-      updateFilters(item.id, [
-        formatDate(dates.toISOString()),
-        formatDate(dates.toISOString()),
-      ]);
+      updateFilters &&
+        updateFilters(item.id, [
+          formatDate(dates.toISOString()),
+          formatDate(dates.toISOString()),
+        ]);
     }
   };
 

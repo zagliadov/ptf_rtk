@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import * as _ from "lodash";
-import { useGetGeneralReportsQuery } from "src/store/services/reportSettingsApi";
+import { useGetGeneralReportsQuery } from "src/store/services/customReportApi";
 import { EDataKeys } from "src/types";
 import { useAppDispatch, useAppSelector, RootState } from "src/store/store";
 import {
@@ -9,9 +9,8 @@ import {
   setReportSourceId,
   setReportType,
 } from "src/store/reportSlice";
-import { setIsFiltersOpen } from "src/store/managerSlice";
-import { format, parseISO } from 'date-fns';
-
+import { format, parseISO } from "date-fns";
+import { fetchAllUserResources } from "src/store/authSlice";
 
 export interface ReportRaw {
   "@row.id": number;
@@ -37,8 +36,10 @@ export interface SourceReports {
 export interface ReportDetail {
   reportName: string;
   dateCreated: string;
-  dateModified: string | null;
-  createdBy: string;
+  department: string;
+  dateUpdated: string | null;
+  creator: string;
+  purpose: string | null,
 }
 
 interface ExtendedReport extends Report {
@@ -68,25 +69,39 @@ const useSideMenuReports = (): ExtendedSourceReports[] | any => {
   const { isReportCreated, isReportDelete } = useAppSelector(
     (state: RootState) => state.report
   );
+  const { userResources } = useAppSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    dispatch(fetchAllUserResources());
+  }, [dispatch]);
+
   const processedData = useMemo(() => {
-    if (!isLoading && data) {
-      dispatch(setIsFiltersOpen(false));
+    if (!isLoading && data && userResources) {
       return _.chain(data as ReportRaw[])
         .groupBy("sourceId")
         .mapValues((reports) =>
-          reports.map(({ "@row.id": rowId, name, type, "Date Created": dateCreated, "Date Modified": dateModified, "Created By": createdBy }) => ({
-            "@row.id": rowId,
-            name,
-            type,
-            details: [
-              {
-                reportName: name,
-                createdBy,
-                dateCreated: dateCreated ? format(parseISO(dateCreated), 'dd.MM.yyyy') as string : "",
-                dateModified: dateModified ? format(parseISO(dateModified), 'dd.MM.yyyy') as string : null,
-              },
-            ],
-          }))
+          reports.map(report => {
+            const userResource = userResources.find((user: any) => user.email === report["Report Creator Email"]);
+            const details = {
+              reportName: report.name,
+              creator: userResource ? userResource.fullName : report["Created By"],
+              department: userResource ? userResource.role : "Unknown",
+              dateCreated: report["Date Created"]
+                ? format(parseISO(report["Date Created"]), "dd.MM.yyyy")
+                : "",
+              dateUpdated: report["Date Modified"]
+                ? format(parseISO(report["Date Modified"]), "dd.MM.yyyy")
+                : null,
+              purpose: null
+            };
+
+            return {
+              "@row.id": report["@row.id"],
+              name: report.name,
+              type: report.type,
+              details: [details],
+            };
+          })
         )
         .toPairs()
         .filter(([sourceId]) => sourceId !== null && sourceId !== "null")
@@ -94,7 +109,7 @@ const useSideMenuReports = (): ExtendedSourceReports[] | any => {
         .value();
     }
     return [];
-  }, [data, dispatch, isLoading]);
+  }, [data, isLoading, userResources]);
 
   useEffect(() => {
     setReportsArray(processedData);

@@ -6,7 +6,7 @@
   cursor: pointer;
 }
 .my-custom-scrollbar-filters {
-
+  height: 100%;
   .simplebar-wrapper {
     width: 100%;
   }
@@ -21,7 +21,8 @@
     transition: all 0.4s;
   }
   .simplebar-content {
-    min-height: 530px;
+    // min-height: 530px;
+    min-height: 4000px;
   }
 
   .simplebar-scrollbar {

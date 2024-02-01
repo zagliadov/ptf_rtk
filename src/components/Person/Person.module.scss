@@ -4,7 +4,6 @@
   display: flex;
   align-items: center;
   white-space: nowrap;
-
   cursor: pointer;
 
   .name-wrapper {
@@ -15,6 +14,10 @@
       font-size: 14px;
       line-height: 20px;
       color: color($var-color-app-dark-blue);
+      width: 115px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .position {
@@ -22,6 +25,10 @@
       font-size: 12px;
       line-height: 20px;
       color: color($var-color-app-black-2);
+      width: 115px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .role {

@@ -7,6 +7,7 @@ export type ICreateReport = {
   sourceId: string;
   name: string;
   type: string;
+  "Report Creator Email": string | null;
 };
 
 const headers = {
@@ -14,10 +15,10 @@ const headers = {
 };
 
 // Define a service using a base URL and expected endpoints
-export const reportSettingsApi = createApi({
-  reducerPath: "reportSettingsApi",
+export const customReportApi = createApi({
+  reducerPath: "customReportApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: Endpoints.API_REPORT_SETTINGS,
+    baseUrl: Endpoints.API_CUSTOM_REPORT,
     prepareHeaders: (headers, { getState }) => {
       return headers;
     },
@@ -32,7 +33,7 @@ export const reportSettingsApi = createApi({
         return `List%20All/select.json`;
       },
     }),
-    createReportSettings: builder.mutation({
+    createCustomReport: builder.mutation({
       query: (formData: ICreateReport) => ({
         url: `/upsert.json`,
         method: "POST",
@@ -40,20 +41,27 @@ export const reportSettingsApi = createApi({
         body: formData,
       }),
     }),
-    updateReportSettings: builder.mutation({
+    updateCustomReport: builder.mutation({
       query: (formData) => ({
-        url: `/update.json`,
+        url: `/upsert.json`,
         method: "POST",
         headers,
         body: formData,
       }),
     }),
-    deleteReportSettings: builder.mutation({
+    deleteCustomReport: builder.mutation({
       query: (reportId: number) => ({
         url: `/delete.json?id=${reportId}`,
         method: "GET",
         headers,
       }),
+    }),
+    getReport: builder.query<ReportData, number>({
+      query: (reportId) => {
+        const urlParams = new URLSearchParams();
+        urlParams.append("filter", `[id]='${reportId}'`);
+        return `List%20All/select.json?${urlParams.toString()}`;
+      },
     }),
   }),
 });
@@ -62,7 +70,8 @@ export const reportSettingsApi = createApi({
 // auto-generated based on the defined endpoints
 export const {
   useGetGeneralReportsQuery,
-  useCreateReportSettingsMutation,
-  useUpdateReportSettingsMutation,
-  useDeleteReportSettingsMutation,
-} = reportSettingsApi;
+  useCreateCustomReportMutation,
+  useUpdateCustomReportMutation,
+  useDeleteCustomReportMutation,
+  useGetReportQuery
+} = customReportApi;

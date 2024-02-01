@@ -18,8 +18,12 @@
     }
     .app-header-content-wrapper-button {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       width: 340px;
+
+      .export-pdf-wrapper {
+        padding-right: 16px;
+      }
     }
   }
 }

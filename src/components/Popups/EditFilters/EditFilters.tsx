@@ -32,7 +32,6 @@ export const EditFilters: FC = () => {
   const [saveFilteredList, setSaveFilteredList] = useState<IIFilters[]>(
     reportFilters || []
   );
-
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
   const maxHeight: string = useElementHeight(filtersWrapperRef);
   const dispatch = useAppDispatch();
@@ -50,7 +49,6 @@ export const EditFilters: FC = () => {
     async (data: DynamicFormData): Promise<void> => {
       dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
       dispatch(setIsSaveFiltersChangesOpen(true));
-      // reset();
     },
     [dispatch]
   );
@@ -105,6 +103,7 @@ export const EditFilters: FC = () => {
               searchValue={searchValue}
               saveFilteredList={saveFilteredList}
               setSaveFilteredList={setSaveFilteredList}
+              isEdit={true}
             />
           </SimpleBar>
         </div>

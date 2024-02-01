@@ -1,38 +1,50 @@
-import { CSSProperties, FC } from "react";
+import { CSSProperties, FC, useEffect } from "react";
 import classNames from "classnames/bind";
 import styles from "./MUSelect.module.scss";
-import BasicCheckbox from "src/components/BasicCheckbox/BasicCheckbox";
-
+import { ReactComponent as SearchIcon } from "src/assets/icons/search-icon.svg";
+import * as _ from "lodash";
+import { CheckboxWithTooltip } from "./CheckboxWithTooltip";
+import BasicCheckbox from "../BasicCheckbox/BasicCheckbox";
 const cx = classNames.bind(styles);
+
 interface IProps {
   position: { top: number; left: number };
   toggleCheckbox: any;
   handleSearchChange: any;
-  logSelectedCheckboxes: any;
+  handleShowOnlySelected: () => void;
   searchValue: string;
-  checkboxState: any;
   isVisible: boolean;
   top?: number;
   right?: number;
   width?: string;
   name?: string;
   id?: any;
+  checkboxState: any;
+  extractData: any;
+  setFilteredState: any;
+  isShowAll: boolean;
+  isAllCheckbox: boolean;
+  toggleAllCheckbox: () => void;
 }
 export const MUOption: FC<IProps> = ({
   position,
   toggleCheckbox,
   handleSearchChange,
-  logSelectedCheckboxes,
+  handleShowOnlySelected,
   searchValue,
-  checkboxState,
   isVisible,
   top = 44,
   right,
   width,
   name,
   id,
+  checkboxState,
+  extractData,
+  setFilteredState,
+  isShowAll,
+  isAllCheckbox,
+  toggleAllCheckbox,
 }) => {
-
   const style: CSSProperties = {
     top: position.top + top,
     ...(right !== undefined ? { right } : { left: position.left - 180 }),
@@ -41,59 +53,71 @@ export const MUOption: FC<IProps> = ({
     width,
   };
 
+  useEffect(() => {
+    if (_.isEmpty(checkboxState)) {
+      setFilteredState(extractData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleClick = () => {
+    handleShowOnlySelected();
+  };
+
+  const handleToggleAll = () => {
+    toggleAllCheckbox();
+  };
+
   return (
     <div
       className={cx("custom-menu-list", isVisible && "active")}
       style={style}
     >
       <div className={cx("wrapper")}>
+        {searchValue.length === 0 && (
+          <div className={cx("search-icon")}>
+            <SearchIcon />
+          </div>
+        )}
         <input
           id={String(id)}
           name={name}
           type={"text"}
-          placeholder={name}
+          placeholder={"Search"}
           value={searchValue}
           onChange={handleSearchChange}
         />
       </div>
 
       <div className={cx("clear-all-button-wrapper")}>
-        <button
-          className={cx("clear-all-button")}
-          onClick={logSelectedCheckboxes}
-        >
-          Clear all
+        <button className={cx("clear-all-button")} onClick={handleClick}>
+          {isShowAll ? "Show all" : "Show only selected"}
         </button>
       </div>
-      {Object.entries(checkboxState).map(([key, value]: any) => (
-        <div
-          key={key}
-          className={cx("checkbox-wrapper")}
-          style={{
-            paddingLeft: "10px",
-            display: "flex",
-            alignItems: "center",
-            height: "44px",
-          }}
-        >
-          <BasicCheckbox
-            className={cx("checkbox", { "half-selected": !value })}
-            checked={value}
-            onChange={() => toggleCheckbox(key)}
-            renderLabel={() => (
-              <span
-                style={{
-                  fontSize: "14px",
-                  lineHeight: "20px",
-                  color: "#454A54",
-                }}
-              >
-                {key}
-              </span>
-            )}
+      <div className={cx("checkbox-wrapper")}>
+        <BasicCheckbox
+          key={name}
+          className={cx("checkbox", { "half-selected": !name })}
+          checked={isAllCheckbox}
+          onChange={handleToggleAll}
+          isAllCheckbox={true}
+          renderLabel={() => (
+            <span className={cx("checkbox-label", { isApplied: !width })}>
+              All
+            </span>
+          )}
+        />
+      </div>
+      {checkboxState &&
+        Object.entries(checkboxState).map(([key, value]: any) => (
+          <CheckboxWithTooltip
+            key={key}
+            label={key}
+            value={value}
+            toggleCheckbox={toggleCheckbox}
+            width={width}
           />
-        </div>
-      ))}
+        ))}
     </div>
   );
 };

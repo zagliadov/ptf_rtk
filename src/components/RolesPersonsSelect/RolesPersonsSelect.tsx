@@ -1,15 +1,15 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import Select from "../BasicSelect/Select";
 import { ChangeAction, Group, Option } from "../BasicSelect/Select";
 import { Person } from "../Person/Person";
 import * as _ from "lodash";
+import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
+import { fetchAllUserResources } from "src/store/authSlice";
 
 export type Resource = {
   id: number;
   role: string;
   fullName: string;
-  email: string;
-  teamLeadId: number | null;
   province: string;
   logo: string;
 };
@@ -44,20 +44,29 @@ type OptionProps = {
   groupKey?: string;
 };
 interface IProps {
-  resources: Resource[];
   selectedResources: Resource[];
   onChange: (newResources: Resource[]) => void;
+  extractData: Resource[];
 }
 
 export const RolesPersonsSelect: FC<IProps> = ({
-  resources,
   selectedResources,
   onChange,
+  extractData,
 }) => {
+  const dispatch = useAppDispatch();
+  const { userResources: data } = useAppSelector(
+    (state: RootState) => state.auth
+  );
+
+  useEffect(() => {
+    dispatch(fetchAllUserResources());
+  }, [dispatch]);
+
   // An array of unique role strings.
   const roles: string[] = useMemo(
-    () => _.uniq(_.map(resources, (item: Resource) => item.role)),
-    [resources]
+    () => _.uniq(_.map(data, (item: Resource) => item.role)),
+    [data]
   );
 
   // Computes a mapping of resources by their roles.
@@ -66,12 +75,12 @@ export const RolesPersonsSelect: FC<IProps> = ({
     return _.reduce(
       roles,
       (acc: Record<string, Resource[]>, role: string) => {
-        acc[role] = _.filter(resources, { role: role });
+        acc[role] = _.filter(data, { role: role });
         return acc;
       },
       {}
     );
-  }, [roles, resources]);
+  }, [roles, data]);
 
   // An array of objects where each object represents a role option with `value` and `label` properties.
   const roleOptions: IRoleOptions[] = useMemo(
@@ -82,13 +91,13 @@ export const RolesPersonsSelect: FC<IProps> = ({
   // Creates an array of resource options for use in a select component.
   const resourcesOptions: IResourcesOptions[] = useMemo(
     () =>
-      _.map(resources, (resource: Resource) => ({
+      _.map(data, (resource: Resource) => ({
         label: resource.fullName,
         value: resource.id.toString(),
         logoSrc: resource.logo,
         role: resource.role,
       })),
-    [resources]
+    [data]
   );
 
   const rolesResourcesOptions: Group<Option>[] = useMemo(() => {
@@ -150,8 +159,9 @@ export const RolesPersonsSelect: FC<IProps> = ({
       { action, option }: ChangeAction<PersonOption>
     ) => {
       if (option?.value === "all") {
-        if (selectedResources.length === resources.length) return onChange([]);
-        return onChange(resources);
+        if (selectedResources.length === extractData.length)
+          return onChange([]);
+        return onChange(extractData);
       }
       const changedRole = _.find(roleOptions, { value: option?.value });
 
@@ -173,7 +183,7 @@ export const RolesPersonsSelect: FC<IProps> = ({
       }
 
       return onChange(
-        _.filter(resources, (item: Resource) =>
+        _.filter(extractData, (item: Resource) =>
           _.some(
             value as PersonOption[],
             (selectedOption: PersonOption) =>
@@ -182,12 +192,15 @@ export const RolesPersonsSelect: FC<IProps> = ({
         )
       );
     },
-    [onChange, resources, resourcesByRole, roleOptions, selectedResources]
+    [onChange, extractData, resourcesByRole, roleOptions, selectedResources]
   );
 
   const getLabel = (): string => {
     let label = `${selectedResources.length} Persons`;
-    const fullSelectedRoles = _.filter(selectedRolesOptions, (item: Option) => !item.halfSelected);
+    const fullSelectedRoles = _.filter(
+      selectedRolesOptions,
+      (item: Option) => !item.halfSelected
+    );
 
     if (fullSelectedRoles.length) {
       label += `, ${fullSelectedRoles.length} Roles`;
@@ -213,12 +226,30 @@ const CustomOption = ({ value: optionValue, groupKey }: OptionProps) => {
   if (optionValue.value === "all") return <span>{optionValue.label}</span>;
 
   return groupKey === "persons" ? (
-    <Person
-      name={optionValue.label}
-      logo={optionValue.logoSrc || ""}
-      role={optionValue.role || ""}
-    />
+    <div
+      style={{
+        width: "160px",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <Person
+        name={optionValue.label}
+        logo={optionValue.logoSrc || ""}
+        role={optionValue.role || ""}
+      />
+    </div>
   ) : (
-    <div>{optionValue.label}</div>
+    <div
+      style={{
+        width: "160px",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {optionValue.label}
+    </div>
   );
 };

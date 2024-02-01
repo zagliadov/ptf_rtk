@@ -5,15 +5,18 @@
   z-index: 1000;
   background-color: color($var-color-app-dark-blue-2);
   width: 194px;
-  height: 152px;
+  // height: 152px;
   border-top-right-radius: 8px;
   border-top-left-radius: 8px;
   border-bottom-right-radius: 8px;
   padding-top: 12px;
-  padding-left: 16px;
+  padding-left: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 
   .tooltip-header {
+    padding-bottom: 8px;
     span {
       font-weight: 400;
       font-size: 12px;
@@ -22,23 +25,26 @@
     }
   }
 
-  ul {
-    padding-top: 8px;
-    padding-left: 16px;
-    margin: 0;
-  }
+  .tooltip-body {
+    display: flex;
+    flex-direction: column;
+    height: 100px;
 
-  .tooltip-line {
-    font-weight: 400;
-    font-size: 12px;
-    color: color($var-color-app-grey-2);
-    height: 20px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    .tooltip-line {
+      font-weight: 400;
+      font-size: 12px;
+      color: color($var-color-app-grey-2);
+      height: 20px;
+      width: 165px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
 
-    &:last-child {
-      margin-bottom: 0;
+      .dot-line {
+        font-size: 12px;
+        padding-left: 7px;
+        padding-right: 2px;
+      }
     }
   }
 }

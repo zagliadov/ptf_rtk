@@ -2,6 +2,7 @@ import { useState, MouseEvent } from "react";
 
 interface UseHoverPositionVisibilityProps<IDetail> {
   setDetail?: (detail: IDetail | null) => void;
+  setName?: (name: string | null) => void
 }
 
 /**
@@ -10,6 +11,7 @@ interface UseHoverPositionVisibilityProps<IDetail> {
  *
  * @template IDetail The type of detail object to be set on mouse enter.
  * @param setDetail - Optional function to set the detail object when mouse enters.
+ * @param setName - Set current report name.
  * @returns An object containing the following:
  *  - isVisible: A boolean indicating if the hover element is visible.
  *  - position: An object containing the top and left coordinates for the hover element.
@@ -21,6 +23,7 @@ interface UseHoverPositionVisibilityProps<IDetail> {
 
 export const useHoverPositionVisibility = <IDetail extends unknown>({
   setDetail,
+  setName,
 }: UseHoverPositionVisibilityProps<IDetail>) => {
   // State management for visibility and position of the hover element
   const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -32,7 +35,8 @@ export const useHoverPositionVisibility = <IDetail extends unknown>({
   // Handle mouse entering the element
   const handleMouseEnter = (
     event: MouseEvent<HTMLElement>,
-    detail?: IDetail
+    detail?: IDetail,
+    name?: string,
   ) => {
     // Set the position of the hover element based on the event target
     const rect = event.currentTarget.getBoundingClientRect();
@@ -45,6 +49,9 @@ export const useHoverPositionVisibility = <IDetail extends unknown>({
     if (setDetail && detail) {
       setDetail(detail);
     }
+    if (setName && name) {
+      setName(name);
+    }
     setIsVisible(true);
   };
 
@@ -54,6 +61,9 @@ export const useHoverPositionVisibility = <IDetail extends unknown>({
     // Optionally reset the detail data
     if (setDetail) {
       setDetail(null);
+    }
+    if (setName) {
+      setName(null);
     }
   };
 

@@ -53,17 +53,21 @@ interface IProps {
 export interface IDetails {
   reportName: string;
   dateCreated: string;
-  dateModified: string | null;
-  createdBy: string;
+  department: string;
+  dateUpdated: string | null;
+  creator: string;
+  purpose: string | null;
 }
 export const SideMenu: FC<IProps> = ({ reportsArray }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const dispatch = useAppDispatch();
   const [resourceFilter, setResourceFilter] = useState<string[]>([]);
   const [currentDetail, setCurrentDetail] = useState<any | null>(null);
+  const [currentName, setCurrentName] = useState<string | null>(null);
   const { isVisible, position, handleMouseEnter, handleMouseLeave } =
     useHoverPositionVisibility<IDetails>({
       setDetail: setCurrentDetail,
+      setName: setCurrentName,
     });
   const [activeReport, setActiveReport] = useState<string | null>(null);
   const { filteredList } = useReportSearch(
@@ -88,11 +92,12 @@ export const SideMenu: FC<IProps> = ({ reportsArray }) => {
   }, [reportSourceId, reportId]);
 
   const handleReportsOpen = (sourceId: string): void => {
-    console.log(sourceId, activeReport, "sourceId")
     if (activeReport) {
       setActiveReport(
-        sourceId === decodeURIComponent(activeReport) ? null : sourceId
+        sourceId === decodeURIComponent(activeReport) ? sourceId : sourceId
       );
+    } else {
+      setActiveReport(sourceId);
     }
   };
 
@@ -198,20 +203,20 @@ export const SideMenu: FC<IProps> = ({ reportsArray }) => {
                                         "detail-item",
                                         rowId === reportId && "active"
                                       )}
-                                      onClick={() =>
+                                      onClick={() => {
                                         handleGetReport(
                                           rowId,
                                           name,
                                           sourceId,
                                           type
                                         )
-                                      }
+                                      }}
                                     >
                                       <span>{name}</span>
                                       <div
                                         className={cx("info-icon-container")}
                                         onMouseEnter={(e) =>
-                                          handleMouseEnter(e, details[0])
+                                          handleMouseEnter(e, details[0], name)
                                         }
                                         onMouseLeave={handleMouseLeave}
                                       >
@@ -238,13 +243,14 @@ export const SideMenu: FC<IProps> = ({ reportsArray }) => {
         currentDetail &&
         ReactDOM.createPortal(
           <Tooltip
+            currentName={currentName}
             position={position}
             content={[
-              `Created By: ${currentDetail.createdBy}`,
-              // `Department: ${currentDetail.department}`,
+              `Creator: ${currentDetail.creator}`,
+              `Department: ${currentDetail.department}`,
               `Date Created: ${currentDetail.dateCreated}`,
-              `Date Modified: ${currentDetail.dateModified}`,
-              // `Purpose: ${currentDetail.purpose}`,
+              `Date Updated: ${currentDetail.dateUpdated}`,
+              `Purpose: ${currentDetail.purpose ? currentDetail.purpose : ""}`,
             ]}
           />,
           document.body

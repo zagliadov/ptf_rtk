@@ -51,7 +51,7 @@ export const CreateNewReport: FC<IProps> = ({
 
   const updateLoadingText = useCallback(() => {
     setLoadingText(prev => {
-      const dots = prev.replace("Loading", "");
+      const dots = prev?.replace("Loading", "");
       return dots.length < 3 ? prev + "." : "Loading";
     });
   }, []);

@@ -7,9 +7,14 @@ import useReportData from "src/hook/useReportData";
 import DataTable from "../DataTable";
 import { TableRef } from "../DataTable/DataTable";
 import { parse } from "date-fns";
-import { RootState, useAppSelector } from "src/store/store";
+import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import { SourceReports } from "src/hook/useSideMenuReports";
 import { IIFilters } from "src/types";
+import { DotSpinner } from "../DotSpinner/DotSpinner";
+import { motion } from "framer-motion";
+import * as _ from "lodash";
+import { selectUserDataByEmail } from "src/store/authSlice";
+import { getReportColumn } from "src/store/columnSlice";
 
 const cx: CX = classnames.bind(styles);
 
@@ -25,8 +30,40 @@ interface Filter {
 export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const { finalFilterArray, rows, columns } = useReportData();
+  const dispatch = useAppDispatch();
   const [filters, setFilters] = useState<Filter>({});
-  const { reportName } = useAppSelector((state: RootState) => state.report);
+  const { fullName } = useAppSelector(selectUserDataByEmail);
+  const { columns: columnArray } = useAppSelector((state: RootState) => state.column);
+  const { reportName, reportSourceId, isColumnCreated, reportId } = useAppSelector(
+    (state: RootState) => state.report
+  );
+  const variants = {
+    hidden: { opacity: 0, y: 1000 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  const mapColumnNamesToRowValues = (columns: any, rows: any) => {
+    const result = _.reduce(
+      columns,
+      (acc, column) => {
+        acc[column.name] = [];
+        return acc;
+      },
+      {}
+    );
+
+    _.forEach(rows, (row) => {
+      _.forEach(row, (value, key) => {
+        if (_.has(result, key) && !_.isNull(value)) {
+          result[key].push(value);
+        }
+      });
+    });
+
+    return result;
+  };
+
+  const filtersValue = mapColumnNamesToRowValues(columns, rows);
 
   useEffect(() => {
     setFilters({});
@@ -71,7 +108,7 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
   const processFilters = (filterArray: IIFilters[]) => {
     const newFilters = {};
     filterArray.forEach((filter) => {
-      if (filter.pinToMainView) {
+      if (filter) {
         // Checking if there is already a value for this filter in the current filters
         if (filters.hasOwnProperty(filter.name)) {
           newFilters[filter.name] = filters[filter.name];
@@ -88,42 +125,80 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
   const processedFilters: Filter = processFilters(finalFilterArray);
 
   const filteredRows = useMemo(() => {
-    return rows.filter((row: Record<string, any>) => {
-      const matchesFilters = Object.entries(processedFilters).every(
-        ([columnName, filterValue]: any) => {
-          if (isNumericRange(filterValue)) {
-            const [minStr, maxStr] = filterValue;
-            const rowValue = Number(row[columnName]);
-            const min = minStr === "" ? -Infinity : Number(minStr);
-            const max = maxStr === "" ? Infinity : Number(maxStr);
-            return rowValue >= min && rowValue <= max;
-          } else if (isDateArray(filterValue)) {
-            const startDateTimestamp = Date.parse(filterValue[0]);
-            const endDateTimestamp = Date.parse(filterValue[1]);
-            const rowDate = row[columnName];
-            if (!rowDate) {
+    return (
+      rows &&
+      rows.filter((row: Record<string, any>) => {
+        const matchesFilters = Object.entries(processedFilters).every(
+          ([columnName, filterValue]: any) => {
+            if (isNumericRange(filterValue)) {
+              const [minStr, maxStr] = filterValue;
+              const rowValue = Number(row[columnName]);
+              const min = minStr === "" ? -Infinity : Number(minStr);
+              const max = maxStr === "" ? Infinity : Number(maxStr);
+              return rowValue >= min && rowValue <= max;
+            } else if (isDateArray(filterValue)) {
+              const startDateTimestamp = Date.parse(filterValue[0]);
+              const endDateTimestamp = Date.parse(filterValue[1]);
+              const rowDate = row[columnName];
+              if (!rowDate) {
+                return false;
+              }
+              const rowDateTimestamp = Date.parse(rowDate);
+              return (
+                rowDateTimestamp >= startDateTimestamp &&
+                rowDateTimestamp <= endDateTimestamp
+              );
+            } else if (isStringArray(filterValue)) {
+              // Assume that row[columnName] can contain a string in the format "Name <Email>"
+              const rowValue = row[columnName];
+              if (typeof rowValue === "string") {
+                // Extract the name from the string if it contains the format "Name <Email>"
+                // const namePart = rowValue.split('<')[0].trim();
+
+                // Check if the filterValue array contains the name extracted from the string
+                return filterValue.some((filterVal: any) =>
+                  rowValue.toLowerCase().includes(filterVal.toLowerCase())
+                );
+              }
               return false;
             }
-            const rowDateTimestamp = Date.parse(rowDate);
-
-            return (
-              rowDateTimestamp >= startDateTimestamp &&
-              rowDateTimestamp <= endDateTimestamp
-            );
-          } else if (isStringArray(filterValue)) {
-            return filterValue.includes(row[columnName]);
+            if (!filterValue) {
+              return row;
+            }
+            return row[columnName]?.toString().includes(filterValue);
           }
-          return row[columnName]?.toString().includes(filterValue);
-        }
-      );
-      const matchesSearch = Object.values(row).some(
-        (value: any) =>
-          value?.toString().toLowerCase().includes(searchValue.toLowerCase())
-      );
+        );
+        const matchesSearch = Object.values(row).some(
+          (value: any) =>
+            value?.toString().toLowerCase().includes(searchValue.toLowerCase())
+        );
 
-      return matchesFilters && matchesSearch;
-    });
+        return matchesFilters && matchesSearch;
+      })
+    );
   }, [rows, processedFilters, searchValue]);
+
+  const filteredAndTransformedData = _.reduce(
+    finalFilterArray,
+    (acc, item) => {
+      if (item.choice && item.choice !== "[]") {
+        try {
+          const parsedChoice = JSON.parse(item.choice);
+          if (!_.isEmpty(parsedChoice)) {
+            acc[item.name] = parsedChoice;
+          }
+        } catch (e) {
+          console.error(item.name, ":", e);
+        }
+      }
+      return acc;
+    },
+    {}
+  );
+
+    useEffect(() => {
+      dispatch(getReportColumn(Number(reportId)));
+    }, []);
 
   return (
     <main className={cx("main")}>
@@ -131,23 +206,53 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
         <SideMenu reportsArray={reportsArray} />
       </div>
       <div className={cx("test")}>
-        <AppliedFiltersOverview
-          filterArray={finalFilterArray}
-          onFilterChange={handleFilterChange}
-          setSearchValue={setSearchValue}
-          searchValue={searchValue}
-        />
-        {!!(rows.length && columns.length) && (
-          <div className={cx("data-table-wrapper")}>
-            <DataTable
-              rows={filteredRows}
-              columnDefs={columns}
-              onRowClick={() => {}}
-              onRecordsNumberChanged={() => {}}
-              excelName="Report"
-              pdfName="Report"
-              ref={dataTableRef as any}
-            />
+        {!isColumnCreated && rows.length ? (
+          <AppliedFiltersOverview
+            filterArray={finalFilterArray}
+            onFilterChange={handleFilterChange}
+            setSearchValue={setSearchValue}
+            searchValue={searchValue}
+            filtersValue={filtersValue}
+          />
+        ) : (
+          <div className={cx("overview-skeleton")}></div>
+        )}
+        {!isColumnCreated ? (
+          !!(rows.length && columns.length) ? (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              transition={{ duration: 1 }}
+              variants={variants}
+            >
+              <div className={cx("data-table-wrapper")}>
+                <DataTable
+                  rows={filteredRows}
+                  columnDefs={columns as any}
+                  onRowClick={() => {}}
+                  onRecordsNumberChanged={() => {}}
+                  excelName="Report"
+                  pdfName="Report"
+                  ref={dataTableRef as any}
+                  reportName={reportName}
+                  filters={filteredAndTransformedData}
+                  fullName={fullName}
+                  columnArray={columnArray}
+                />
+              </div>
+            </motion.div>
+          ) : !reportName || !reportSourceId ? (
+            <div className={cx("data-table-is-loading")}>
+              <span>Please select a report</span>
+            </div>
+          ) : (
+            <div className={cx("data-table-is-loading")}>
+              <DotSpinner />
+            </div>
+          )
+        ) : (
+          <div className={cx("data-table-is-loading")}>
+            <DotSpinner />
           </div>
         )}
       </div>

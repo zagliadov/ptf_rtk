@@ -1,7 +1,11 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { DynamicFormData, EDataKeys, IIFilters } from "src/types";
-import { ICreateReport, reportSettingsApi } from "./services/reportSettingsApi";
+import { ICreateReport, customReportApi } from "./services/customReportApi";
 import { reportColumnApi } from "./services/reportColumnApi";
+import { isNameExcluded } from "src/utils/helpers";
+import { RootState } from "./store";
+import { Endpoints } from "src/constants/endpoint";
+import axios from "axios";
 
 interface IReportData {
   reportSourceId: EDataKeys.DATA_SOURCE;
@@ -22,6 +26,7 @@ interface IReportState {
   deleteReportLoading: boolean;
   isReportCreated: boolean;
   isReportDelete: boolean;
+  isColumnCreated: boolean;
 }
 
 const initialState: IReportState = {
@@ -36,6 +41,7 @@ const initialState: IReportState = {
   deleteReportLoading: false,
   isReportCreated: false,
   isReportDelete: false,
+  isColumnCreated: false,
 };
 
 interface IBasicReportData {
@@ -47,50 +53,115 @@ interface IBasicReportData {
 
 export const createReport = createAsyncThunk(
   "report/createReport",
-  async (data: DynamicFormData, { dispatch, rejectWithValue }) => {
+  async (
+    { data, update = false }: { data: DynamicFormData; update?: boolean },
+    { dispatch, getState, rejectWithValue }
+  ): Promise<any> => {
     try {
-      const reportData: ICreateReport = {
-        sourceId: data[EDataKeys.DATA_SOURCE],
-        name: data[EDataKeys.REPORT_TITLE],
-        type: data[EDataKeys.REPORT_TYPE],
-      };
-      const reportResult = await dispatch(
-        reportSettingsApi.endpoints.createReportSettings.initiate(reportData)
-      ).unwrap();
-
-      const columnPromises = data[EDataKeys.COLUMN_IDS].map(
-        async (columnId: number) => {
-          const filterIndex = data[EDataKeys.FILTERED_LIST].findIndex(
-            (filter: IIFilters) => String(filter.id) === String(columnId)
-          );
-          if (filterIndex !== -1) {
-            const filterData = data[EDataKeys.FILTERED_LIST][filterIndex];
-            const columnData = {
-              "Report Setting": reportResult[0].id,
-              id: columnId,
-              selectedTableCell: filterData[EDataKeys.SELECTED_TABLE_CELL],
-              selectedTableFilter: filterData[EDataKeys.SELECTED_TABLE_FILTER],
-              disabled: filterData[EDataKeys.DISABLED],
-              pinToMainView: filterData[EDataKeys.PIN_TO_MAIN_VIEW],
-              name: filterData[EDataKeys.NAME],
-              choice: filterData[EDataKeys.CHOICE],
-              alias: filterData[EDataKeys.ALIAS],
-              description: filterData[EDataKeys.DESCRIPTION],
-              type: filterData[EDataKeys.TYPE],
-              position: filterData?.position ? filterData?.position : filterIndex,
-            };
-            return dispatch(
-              reportColumnApi.endpoints.createReportColumn.initiate(columnData)
-            ).unwrap();
+      const state = getState() as RootState;
+      const userEmail = state.auth.userEmail;
+      const reportId = state.report.reportId;
+      if (!userEmail) return false;
+      dispatch(setIsColumnCreated(true));
+      if (update && reportId) {
+        const columnPromises = data[EDataKeys.COLUMN_IDS].map(
+          async (columnId: number) => {
+            const filterIndex = data[EDataKeys.FILTERED_LIST].findIndex(
+              (filter: IIFilters) => String(filter.id) === String(columnId)
+            );
+            if (filterIndex !== -1) {
+              const filterData = data[EDataKeys.FILTERED_LIST][filterIndex];
+              if (isNameExcluded(filterData.name, data[EDataKeys.DATA_SOURCE]))
+                return;
+              const columnData = {
+                "Report Setting": reportId,
+                id: columnId,
+                selectedTableCell: filterData[EDataKeys.SELECTED_TABLE_CELL],
+                selectedTableFilter:
+                  filterData[EDataKeys.SELECTED_TABLE_FILTER],
+                disabled: filterData[EDataKeys.DISABLED],
+                pinToMainView: filterData[EDataKeys.PIN_TO_MAIN_VIEW],
+                name: filterData[EDataKeys.NAME],
+                choice: filterData[EDataKeys.CHOICE],
+                alias: filterData[EDataKeys.ALIAS],
+                description: filterData[EDataKeys.DESCRIPTION],
+                type: filterData[EDataKeys.TYPE],
+                position: filterData?.position
+                  ? filterData?.position
+                  : filterIndex,
+              };
+              return await dispatch(
+                reportColumnApi.endpoints.createReportColumn.initiate(
+                  columnData
+                )
+              ).unwrap();
+            }
+            return null;
           }
-          return null;
-        }
-      );
+        );
+        const findUrl = `${Endpoints.API_CUSTOM_REPORT}List%20All/select.json`;
+        const columnResults = await Promise.all(columnPromises.filter(Boolean));
+        console.log("All Columns Created Successfully:", columnResults);
+        const urlParams = new URLSearchParams();
+        urlParams.append("filter", `[id]='${reportId}'`);
 
-      const columnResults = await Promise.all(columnPromises.filter(Boolean));
-      console.log("All Columns Created Successfully:", columnResults);
+        const findResponse = await axios.get(
+          `${findUrl}?${urlParams.toString()}`
+        );
+        const item = findResponse.data;
+        return { item, update };
+      } else {
+        const reportData: ICreateReport = {
+          sourceId: data[EDataKeys.DATA_SOURCE],
+          name: data[EDataKeys.REPORT_TITLE],
+          type: data[EDataKeys.REPORT_TYPE],
+          "Report Creator Email": userEmail,
+        };
+        const reportResult = await dispatch(
+          customReportApi.endpoints.createCustomReport.initiate(reportData)
+        ).unwrap();
 
-      return reportResult;
+        const columnPromises = data[EDataKeys.COLUMN_IDS].map(
+          async (columnId: number) => {
+            const filterIndex = data[EDataKeys.FILTERED_LIST].findIndex(
+              (filter: IIFilters) => String(filter.id) === String(columnId)
+            );
+            if (filterIndex !== -1) {
+              const filterData = data[EDataKeys.FILTERED_LIST][filterIndex];
+              if (isNameExcluded(filterData.name, data[EDataKeys.DATA_SOURCE]))
+                return;
+              const columnData = {
+                "Report Setting": reportResult[0].id,
+                id: columnId,
+                selectedTableCell: filterData[EDataKeys.SELECTED_TABLE_CELL],
+                selectedTableFilter:
+                  filterData[EDataKeys.SELECTED_TABLE_FILTER],
+                disabled: filterData[EDataKeys.DISABLED],
+                pinToMainView: filterData[EDataKeys.PIN_TO_MAIN_VIEW],
+                name: filterData[EDataKeys.NAME],
+                choice: filterData[EDataKeys.CHOICE],
+                alias: filterData[EDataKeys.ALIAS],
+                description: filterData[EDataKeys.DESCRIPTION],
+                type: filterData[EDataKeys.TYPE],
+                position: filterData?.position
+                  ? filterData?.position
+                  : filterIndex,
+              };
+              return await dispatch(
+                reportColumnApi.endpoints.createReportColumn.initiate(
+                  columnData
+                )
+              ).unwrap();
+            }
+            return null;
+          }
+        );
+
+        const columnResults = await Promise.all(columnPromises.filter(Boolean));
+        console.log("All Columns Created Successfully:", columnResults);
+
+        return { reportResult, update };
+      }
     } catch (error) {
       console.error("Error in createReport:", error);
       return rejectWithValue(error);
@@ -105,7 +176,15 @@ export const deleteReport = createAsyncThunk(
       reportId,
       columnIds,
       update = false,
-    }: { reportId: number; columnIds: number[]; update?: boolean },
+      newName,
+      newType,
+    }: {
+      reportId: number;
+      columnIds: number[];
+      update?: boolean;
+      newName?: string;
+      newType?: string;
+    },
     { dispatch, rejectWithValue }
   ) => {
     try {
@@ -117,10 +196,21 @@ export const deleteReport = createAsyncThunk(
 
       const deleteColumnResults = await Promise.all(deleteColumnPromises);
       console.log("All columns deleted:", deleteColumnResults);
-      const deleteResult = await dispatch(
-        reportSettingsApi.endpoints.deleteReportSettings.initiate(reportId)
-      ).unwrap();
-      console.log(deleteResult, "delete result");
+      if (update && newName && newType) {
+        const updateData = {
+          "@row.id": reportId,
+          name: newName,
+          type: newType,
+        };
+        await dispatch(
+          customReportApi.endpoints.updateCustomReport.initiate(updateData)
+        ).unwrap();
+      } else {
+        await dispatch(
+          customReportApi.endpoints.deleteCustomReport.initiate(reportId)
+        ).unwrap();
+      }
+
       return update;
     } catch (error) {
       console.error("Error in deleteReport", error);
@@ -175,7 +265,10 @@ const reportSlice = createSlice({
     },
     setIsCreateReportLoading(state, action: PayloadAction<boolean>) {
       state.createReportLoading = action.payload;
-    }
+    },
+    setIsColumnCreated(state, action: PayloadAction<boolean>) {
+      state.isColumnCreated = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -185,11 +278,19 @@ const reportSlice = createSlice({
       })
       .addCase(createReport.fulfilled, (state, action) => {
         state.createReportLoading = false;
-        state.reportId = action?.payload[0].id;
-        state.reportName = action?.meta?.arg[EDataKeys.REPORT_TITLE];
-        state.reportSourceId = action?.meta?.arg[EDataKeys.DATA_SOURCE];
-        state.reportType = action?.meta?.arg[EDataKeys.REPORT_TYPE];
+        if (action.payload.update) {
+          state.reportId = action.payload.item[0]["@row.id"];
+          state.reportName = action.payload.item[0].name;
+          state.reportSourceId = action.payload.item[0].sourceId;
+          state.reportType = action.payload.item[0].type;
+        } else {
+          state.reportId = action?.payload.reportResult[0].id;
+          state.reportName = action?.meta?.arg.data[EDataKeys.REPORT_TITLE];
+          state.reportSourceId = action?.meta?.arg.data[EDataKeys.DATA_SOURCE];
+          state.reportType = action?.meta?.arg.data[EDataKeys.REPORT_TYPE];
+        }
         state.isReportCreated = true;
+        state.isColumnCreated = false;
       })
       .addCase(createReport.rejected, (state, action) => {
         state.createReportLoading = false;
@@ -226,6 +327,7 @@ export const {
   setReportSourceId,
   setReportType,
   setIsCreateReportLoading,
+  setIsColumnCreated,
 } = reportSlice.actions;
 
 export default reportSlice.reducer;

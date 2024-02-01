@@ -11,6 +11,7 @@ import {
   setEditColumnSelectorOpen,
   setReportEditOpen,
   setIsEditFiltersOpen,
+  setCreateCopyReportOpen,
 } from "src/store/managerSlice";
 import { useAppDispatch } from "src/store/store";
 import { DeleteEntry } from "../DeleteEntry/DeleteEntry";
@@ -24,10 +25,13 @@ import { EditFilters } from "../EditFilters/EditFilters";
 import { SaveFiltersChanges } from "../SaveFiltersChanges/SaveFiltersChanges";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 import { ShowAllFilters } from "../ShowAllFilters/ShowAllFilters";
+import { SaveFilterChanges } from "../SaveFilterChanges/SaveFilterChanges";
+import { CreateCopyReport } from "../CreateCopyReport/CreateCopyReport";
+import { NotReportCreatorPopup } from "../NotReportCreatorPopup/NotReportCreatorPopup";
 
 interface IProps {
   refetchReportsArray: any;
-};
+}
 
 export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
   const methods = useForm({
@@ -36,6 +40,7 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
   const dispatch = useAppDispatch();
   const {
     isCreateNewReportOpen,
+    isCreateCopyReportOpen,
     isColumnSelectorOpen,
     isFiltersOpen,
     isDeleteEntryOpen,
@@ -47,8 +52,12 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
     isDeleteReport,
     isCreateReport,
     isShowAllFiltersOpen,
+    isFilterChanges,
+    isNotReportCreator,
   } = useAppSelector((state: RootState) => state.manager);
-  const { createReportLoading } = useAppSelector((state: RootState) => state.report);
+  const { createReportLoading } = useAppSelector(
+    (state: RootState) => state.report
+  );
 
   const openColumnSelector = useCallback((): void => {
     dispatch(setCreateNewReportOpen(false));
@@ -70,12 +79,27 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
     dispatch(setIsEditFiltersOpen(true));
   }, [dispatch]);
 
+  const openCreateCopyReport = useCallback((): void => {
+    dispatch(setCreateCopyReportOpen(false));
+  }, [dispatch]);
+
   return (
     <FormProvider {...methods}>
       <div>
         {isCreateNewReportOpen && (
           <Popup open={isCreateNewReportOpen}>
-            <CreateNewReport onContinue={openColumnSelector} refetchReportsArray={refetchReportsArray} />
+            <CreateNewReport
+              onContinue={openColumnSelector}
+              refetchReportsArray={refetchReportsArray}
+            />
+          </Popup>
+        )}
+        {isCreateCopyReportOpen && (
+          <Popup open={isCreateCopyReportOpen}>
+            <CreateCopyReport
+              onContinue={openCreateCopyReport}
+              refetchReportsArray={refetchReportsArray}
+            />
           </Popup>
         )}
         {isColumnSelectorOpen && (
@@ -84,13 +108,19 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
           </Popup>
         )}
         {isFiltersOpen && (
-          <Popup open={isFiltersOpen} align={isCreateReport ? "center" : "right"}>
-            { isCreateReport ? <DotSpinner /> : <Filters /> }
+          <Popup
+            open={isFiltersOpen}
+            align={isCreateReport ? "center" : "right"}
+          >
+            {isCreateReport ? <DotSpinner /> : <Filters />}
           </Popup>
         )}
         {isEditReportOpen && (
           <Popup open={isEditReportOpen} align={"center"}>
-            <EditReport onContinue={openEditColumnSelector} refetchReportsArray={refetchReportsArray} />
+            <EditReport
+              onContinue={openEditColumnSelector}
+              refetchReportsArray={refetchReportsArray}
+            />
           </Popup>
         )}
         {isEditColumnSelectorOpen && (
@@ -105,7 +135,7 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
         )}
         {isDeleteEntryOpen && (
           <Popup open={isDeleteEntryOpen} align={"center"}>
-            { isDeleteReport ? <DotSpinner /> : <DeleteEntry /> }
+            {isDeleteReport ? <DotSpinner /> : <DeleteEntry />}
           </Popup>
         )}
         {isUnsavedChanges && (
@@ -120,7 +150,17 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
         )}
         {isSaveFiltersChangesOpen && (
           <Popup open={isSaveFiltersChangesOpen} align={"center"}>
-            {createReportLoading ? <DotSpinner /> : <SaveFiltersChanges /> }
+            {createReportLoading ? <DotSpinner /> : <SaveFiltersChanges />}
+          </Popup>
+        )}
+        {isFilterChanges && (
+          <Popup open={isFilterChanges} align={"center"}>
+            {<SaveFilterChanges />}
+          </Popup>
+        )}
+        {isNotReportCreator && (
+          <Popup open={isNotReportCreator} align={"center"}>
+            {<NotReportCreatorPopup />}
           </Popup>
         )}
       </div>

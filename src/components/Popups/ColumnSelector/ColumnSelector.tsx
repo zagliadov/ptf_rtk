@@ -14,11 +14,12 @@ import styles from "./ColumnSelector.module.scss";
 import "./simplebar.scss";
 import { ColumnListHeader } from "./ColumnListHeader/ColumnListHeader";
 import { useFormContext } from "react-hook-form";
-import { EDataKeys, RData } from "src/types";
+import { EDataKeys, IIFilters, RData } from "src/types";
 import { DotSpinner } from "src/components/DotSpinner/DotSpinner";
 import useFilterInitialization from "src/hook/useFilterInitialization";
 import { useHandleCheckboxAll } from "src/hook/useHandleCheckboxAll";
 import { ColumnSearchHeader } from "./ColumnListHeader/ColumnSearchHeader/ColumnSearchHeader";
+import _ from "lodash";
 const ColumnList = lazy(() => import("./ColumnList/ColumnList"));
 
 const cx: CX = classnames.bind(styles);
@@ -28,27 +29,20 @@ interface IProps {
 }
 
 export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
-  const { register, handleSubmit } = useFormContext<RData>();
+  const { register, handleSubmit, watch } = useFormContext<RData>();
   const [searchValue, setSearchValue] = useState<string>("");
-  // const [ , setInitialValues] = useState<any>({});
   const { filters, setFilters, isLoading } = useFilterInitialization();
+  const [isColumnNotFound, setIsColumnNotFound] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   const { isChecked, handleCheckedAll, handleResetAll } = useHandleCheckboxAll(
     filters,
     setFilters
   );
 
-  // useEffect(() => {
-  //   setInitialValues({
-  //     filters: watch(EDataKeys.FILTERS),
-  //   });
-  // }, [watch]);
-
   const handleCloseColumnSelector = useCallback(() => {
-      dispatch(setColumnSelectorOpen(false));
-      dispatch(setCreateNewReportOpen(true));
+    dispatch(setColumnSelectorOpen(false));
+    dispatch(setCreateNewReportOpen(true));
   }, [dispatch]);
-
 
   useEffect(() => {
     register(EDataKeys.FILTERS);
@@ -56,10 +50,25 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
 
   const onSubmit = useCallback(
     (data: RData) => {
-      onContinue();
+      const checkList = watch(EDataKeys.FILTERS) as IIFilters[];
+      const check = _.find(checkList, (item) => item.selectedTableCell);
+      setIsColumnNotFound(true);
+      if (!_.isEmpty(check)) {
+        onContinue();
+      }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onContinue]
   );
+
+  useEffect(() => {
+    if (isColumnNotFound) {
+      const timer = setTimeout(() => {
+        setIsColumnNotFound(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isColumnNotFound]);
 
   const handleResetColumns = useCallback(() => {
     handleResetAll();
@@ -78,7 +87,7 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
         />
         <div className={cx("column-wrapper")}>
           <div className={cx("search-wrapper")}>
-          <ColumnSearchHeader
+            <ColumnSearchHeader
               isChecked={isChecked}
               handleCheckedAll={handleCheckedAll}
               isLoading={isLoading}
@@ -88,7 +97,7 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
           </div>
 
           <div className={cx("column-list")}>
-          <ColumnListHeader />
+            <ColumnListHeader />
             <SimpleBar
               style={{ maxHeight: "403px" }}
               className="my-custom-scrollbar-column"
@@ -127,6 +136,11 @@ export const ColumnSelector: FC<IProps> = ({ onContinue }) => {
             onClick={handleResetColumns}
             style={{ width: "128px", marginLeft: "16px" }}
           />
+          {isColumnNotFound && (
+            <div className={cx("is-column-not-found")}>
+              <span>Please select at least one column to proceed.</span>
+            </div>
+          )}
         </ButtonWrapper>
       </div>
     </form>

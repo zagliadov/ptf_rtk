@@ -66,3 +66,11 @@ export const updateChoices = (
     colorization: colorization,
   }));
 };
+
+export const updateChoicesCheckbox = (choices: any): any => {
+  if (!choices) return null;
+  return choices.reduce((acc: any, choice: any) => {
+    acc[choice.value] = false;
+    return acc;
+  }, []);
+};

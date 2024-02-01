@@ -2,7 +2,6 @@ import { FC, RefObject, useCallback } from "react";
 import styles from "./AppHeader.module.scss";
 import classnames from "classnames/bind";
 import { Button } from "../Button/Button";
-import { ReactComponent as LinkIcon } from "src/assets/icons/link-icon.svg";
 import { ReactComponent as GetFilePDFIcon } from "src/assets/icons/get-file-pdf-icon.svg";
 import { ReactComponent as ExcelTableIcon } from "src/assets/icons/excel-table-icon.svg";
 import { TableRef } from "../DataTable/DataTable";
@@ -14,10 +13,6 @@ interface IProps {
 }
 
 export const AppHeader: FC<IProps> = ({ dataTableRef }) => {
-  const handleGetApiUrl = useCallback(async () => {
-    dataTableRef.current?.exportJSON();
-  }, [dataTableRef]);
-
   const handleExportExcel = useCallback(() => {
     dataTableRef.current?.exportExcel();
   }, [dataTableRef]);
@@ -25,7 +20,6 @@ export const AppHeader: FC<IProps> = ({ dataTableRef }) => {
   const handleExportPdf = useCallback(() => {
     dataTableRef.current?.exportPdf();
   }, [dataTableRef]);
-
 
   return (
     <header className={cx("app-header")}>
@@ -35,20 +29,16 @@ export const AppHeader: FC<IProps> = ({ dataTableRef }) => {
         </div>
 
         <div className={cx("app-header-content-wrapper-button")}>
-          <Button
-            primary
-            icon={<LinkIcon />}
-            title="Get API URL"
-            onClick={handleGetApiUrl}
-            style={{ width: "134px" }}
-          />
-          <Button
-            primary
-            icon={<GetFilePDFIcon />}
-            title="PDF"
-            onClick={handleExportPdf}
-            style={{ width: "83px" }}
-          />
+          <div className={cx("export-pdf-wrapper")}>
+            <Button
+              primary
+              icon={<GetFilePDFIcon />}
+              title="PDF"
+              onClick={handleExportPdf}
+              style={{ width: "83px" }}
+            />
+          </div>
+
           <Button
             primary
             icon={<ExcelTableIcon />}

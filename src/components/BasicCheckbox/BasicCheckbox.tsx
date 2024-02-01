@@ -11,6 +11,7 @@ function BasicCheckbox({
   disabled,
   onChange,
   renderLabel,
+  isAllCheckbox,
   ...attributes
 }: Props) {
   const inputId = useId();
@@ -37,14 +38,14 @@ function BasicCheckbox({
           onChange={handleChange}
           {...attributes}
         />
-        <div className={cx("checkbox-wrapper")}>
+        <div className={cx("checkbox-wrapper", {"select-all": isAllCheckbox})}>
           {checked && (
             <CheckIcon
               color={disabled ? COLOR["grey"] : COLOR["white"]}
             />
           )}
         </div>
-        <div className={cx("label-text")}>
+        <div className={cx("label-text")} >
           {renderLabel(checked, disabled || false)}
         </div>
       </label>
@@ -55,6 +56,7 @@ function BasicCheckbox({
 interface Props
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   checked: boolean;
+  isAllCheckbox?: boolean;
   onChange: (
     checked: boolean,
     event: React.ChangeEvent<HTMLInputElement>

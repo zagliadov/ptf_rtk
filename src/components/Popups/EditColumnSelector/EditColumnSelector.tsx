@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, lazy, Suspense } from "react";
+import { FC, useCallback, useState, lazy, Suspense, useEffect } from "react";
 import classnames from "classnames/bind";
 import { ButtonWrapper } from "src/components/ButtonWrapper/ButtonWrapper";
 import { Button } from "src/components/Button/Button";
@@ -9,7 +9,6 @@ import {
   setIsUnsavedChanges,
   setReportEditOpen,
 } from "src/store/managerSlice";
-import Search from "src/components/Search";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import styles from "./EditColumnSelector.module.scss";
@@ -34,6 +33,7 @@ interface IProps {
 
 export const EditColumnSelector: FC<IProps> = ({ onContinue }) => {
   const { reset, handleSubmit, watch } = useFormContext<RData>();
+  const [isColumnNotFound, setIsColumnNotFound] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
   const { reportName, reportType } = useAppSelector(
     (state: RootState) => state.report
@@ -75,10 +75,25 @@ export const EditColumnSelector: FC<IProps> = ({ onContinue }) => {
 
   const onSubmit = useCallback(
     (data: RData) => {
-      onContinue();
+      const checkList = watch(EDataKeys.FILTERS) as IIFilters[];
+      const check = _.find(checkList, (item) => item.selectedTableCell);
+      setIsColumnNotFound(true);
+      if (!_.isEmpty(check)) {
+        onContinue();
+      }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [onContinue]
   );
+
+  useEffect(() => {
+    if (isColumnNotFound) {
+      const timer = setTimeout(() => {
+        setIsColumnNotFound(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isColumnNotFound]);
 
   const handleResetColumns = useCallback(() => {
     handleResetAll();
@@ -156,6 +171,11 @@ export const EditColumnSelector: FC<IProps> = ({ onContinue }) => {
             onClick={handleBack}
             style={{ width: "128px", marginLeft: "16px" }}
           />
+          {isColumnNotFound && (
+            <div className={cx("is-column-not-found")}>
+              <span>Please select at least one column to proceed.</span>
+            </div>
+          )}
         </ButtonWrapper>
       </div>
     </form>

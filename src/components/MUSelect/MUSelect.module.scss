@@ -40,32 +40,80 @@
     }
 
     .search-value-wrapper {
-      max-width: 120px;
+      max-width: 220px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-size: 14px;
+      position: relative;
+
+      .pseudo-placeholder {
+        color: color($var-color-app-grey-2);
+      }
     }
 
     .control-wrapper {
       display: flex;
+
+      span {
+        font-size: 14px;
+        color: color($var-color-app-grey-2);
+      }
     }
   }
 }
 
 .custom-menu-list {
   width: 180px;
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  outline: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 6px;
   border: 1px solid;
   border-color: color($var-color-app-grey-1);
   background-color: white;
   border-radius: 8px;
 
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    width: 100%;
+    padding-left: 10px;
+
+    .isApplied {
+      width: 120px;
+    }
+
+  }
+  
+  .checkbox-label {
+    font-size: 14px;
+    line-height: 20px;
+    color: #454A54;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 290px;
+  }
+
+  .wrapper {
+    .search-icon {
+      position: absolute;
+      top: 18px;
+      left: 17px;
+    }
+  }
+
   &.active {
     border: 1px solid color($var-color-app-grey-2);
   }
 
   input {
-    font-size: 0.875rem;
+    font-size: 14px;
     border-radius: 8px;
     border-width: 1px;
     border-style: solid;
@@ -74,6 +122,7 @@
     font-family: inherit;
     height: 2.5rem;
     padding: 0 1rem;
+    padding-left: 30px;
     border-color: color($var-color-app-grey-1);
     outline: none;
     width: 100%;
@@ -83,6 +132,7 @@
     &:focus {
       border-color: color($var-color-app-grey-2);
       color: color($var-color-app-black);
+      padding-left: 30px;
     }
 
     &::placeholder {

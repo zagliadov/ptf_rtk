@@ -31,4 +31,14 @@
       }
     }
   }
+
+  .is-column-not-found {
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+    span {
+      font-size: 14px;
+      color: color($var-color-app-orange);
+    }
+  }
 }

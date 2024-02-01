@@ -36,6 +36,10 @@
           background-color: color($var-color-app-blue-main);
           border-color: color($var-color-app-blue-main);
           box-shadow: 0 0 6px 0 rgb(78 176 194 / 61%);
+
+          &.select-all {
+            opacity: 0.5;
+          }
         }
       }
 
@@ -53,4 +57,9 @@
       cursor: default;
     }
   }
+}
+
+.checkbox-wrapper.select-all .checkbox:checked {
+  /* Стили для .checkbox, когда он выбран */
+  border: 1px solid red; /* Пример изменения границы */
 }

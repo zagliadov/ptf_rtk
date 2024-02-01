@@ -1,14 +1,13 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useMemo } from "react";
 import styles from "./FiltersItem.module.scss";
 import classnames from "classnames/bind";
 import * as _ from "lodash";
 import { motion } from "framer-motion";
-import { Choice, EDataKeys, UpdatedChoice } from "src/types";
-import { updateChoices } from "src/utils";
+import { EDataKeys } from "src/types";
 import { DateInput } from "src/components/Popups/Filters/FilteredColumns/components/DateInput/DateInput";
 import { DualInput } from "src/components/DualInput/DualInput";
 import { MUSelect } from "../../MUSelect/MUSelect";
-import { MUCSelect } from "src/components/MUCSelect/MUCSelect";
+import { RootState, useAppSelector } from "src/store/store";
 
 const cx: CX = classnames.bind(styles);
 
@@ -16,11 +15,13 @@ interface IProps {
   selectedFilters: any[];
   visibleBlocks: number;
   onFilterChange: any;
+  filtersValue: any;
 }
 export const FiltersItem: FC<IProps> = ({
   selectedFilters,
   visibleBlocks,
   onFilterChange,
+  filtersValue,
 }) => {
   const handleSelectChange = useCallback(
     (value: string | null | any, name?: string) => {
@@ -33,9 +34,35 @@ export const FiltersItem: FC<IProps> = ({
     [onFilterChange]
   );
 
-  const updateFilters = () => {
-    console.log("updateFilters");
-  };
+  const { reportName } = useAppSelector((state: RootState) => state.report);
+
+  const memoizedFiltersData = useMemo(() => {
+    return selectedFilters.reduce((acc, filter) => {
+      const filterValues = _.has(filtersValue, filter.name)
+        ? filtersValue[filter.name]
+        : [];
+
+      const extractData = _.chain(filterValues)
+        .uniq()
+        .map((item) => {
+          const nameOnly = typeof item === 'string' ? item.replace(/<.*?>/, "").trim() : "";
+          return nameOnly;
+        })
+        .reduce((acc, item) => {
+          acc[item] = false;
+          return acc;
+        }, {})
+        .value();
+
+      acc[filter.name] = {
+        filterValues,
+        extractData,
+      };
+      return acc;
+    }, {});
+  }, [selectedFilters, filtersValue]);
+
+  const updateFilters = () => {};
   const sortedFilters = _.orderBy(
     selectedFilters,
     [(filter) => filter.position === undefined, "position"],
@@ -47,29 +74,38 @@ export const FiltersItem: FC<IProps> = ({
     <>
       {!_.isEmpty(sortedFilters) &&
         _.slice(sortedFilters, 0, visibleNum).map((filter, index) => {
-          const updatedChoices: UpdatedChoice[] | null = updateChoices(
-            filter?.choices as Choice[],
-            filter?.colorization
-          );
           const isColorization = filter[EDataKeys.COLORIZATION];
-          const isText = filter[EDataKeys.TYPE] === EDataKeys.TYPE_TEXT;
           const isNumeric = filter[EDataKeys.TYPE] === EDataKeys.TYPE_NUMERIC;
           const isEmail = filter[EDataKeys.TYPE] === EDataKeys.TYPE_EMAIL;
           const isChoices = filter[EDataKeys.CHOICES];
           const isDate = filter[EDataKeys.TYPE] === EDataKeys.TYPE_DATE;
           const isTimestamp =
             filter[EDataKeys.TYPE] === EDataKeys.TYPE_TIMESTAMP;
+          const isText = filter[EDataKeys.TYPE] === EDataKeys.TYPE_TEXT;
           const isURL = filter[EDataKeys.TYPE] === EDataKeys.TYPE_URL;
-          const isPhone = filter[EDataKeys.TYPE_PHONE] === EDataKeys.TYPE_PHONE;
+          const isPhone = filter[EDataKeys.TYPE] === EDataKeys.TYPE_PHONE;
           const selectWithColorization = isChoices && isColorization;
           const selectWithOutColorization = isChoices && !isColorization;
-          const inputText = isText && !isChoices;
           const isUser = filter[EDataKeys.TYPE] === EDataKeys.TYPE_USER;
           const isAutonumber =
             filter[EDataKeys.TYPE] === EDataKeys.TYPE_AUTONUMBER;
           const isCheckbox = filter[EDataKeys.TYPE] === EDataKeys.TYPE_CHECKBOX;
           if (isCheckbox) return false;
           if (!filter.pinToMainView) return false;
+
+          const { extractData } = memoizedFiltersData[filter.name];
+          let extractDataFunction;
+          if (
+            filter[EDataKeys.TYPE] === EDataKeys.TYPE_TEXT ||
+            filter[EDataKeys.TYPE] === EDataKeys.TYPE_EMAIL ||
+            filter[EDataKeys.TYPE] === EDataKeys.TYPE_USER ||
+            filter[EDataKeys.TYPE] === EDataKeys.TYPE_PHONE
+          ) {
+            extractDataFunction = extractData;
+          } else {
+            extractDataFunction = {};
+          }
+
           return (
             <motion.div
               key={`filter-block-${filter.id}`}
@@ -82,49 +118,39 @@ export const FiltersItem: FC<IProps> = ({
             >
               <span className={cx("filter-name")}>{filter.name}</span>
               {selectWithColorization && (
-                <MUCSelect
+                <MUSelect
                   item={filter}
-                  updatedChoices={updatedChoices}
                   handleSelectChange={handleSelectChange}
+                  extractData={extractDataFunction}
+                  isAppliedFiltersOverview={true}
                 />
               )}
               {selectWithOutColorization && (
-                <MUCSelect
+                <MUSelect
                   item={filter}
-                  updatedChoices={updatedChoices}
                   handleSelectChange={handleSelectChange}
+                  extractData={extractDataFunction}
+                  isAppliedFiltersOverview={true}
                 />
               )}
-              {isAutonumber && (
+              {(isAutonumber || isNumeric) && (
                 <DualInput
                   updateFilters={updateFilters}
                   handleSelectChange={handleSelectChange}
                   item={filter}
+                  isAppliedFiltersOverview={true}
                 />
               )}
-              {isUser && (
+              {(isEmail ||
+                isUser ||
+                (isText && !isChoices) ||
+                (isURL && !isChoices) ||
+                (isPhone && !isChoices)) && (
                 <MUSelect
                   item={filter}
                   handleSelectChange={handleSelectChange}
-                />
-              )}
-              {inputText && (
-                <MUSelect
-                  item={filter}
-                  handleSelectChange={handleSelectChange}
-                />
-              )}
-              {isNumeric && (
-                <DualInput
-                  updateFilters={updateFilters}
-                  handleSelectChange={handleSelectChange}
-                  item={filter}
-                />
-              )}
-              {isEmail && (
-                <MUSelect
-                  item={filter}
-                  handleSelectChange={handleSelectChange}
+                  extractData={extractDataFunction}
+                  isAppliedFiltersOverview={true}
                 />
               )}
               {(isDate || isTimestamp) && (
@@ -133,18 +159,6 @@ export const FiltersItem: FC<IProps> = ({
                   handleSelectChange={handleSelectChange}
                   fieldName={filter.name}
                   item={filter}
-                />
-              )}
-              {isPhone && (
-                <MUSelect
-                  item={filter}
-                  handleSelectChange={handleSelectChange}
-                />
-              )}
-              {isURL && (
-                <MUSelect
-                  item={filter}
-                  handleSelectChange={handleSelectChange}
                 />
               )}
             </motion.div>

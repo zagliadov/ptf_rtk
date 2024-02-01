@@ -27,8 +27,9 @@ interface IProps {
   onFilterChange: any;
   setSearchValue: (value: string) => void;
   searchValue: string;
+  filtersValue: any;
 }
-export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange, setSearchValue, searchValue }) => {
+export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange, setSearchValue, searchValue, filtersValue }) => {
   const methods = useForm();
   const dispatch = useAppDispatch();
   const [filtersAreExpanded, setFiltersAreExpanded] = useState<boolean>(false);
@@ -39,6 +40,7 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
   const { isDotThreeMenuOpen } = useAppSelector(
     (state: RootState) => state.manager
   );
+  const { reportName } = useAppSelector((state: RootState) => state.report);
   const {
     isVisible: isInfoVisible,
     position: infoPosition,
@@ -81,6 +83,10 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
     dispatch(setIsDotThreeMenuOpen(!isDotThreeMenuOpen));
   };
 
+  useEffect(() => {
+    dispatch(setIsDotThreeMenuOpen(false));
+  }, [reportName])
+
   const handleSearchChange = useCallback((newValue: string) => {
     setSearchValue(newValue);
   }, [setSearchValue]);
@@ -92,7 +98,6 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
   const handleOpenAllFilters = () => {
     dispatch(setIsShowAllFiltersOpen(true));
   };
-
   return (
     <FormProvider {...methods}>
       <motion.div
@@ -106,6 +111,7 @@ export const AppliedFiltersOverview: FC<IProps> = ({ filterArray, onFilterChange
             selectedFilters={filterArray}
             visibleBlocks={visibleBlocks}
             onFilterChange={onFilterChange}
+            filtersValue={filtersValue}
           />
         </div>
         {!filtersAreExpanded && (

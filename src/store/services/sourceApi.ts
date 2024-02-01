@@ -22,14 +22,17 @@ export const sourceApi = createApi({
       query: (source: Source) =>
         `${source.tableName}/${source.viewName}/select.json`,
     }),
-    getSourceInfoData: builder.query<{columns: ColumnData[]}, Source>({
-      query: (source: Source) =>
-        `${source.tableName}/describe.json`,
-    })
+    getSourceInfoData: builder.query<{ columns: ColumnData[] }, Source>({
+      query: (source: Source) => `${source.tableName}/describe.json`,
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetFiltersDescribeDataQuery, useGetFiltersSelectDataQuery, useGetSourceInfoDataQuery, useGetSourceItemsDataQuery } =
-  sourceApi;
+export const {
+  useGetFiltersDescribeDataQuery,
+  useGetFiltersSelectDataQuery,
+  useGetSourceInfoDataQuery,
+  useGetSourceItemsDataQuery,
+} = sourceApi;

@@ -29,6 +29,7 @@ export enum EDataKeys {
   API = "API",
   COLUMN_IDS = "columnIds",
   REPORT_TYPE = "Report Type",
+  USER_EMAIL = "User Email",
   PIN_TO_MAIN_VIEW = "pinToMainView",
   FILTERED_LIST = "Filtered List",
   SELECTED_TABLE_CELL = "selectedTableCell",

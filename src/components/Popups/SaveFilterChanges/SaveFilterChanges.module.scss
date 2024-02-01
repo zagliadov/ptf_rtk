@@ -1,0 +1,38 @@
+@import "src/styles/colors.scss";
+
+.save-filter-changes {
+  display: flex;
+  flex-direction: column;
+  width: 283px;
+  height: 310px;
+  background-color: color($var-color-app-white);
+  border-radius: 8px;
+  box-shadow: 8px 4px 39px 0px #0000000F;
+  .spec-header {
+    padding-top: 10px;
+    padding-right: 5px;
+  }
+  .description {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 24px;
+    .description-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 18.4px;
+      text-align: center;
+      color: color($var-color-app-dark-blue);
+    }
+    .description-text {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+      text-align: center;
+      color: color($var-color-app-black);
+      padding-top: 8px;
+    }
+  }
+}

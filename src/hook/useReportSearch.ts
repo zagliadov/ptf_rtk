@@ -40,7 +40,7 @@ export const useReportSearch = (
         // Checking if any report detail's creator matches the resource filter
         const matchesResource = !_.isEmpty(resourceFilter)
           ? report.details.some((detail) =>
-              resourceFilter.includes(detail.createdBy)
+              resourceFilter.includes(detail.creator)
             )
           : true;
         return matchesSearch && matchesResource;

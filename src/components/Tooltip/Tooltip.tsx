@@ -7,11 +7,12 @@ import * as _ from "lodash";
 const cx = classnames.bind(styles);
 
 interface TooltipProps {
+  currentName: string | null;
   content: string[];
   position: { top: number; left: number };
 }
 
-export const Tooltip: FC<TooltipProps> = ({ content, position }) => {
+export const Tooltip: FC<TooltipProps> = ({ currentName, content, position }) => {
   const style: CSSProperties = {
     top: position.top + window.scrollY - 158,
     left: position.left + window.scrollX - 15,
@@ -20,16 +21,16 @@ export const Tooltip: FC<TooltipProps> = ({ content, position }) => {
   const tooltipElement: JSX.Element = (
     <div className={cx("tooltip")} style={style}>
       <div className={cx("tooltip-header")}>
-        <span>Report Title</span>
+        <span>{currentName}</span>
       </div>
-      <ul>
+      <div className={cx("tooltip-body")}>
         {!_.isEmpty(content) &&
           _.map(content, (line, index) => (
-            <li key={index} className={cx("tooltip-line")}>
-              {line}
-            </li>
+            <span key={index} className={cx("tooltip-line")}>
+              <span className={cx("dot-line")}>•</span> {line}
+            </span>
           ))}
-      </ul>
+      </div>
     </div>
   );
 

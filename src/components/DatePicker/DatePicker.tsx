@@ -23,7 +23,7 @@ const CustomInput = React.forwardRef(
     {
       error,
       ...attributes
-    }: React.InputHTMLAttributes<HTMLInputElement> & { error?: boolean },
+    }: any | React.InputHTMLAttributes<HTMLInputElement> & { error?: boolean },
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     return (

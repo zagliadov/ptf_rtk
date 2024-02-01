@@ -35,7 +35,6 @@ export const SaveFiltersChanges: FC = () => {
 
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
-      console.log(data, "data")
       dispatch(setIsReportUpdate(true));
       dispatch(setIsCreateReportLoading(true))
       const newReportResult = await refetch();
@@ -46,9 +45,9 @@ export const SaveFiltersChanges: FC = () => {
 
       const columnIds = _.map(filteredData, "@row.id");
       if (reportId) {
-        await dispatch(deleteReport({ reportId, columnIds, update: true }))
+        await dispatch(deleteReport({ reportId, columnIds, update: true, newName: data["Report Title"], newType: data["Report Type"] }))
           .then(() => {
-            dispatch(createReport(data));
+            dispatch(createReport({data, update: true}));
           })
           .then(() => {
             dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));

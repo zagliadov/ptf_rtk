@@ -42,8 +42,9 @@ export const Filters: FC = () => {
 
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
+      if (_.isEmpty(data[EDataKeys.FILTERED_LIST])) return;
       dispatch(setIsCreateReport(true));
-      await dispatch(createReport(data))
+      await dispatch(createReport({data, update: false}))
         .then(() => {
           dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
           dispatch(setIsFiltersOpen(false));
