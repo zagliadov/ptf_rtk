@@ -248,7 +248,7 @@ export const SideMenu: FC<IProps> = ({ reportsArray }) => {
             content={[
               `Creator: ${currentDetail.creator}`,
               `Department: ${currentDetail.department}`,
-              `Date Created: ${currentDetail.dateCreated}`,
+              `Date Created: ${currentDetail?.dateCreated}`,
               `Date Updated: ${currentDetail.dateUpdated}`,
               `Purpose: ${currentDetail.purpose ? currentDetail.purpose : ""}`,
             ]}

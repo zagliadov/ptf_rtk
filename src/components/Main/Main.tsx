@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import * as _ from "lodash";
 import { selectUserDataByEmail } from "src/store/authSlice";
 import { getReportColumn } from "src/store/columnSlice";
+import { useGetReportQuery } from "src/store/services/customReportApi";
 
 const cx: CX = classnames.bind(styles);
 
@@ -32,11 +33,14 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
   const { finalFilterArray, rows, columns } = useReportData();
   const dispatch = useAppDispatch();
   const [filters, setFilters] = useState<Filter>({});
-  const { fullName } = useAppSelector(selectUserDataByEmail);
-  const { columns: columnArray } = useAppSelector((state: RootState) => state.column);
-  const { reportName, reportSourceId, isColumnCreated, reportId } = useAppSelector(
-    (state: RootState) => state.report
+  const userData = useAppSelector((state: RootState) => selectUserDataByEmail(state));
+  const { fullName, role: department } = userData || {};
+  const { columns: columnArray } = useAppSelector(
+    (state: RootState) => state.column
   );
+  const { reportName, reportSourceId, isColumnCreated, reportId } =
+    useAppSelector((state: RootState) => state.report);
+  const { data } = useGetReportQuery(Number(reportId));
   const variants = {
     hidden: { opacity: 0, y: 1000 },
     visible: { opacity: 1, y: 0 },
@@ -178,8 +182,27 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
     );
   }, [rows, processedFilters, searchValue]);
 
+  // Convert filters to an array for ease of processing
+  const filtersArray = Object.entries(filters).map(([name, choice]) => ({
+    name,
+    choice: choice ? JSON.stringify(choice) : "[]",
+  }));
+
+  // Create a copy of finalFilterArray for updating
+  const updatedFinalFilterArray = finalFilterArray.map((filterItem: any) => {
+    const filterUpdate = filtersArray.find(
+      (filter) => filter.name === filterItem.name
+    );
+    if (filterUpdate) {
+      // Return a new object with updated choice
+      return { ...filterItem, choice: filterUpdate.choice };
+    }
+    // Return an unchanged object if no update is required
+    return filterItem;
+  });
+
   const filteredAndTransformedData = _.reduce(
-    finalFilterArray,
+    updatedFinalFilterArray,
     (acc, item) => {
       if (item.choice && item.choice !== "[]") {
         try {
@@ -196,9 +219,9 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
     {}
   );
 
-    useEffect(() => {
-      dispatch(getReportColumn(Number(reportId)));
-    }, []);
+  useEffect(() => {
+    dispatch(getReportColumn(Number(reportId)));
+  }, []);
 
   return (
     <main className={cx("main")}>
@@ -236,8 +259,11 @@ export const Main: FC<IProps> = ({ dataTableRef, reportsArray }) => {
                   ref={dataTableRef as any}
                   reportName={reportName}
                   filters={filteredAndTransformedData}
-                  fullName={fullName}
+                  fullName={fullName && fullName}
+                  department={department}
                   columnArray={columnArray}
+                  dateCreated={data && data[0] && data[0]["Date Created"] ? data[0]["Date Created"] : undefined}
+                  dateModified={data && data[0] && data[0]["Date Modified"] ? data[0]["Date Modified"] : undefined}
                 />
               </div>
             </motion.div>

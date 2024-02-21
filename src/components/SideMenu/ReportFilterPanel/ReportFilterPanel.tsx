@@ -47,7 +47,7 @@ export const ReportFilterPanel: FC<IProps> = ({
       setSelectedResources(newResources);
       const selectedFullNames = _.map(
         newResources,
-        (resource) => resource.fullName
+        (resource) => resource?.fullName
       );
       setResourceFilter(selectedFullNames);
     },

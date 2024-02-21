@@ -92,7 +92,7 @@ export const RolesPersonsSelect: FC<IProps> = ({
   const resourcesOptions: IResourcesOptions[] = useMemo(
     () =>
       _.map(data, (resource: Resource) => ({
-        label: resource.fullName,
+        label: resource?.fullName,
         value: resource.id.toString(),
         logoSrc: resource.logo,
         role: resource.role,

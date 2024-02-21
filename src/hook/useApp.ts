@@ -11,13 +11,31 @@ function useApp() {
   useLayoutEffect(() => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
-    if (params.token && params.email) {
-      setPermissionAllowed(true);
-      setToken(params.token);
+    window.parent.postMessage("scheduler-request-current-user", "*");
+    const handleMessage = (event: any) => {
+      if (event.data?.name === "scheduler-current-user" && event.data?.email) {
+        const { email } = event.data;
+        console.log(email, "email")
+        if (email && params.token) {
+          setEmailParams(email);
+          dispatch(setUserEmail(email));
+          setToken(params.token);
+          setPermissionAllowed(true);
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+
+    if (params.email && params.token) {
       setEmailParams(params.email);
       dispatch(setUserEmail(params.email));
+      setToken(params.token);
+      setPermissionAllowed(true);
     }
-  }, [dispatch, permissionAllowed]);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [dispatch]);
 
   return {
     permissionAllowed,

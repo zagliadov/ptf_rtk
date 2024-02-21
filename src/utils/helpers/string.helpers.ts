@@ -15,6 +15,24 @@ export const createAbbreviation = (name: string) => {
     .value();
 };
 
+export const isISO8601Date = (str: any) => {
+  const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?([+-]\d{2}:\d{2}|Z)$/;
+  return regex.test(str);
+}
+export const formatDateToDDMMMYYYY = (date: any) => {
+  return `${('0' + date.getDate()).slice(-2)} ${date.toLocaleString('en-us', { month: 'short' })} ${date.getFullYear()}`;
+}
+
+export const formatDate = (dateString: Date): string => {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  };
+  return date.toLocaleDateString("en-GB", options);
+};
+
 export const isNameExcluded = (name: string, sourceId: string) => {
   return (
     name === "Slip OASIS Old Date" ||
@@ -49,6 +67,4 @@ export const isNameExcluded = (name: string, sourceId: string) => {
     name === "Estimated Cost of Other (Stay, Meals etc.) (€)" ||
     (sourceId === "Ticket" && name === "Status")
   );
-}
-
-
+};

@@ -153,7 +153,15 @@ export const FiltersItem: FC<IProps> = ({
                   isAppliedFiltersOverview={true}
                 />
               )}
-              {(isDate || isTimestamp) && (
+              {(isDate) && (
+                <DateInput
+                  updateFilters={updateFilters}
+                  handleSelectChange={handleSelectChange}
+                  fieldName={filter.name}
+                  item={filter}
+                />
+              )}
+              {(isTimestamp) && (
                 <DateInput
                   updateFilters={updateFilters}
                   handleSelectChange={handleSelectChange}

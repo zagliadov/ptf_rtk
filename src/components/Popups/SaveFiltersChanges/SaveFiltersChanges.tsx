@@ -16,7 +16,11 @@ import { useFormContext } from "react-hook-form";
 import { setSelectedFilters } from "src/store/filtersSlice";
 import { useGetReportColumnQuery } from "src/store/services/reportColumnApi";
 import * as _ from "lodash";
-import { createReport, deleteReport, setIsCreateReportLoading } from "src/store/reportSlice";
+import {
+  createReport,
+  deleteReport,
+  setIsCreateReportLoading,
+} from "src/store/reportSlice";
 
 const cx: CX = classnames.bind(styles);
 export const SaveFiltersChanges: FC = () => {
@@ -36,7 +40,7 @@ export const SaveFiltersChanges: FC = () => {
   const onSubmit = useCallback(
     async (data: DynamicFormData): Promise<void> => {
       dispatch(setIsReportUpdate(true));
-      dispatch(setIsCreateReportLoading(true))
+      dispatch(setIsCreateReportLoading(true));
       const newReportResult = await refetch();
       const filteredData = _.filter(
         newReportResult.data,
@@ -44,10 +48,19 @@ export const SaveFiltersChanges: FC = () => {
       );
 
       const columnIds = _.map(filteredData, "@row.id");
+
       if (reportId) {
-        await dispatch(deleteReport({ reportId, columnIds, update: true, newName: data["Report Title"], newType: data["Report Type"] }))
+        await dispatch(
+          deleteReport({
+            reportId,
+            columnIds,
+            update: true,
+            newName: data["Report Title"],
+            newType: data["Report Type"],
+          })
+        )
           .then(() => {
-            dispatch(createReport({data, update: true}));
+            dispatch(createReport({ data, update: true }));
           })
           .then(() => {
             dispatch(setSelectedFilters(data[EDataKeys.FILTERED_LIST]));
@@ -97,4 +110,3 @@ export const SaveFiltersChanges: FC = () => {
     </form>
   );
 };
-

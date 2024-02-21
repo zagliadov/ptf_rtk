@@ -10,9 +10,6 @@ import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
 import { setReportFilters } from "src/store/reportSlice";
 import { Source, sourceByType } from "src/constants/sources";
 import { parseISO, format } from "date-fns";
-import fetchCustomData from "./ItemsData";
-
-
 
 /**
  * Custom hook to manage and process report data.

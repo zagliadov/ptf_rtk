@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import styles from "./CreateCopyReport.module.scss";
 import classnames from "classnames/bind";
 import { RootState, useAppDispatch, useAppSelector } from "src/store/store";
@@ -22,6 +22,8 @@ import ReactDOM from "react-dom";
 import * as _ from "lodash";
 import { createReport, setIsReportCreated } from "src/store/reportSlice";
 import { setSelectedFilters } from "src/store/filtersSlice";
+import axios from "axios";
+import { Endpoints } from "src/constants/endpoint";
 
 const cx: CX = classnames.bind(styles);
 
@@ -55,8 +57,10 @@ export const CreateCopyReport: FC<IProps> = ({
     formState: { errors },
   } = useFormContext<RData>();
   const dispatch = useAppDispatch();
-  const { reportName, reportSourceId, reportType, reportFilters } =
+  const { reportName, reportSourceId, reportType } =
     useAppSelector((state: RootState) => state.report);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [loadingText, setLoadingText] = useState<string>("Loading");
   const {
     isVisible: isInfoVisible,
     position: infoPosition,
@@ -64,8 +68,24 @@ export const CreateCopyReport: FC<IProps> = ({
     handleMouseLeave: handleInfoMouseLeave,
   } = useHoverPositionVisibility({});
 
+  const updateLoadingText = useCallback(() => {
+    setLoadingText(prev => {
+      const dots = prev?.replace("Loading", "");
+      return dots.length < 3 ? prev + "." : "Loading";
+    });
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      interval = setInterval(updateLoadingText, 300);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading, updateLoadingText]);
+
   const onSubmit = useCallback(
     async (data: RData) => {
+      setIsLoading(true);
       if (reportName !== data[EDataKeys.REPORT_TITLE]) {
         const reportsArray = await refetchReportsArray();
         const isDuplicateName = _.some(reportsArray.data, {
@@ -79,10 +99,18 @@ export const CreateCopyReport: FC<IProps> = ({
           return;
         }
       }
-
-      const columnIds = _.map(reportFilters, (item) => item.id);
-      const updateReportFilters = _.map(reportFilters, (item, index) => ({ ...item, position: index }));
-      setValue(EDataKeys.FILTERED_LIST, updateReportFilters);
+      const columnUpdateUrl = `${Endpoints.API_REPORT_COLUMN}List%20All/select.json`;
+        const columnURLParams = new URLSearchParams();
+        columnURLParams.append(
+          "filter",
+          `[Report Name]='${reportName}'`
+        );
+      const findColumnResponse = await axios.get(
+        `${columnUpdateUrl}?${columnURLParams.toString()}`
+      );
+      const reportColumn = findColumnResponse.data;
+      const columnIds = _.map(reportColumn, (item) => item.id);
+      setValue(EDataKeys.FILTERED_LIST, reportColumn);
       setValue(EDataKeys.COLUMN_IDS, columnIds);
       if (_.isEmpty(data[EDataKeys.FILTERED_LIST])) return;
       dispatch(setIsCreateReport(true));
@@ -95,8 +123,8 @@ export const CreateCopyReport: FC<IProps> = ({
         .then(() => {
           dispatch(setIsReportCreated(false));
           dispatch(setIsCreateReport(false));
+          setIsLoading(false);
         });
-      // onContinue();
     },
     [onContinue, refetchReportsArray, reportName, setError]
   );
@@ -170,8 +198,9 @@ export const CreateCopyReport: FC<IProps> = ({
             <Button
               primary
               type="submit"
-              title="Save"
+              title={isLoading ? loadingText : "Save"}
               style={{ width: "134px" }}
+              disabled={isLoading}
             />
             <Button
               title="Cancel"

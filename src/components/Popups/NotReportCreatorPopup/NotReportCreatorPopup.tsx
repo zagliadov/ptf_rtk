@@ -30,15 +30,6 @@ export const NotReportCreatorPopup: FC = () => {
           That will not affect the scheduled reports.
         </span>
       </div>
-      <div className={cx("button-wrapper")}>
-        <Button
-          primary
-          title="Yes"
-          type="submit"
-          style={{ width: "100px" }}
-          onClick={handleClosePopup}
-        />
-      </div>
     </div>
   );
 };

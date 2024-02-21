@@ -96,10 +96,14 @@ export const PopupManager: FC<IProps> = ({ refetchReportsArray }) => {
         )}
         {isCreateCopyReportOpen && (
           <Popup open={isCreateCopyReportOpen}>
-            <CreateCopyReport
-              onContinue={openCreateCopyReport}
-              refetchReportsArray={refetchReportsArray}
-            />
+            {isCreateReport ? (
+              <DotSpinner />
+            ) : (
+              <CreateCopyReport
+                onContinue={openCreateCopyReport}
+                refetchReportsArray={refetchReportsArray}
+              />
+            )}
           </Popup>
         )}
         {isColumnSelectorOpen && (

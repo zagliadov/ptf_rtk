@@ -4,6 +4,7 @@ import { Workbook, Column } from "exceljs";
 import * as ExcelProper from "exceljs";
 import * as fs from "file-saver";
 import * as _ from "lodash";
+import { formatDate, formatDateToDDMMMYYYY, isISO8601Date } from "src/utils/helpers";
 
 async function exportToExcel<T>(
   gridOptions: AgGridReact<T>,
@@ -14,6 +15,9 @@ async function exportToExcel<T>(
     filters: any;
     currentFilters: any;
     fullName: string;
+    department: string;
+    dateCreated: Date;
+    dateModified: Date;
   }
 ) {
   const colDefs = gridOptions.api.getColumnDefs() as ColDef<T>[];
@@ -30,13 +34,28 @@ async function exportToExcel<T>(
     bold: true,
     size: 12,
   };
-  lastRowNumber++;
+  lastRowNumber += 2;
   if (!_.isEmpty(options.filters) && _.isEmpty(options.currentFilters)) {
-    const filtersAboveTable = worksheet.addRow(["Filters above table:"]);
+    const fullNameRow = worksheet.getRow(lastRowNumber);
+    fullNameRow.getCell(1).value = "Creator:";
+    fullNameRow.getCell(2).value = options?.fullName;
+    lastRowNumber++;
+    const departmentRow = worksheet.getRow(lastRowNumber);
+    departmentRow.getCell(1).value = "Department:";
+    departmentRow.getCell(2).value = options.department;
+    lastRowNumber++;
+    const dateOfCreation = worksheet.getRow(lastRowNumber);
+    dateOfCreation.getCell(1).value = "Date Created:";
+    dateOfCreation.getCell(2).value = formatDate(new Date());
+    lastRowNumber++;
+    lastRowNumber++;
+    const filtersAboveTable = worksheet.getRow(lastRowNumber);
+    filtersAboveTable.getCell(1).value = "Filters applied:";
     filtersAboveTable.font = {
       bold: true,
       size: 11,
     };
+
     lastRowNumber++;
     const filtersRow = worksheet.getRow(lastRowNumber);
     Object.keys(options.filters).forEach((filterKey, index) => {
@@ -44,42 +63,57 @@ async function exportToExcel<T>(
       cell.value = filterKey;
       cell.font = {
         bold: true,
-      }
+      };
     });
+
     lastRowNumber++;
     Object.values(options.filters).forEach((filterValues: any, colIndex) => {
-      filterValues.forEach((value: any, rowIndex: any) => {
-        const row = worksheet.getRow(lastRowNumber + rowIndex);
-        row.getCell(colIndex + 1).value = value;
-      });
+      if (
+        Array.isArray(filterValues) &&
+        filterValues.length === 2 &&
+        (filterValues.every((value) => !isNaN(Number(value))) ||
+          filterValues.every((value) => !isNaN(Date.parse(value))))
+      ) {
+        // If yes, form a range of values separated by a dash
+        filterValues.forEach((value: any, rowIndex: any) => {
+          const row = worksheet.getRow(lastRowNumber);
+          row.getCell(colIndex + 1).value =
+            `${filterValues[0]} - ${filterValues[1]}`;
+        });
+      } else {
+        filterValues.forEach((value: any, rowIndex: any) => {
+          const row = worksheet.getRow(lastRowNumber + rowIndex);
+          row.getCell(colIndex + 1).value = value;
+        });
+      }
     });
+
     const longestArray = _.maxBy(_.values(options.filters), "length");
     const longestArrayLength = longestArray ? longestArray.length : 0;
-
-    lastRowNumber += longestArrayLength + 1;
-    const fullNameRow = worksheet.getRow(lastRowNumber);
-    fullNameRow.getCell(1).value = "Who populated the report:";
-    fullNameRow.getCell(2).value = options.fullName;
-    lastRowNumber++;
-    const dateOfCreation = worksheet.getRow(lastRowNumber);
-    const now = new Date();
-    const formattedDate =
-      now.getDate() +
-      " " +
-      now.toLocaleString("en-us", { month: "short" }) +
-      " " +
-      now.getFullYear();
-
-    dateOfCreation.getCell(1).value = "Date of creation:";
-    dateOfCreation.getCell(2).value = formattedDate;
+    lastRowNumber += longestArrayLength;
   }
 
   if (!_.isEmpty(options.currentFilters) && _.isEmpty(options.filters)) {
-    const tableHeaderFilters = worksheet.addRow(["Table header filters:"]);
+    const fullNameRow = worksheet.getRow(lastRowNumber);
+    fullNameRow.getCell(1).value = "Creator:";
+    fullNameRow.getCell(2).value = options?.fullName;
+    lastRowNumber++;
+    const departmentRow = worksheet.getRow(lastRowNumber);
+    departmentRow.getCell(1).value = "Department:";
+    departmentRow.getCell(2).value = options.department;
+    lastRowNumber++;
+    const dateOfCreation = worksheet.getRow(lastRowNumber);
+    dateOfCreation.getCell(1).value = "Date Created:";
+    dateOfCreation.getCell(2).value = formatDate(new Date());
+    lastRowNumber++;
+    lastRowNumber++;
+    const tableHeaderFilters = worksheet.getRow(lastRowNumber);
+    tableHeaderFilters.getCell(1).value = "Table header filters:";
     tableHeaderFilters.font = {
       bold: true,
       size: 11,
     };
+
     lastRowNumber++;
     Object.entries(options.currentFilters).forEach(
       ([filterKey, filterValue]: any) => {
@@ -87,7 +121,7 @@ async function exportToExcel<T>(
         row.getCell(1).value = filterKey;
         row.getCell(1).font = {
           bold: true,
-        }
+        };
         if (filterValue.conditions && filterValue.conditions.length) {
           filterValue.conditions.forEach((condition: any, index: any) => {
             row.getCell(2 + index).value =
@@ -99,34 +133,30 @@ async function exportToExcel<T>(
         lastRowNumber++;
       }
     );
-    const longestArray = _.maxBy(_.values(options.currentFilters), "length");
-    const longestArrayLength = longestArray ? longestArray.length : 0;
-
-    lastRowNumber += longestArrayLength + 1;
-    const fullNameRow = worksheet.getRow(lastRowNumber);
-    fullNameRow.getCell(1).value = "Who populated the report:";
-    fullNameRow.getCell(2).value = options.fullName;
-    lastRowNumber++;
-    const dateOfCreation = worksheet.getRow(lastRowNumber);
-    const now = new Date();
-    const formattedDate =
-      now.getDate() +
-      " " +
-      now.toLocaleString("en-us", { month: "short" }) +
-      " " +
-      now.getFullYear();
-
-    dateOfCreation.getCell(1).value = "Date of creation:";
-    dateOfCreation.getCell(2).value = formattedDate;
   }
 
   //---------------------------------------------------------
   if (!_.isEmpty(options.currentFilters) && !_.isEmpty(options.filters)) {
-    const filtersAboveTable = worksheet.addRow(["Filters above table:"]);
+    const fullNameRow = worksheet.getRow(lastRowNumber);
+    fullNameRow.getCell(1).value = "Creator:";
+    fullNameRow.getCell(2).value = options?.fullName;
+    lastRowNumber++;
+    const departmentRow = worksheet.getRow(lastRowNumber);
+    departmentRow.getCell(1).value = "Department:";
+    departmentRow.getCell(2).value = options.department;
+    lastRowNumber++;
+    const dateOfCreation = worksheet.getRow(lastRowNumber);
+    dateOfCreation.getCell(1).value = "Date Created:";
+    dateOfCreation.getCell(2).value = formatDate(new Date());
+    lastRowNumber++;
+    lastRowNumber++;
+    const filtersAboveTable = worksheet.getRow(lastRowNumber);
+    filtersAboveTable.getCell(1).value = "Filters applied:";
     filtersAboveTable.font = {
       bold: true,
       size: 11,
     };
+
     lastRowNumber++;
     const filtersRow = worksheet.getRow(lastRowNumber);
     Object.keys(options.filters).forEach((filterKey, index) => {
@@ -138,27 +168,44 @@ async function exportToExcel<T>(
     });
     lastRowNumber++;
     Object.values(options.filters).forEach((filterValues: any, colIndex) => {
-      filterValues.forEach((value: any, rowIndex: any) => {
-        const row = worksheet.getRow(lastRowNumber + rowIndex);
-        row.getCell(colIndex + 1).value = value;
-      });
+      if (
+        Array.isArray(filterValues) &&
+        filterValues.length === 2 &&
+        (filterValues.every((value) => !isNaN(Number(value))) ||
+          filterValues.every((value) => !isNaN(Date.parse(value))))
+      ) {
+        // If yes, form a range of values separated by a dash
+        filterValues.forEach((value: any, rowIndex: any) => {
+          const row = worksheet.getRow(lastRowNumber);
+          row.getCell(colIndex + 1).value =
+            `${filterValues[0]} - ${filterValues[1]}`;
+        });
+      } else {
+        filterValues.forEach((value: any, rowIndex: any) => {
+          const row = worksheet.getRow(lastRowNumber + rowIndex);
+          row.getCell(colIndex + 1).value = value;
+        });
+      }
     });
     const longestArray = _.maxBy(_.values(options.filters), "length");
     const longestArrayLength = longestArray ? longestArray.length : 0;
     lastRowNumber += longestArrayLength + 1;
 
-    const tableHeaderFilters = worksheet.addRow(["Table header filters:"]);
+    const tableHeaderFilters = worksheet.getRow(lastRowNumber);
+    tableHeaderFilters.getCell(1).value = "Table header filters:";
     tableHeaderFilters.font = {
       bold: true,
       size: 11,
     };
+    lastRowNumber++;
+
     Object.entries(options.currentFilters).forEach(
       ([filterKey, filterValue]: any) => {
         const row = worksheet.getRow(lastRowNumber);
         row.getCell(1).value = filterKey;
         row.getCell(1).font = {
           bold: true,
-        }
+        };
         if (filterValue.conditions && filterValue.conditions.length) {
           filterValue.conditions.forEach((condition: any, index: any) => {
             row.getCell(2 + index).value =
@@ -170,52 +217,24 @@ async function exportToExcel<T>(
         lastRowNumber++;
       }
     );
-
-    const longestCurrentFiltersArray = _.maxBy(
-      _.values(options.currentFilters),
-      "length"
-    );
-    const longestCurrentFiltersArrayLength = longestCurrentFiltersArray
-      ? longestCurrentFiltersArray.length
-      : 0;
-
-    lastRowNumber += longestCurrentFiltersArrayLength + 1;
-    const fullNameRow = worksheet.getRow(lastRowNumber);
-    fullNameRow.getCell(1).value = "Who populated the report:";
-    fullNameRow.getCell(2).value = options.fullName;
-    lastRowNumber++;
-    const dateOfCreation = worksheet.getRow(lastRowNumber);
-    const now = new Date();
-    const formattedDate =
-      now.getDate() +
-      " " +
-      now.toLocaleString("en-us", { month: "short" }) +
-      " " +
-      now.getFullYear();
-
-    dateOfCreation.getCell(1).value = "Date of creation:";
-    dateOfCreation.getCell(2).value = formattedDate;
   }
 
   if (_.isEmpty(options.currentFilters) && _.isEmpty(options.filters)) {
     const fullNameRow = worksheet.getRow(lastRowNumber);
-    fullNameRow.getCell(1).value = "Who populated the report:";
-    fullNameRow.getCell(2).value = options.fullName;
+    fullNameRow.getCell(1).value = "Creator:";
+    fullNameRow.getCell(2).value = options?.fullName;
+    lastRowNumber++;
+    const departmentRow = worksheet.getRow(lastRowNumber);
+    departmentRow.getCell(1).value = "Department:";
+    departmentRow.getCell(2).value = options.department;
     lastRowNumber++;
     const dateOfCreation = worksheet.getRow(lastRowNumber);
-    const now = new Date();
-    const formattedDate =
-      now.getDate() +
-      " " +
-      now.toLocaleString("en-us", { month: "short" }) +
-      " " +
-      now.getFullYear();
-
-    dateOfCreation.getCell(1).value = "Date of creation:";
-    dateOfCreation.getCell(2).value = formattedDate;
+    dateOfCreation.getCell(1).value = "Date Created:";
+    dateOfCreation.getCell(2).value = formatDate(new Date());
+    lastRowNumber++;
   }
 
-  lastRowNumber += 2;
+  lastRowNumber++;
   const headerRow = worksheet.getRow(lastRowNumber);
   colDefs.forEach((col, index) => {
     const cell = headerRow.getCell(index + 1);
@@ -226,21 +245,15 @@ async function exportToExcel<T>(
   });
 
   lastRowNumber++;
+
   data.forEach((rowData: any, rowIndex) => {
     const row = worksheet.getRow(rowIndex + lastRowNumber);
     colDefs.forEach((col, colIndex) => {
       let cellValue = rowData[col.field];
 
-      if (
-        typeof cellValue === "string" &&
-        cellValue.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2}/)
-      ) {
+      if (typeof cellValue === "string" && isISO8601Date(cellValue)) {
         const date = new Date(cellValue);
-        cellValue = date.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
+        cellValue = formatDateToDDMMMYYYY(date);
       }
 
       row.getCell(colIndex + 1).value = cellValue;

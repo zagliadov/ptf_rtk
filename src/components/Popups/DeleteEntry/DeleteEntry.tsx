@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import styles from "./DeleteEntry.module.scss";
 import classnames from "classnames/bind";
 import { PopupHeader } from "../PopupHeader/PopupHeader";
@@ -17,16 +17,33 @@ const cx: CX = classnames.bind(styles);
 
 export const DeleteEntry: FC = () => {
   const dispatch = useAppDispatch();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingText, setLoadingText] = useState<string>("Loading");
   const { reportId, reportName } = useAppSelector(
     (state: RootState) => state.report
   );
-
   const { refetch } = useGetReportColumnQuery({});
   const handleCloseDeleteEntry = () => {
     dispatch(setIsDeleteEntryOpen(false));
   };
 
+  const updateLoadingText = useCallback(() => {
+    setLoadingText(prev => {
+      const dots = prev?.replace("Loading", "");
+      return dots.length < 3 ? prev + "." : "Loading";
+    });
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      interval = setInterval(updateLoadingText, 300);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading, updateLoadingText]);
+
   const handleDeleteEntry = async () => {
+    setIsLoading(true);
     const newReportResult = await refetch();
     const filteredData = _.filter(
       newReportResult.data,
@@ -42,6 +59,7 @@ export const DeleteEntry: FC = () => {
         .then(() => {
           dispatch(setIsReportDelete(false));
           dispatch(setIsDeleteReport(false));
+          setIsLoading(false);
         });
     }
   };
@@ -65,9 +83,10 @@ export const DeleteEntry: FC = () => {
       <ButtonWrapper shift={"center"}>
         <Button
           primary
-          title={"Yes"}
+          title={isLoading ? loadingText : "Yes"}
           onClick={handleDeleteEntry}
           style={{ width: "100px" }}
+          disabled={isLoading}
         />
         <Button
           title="No"

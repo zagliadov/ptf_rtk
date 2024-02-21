@@ -28,7 +28,7 @@ export const reportColumnApi = createApi({
     }),
     updateReportColumn: builder.mutation({
       query: (formData) => ({
-        url: `/update.json`,
+        url: `/upsert.json`,
         method: "POST",
         headers,
         body: formData,

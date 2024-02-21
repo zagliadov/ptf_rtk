@@ -52,7 +52,10 @@ type Props<T> = {
   reportName: string;
   filters: any;
   fullName: string;
+  department: string;
   columnArray: any;
+  dateCreated: Date;
+  dateModified: Date;
 };
 
 export type TableRef = {
@@ -72,11 +75,14 @@ function DataTable<T>(props: Props<T>, ref: React.ForwardedRef<TableRef>) {
     reportName,
     filters,
     fullName,
+    department,
     columnArray,
+    dateCreated,
+    dateModified,
   } = props;
 
   const gridRef = useRef<AgGridReact<T>>();
-  const { reportId } = useAppSelector((state: RootState) => state.report);
+  const { reportId, isReportCreated, createReportLoading } = useAppSelector((state: RootState) => state.report);
   const { userResources, userEmail } = useAppSelector(
     (state: RootState) => state.auth
   );
@@ -107,6 +113,9 @@ function DataTable<T>(props: Props<T>, ref: React.ForwardedRef<TableRef>) {
             filters: filters,
             currentFilters: currentFilters,
             fullName: fullName,
+            department: department,
+            dateCreated,
+            dateModified,
           });
         }
       },
@@ -209,7 +218,7 @@ function DataTable<T>(props: Props<T>, ref: React.ForwardedRef<TableRef>) {
     };
 
     fetchAndApplyColumnState();
-  }, [columnDefs, dispatch, reportId, reportName]);
+  }, [columnDefs, dispatch, reportId, reportName, isReportCreated, createReportLoading ]);
 
   const onModelUpdated = () => {
     if (onRecordsNumberChanged && gridRef.current) {

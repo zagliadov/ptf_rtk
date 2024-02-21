@@ -148,7 +148,6 @@ export const FilteredColumns: FC<IProps> = ({
 
   useEffect(() => {
     setValue(EDataKeys.FILTERED_LIST, updateReportFilters);
-    console.log(updateReportFilters);
   }, [setValue, updateReportFilters]);
 
   return (

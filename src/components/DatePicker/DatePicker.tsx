@@ -110,9 +110,9 @@ function DatePicker({
         }}
         readOnly={false}
         allowSameDay={false}
-        selected={convertUTCToLocalDate(startDate || date || null)}
-        startDate={convertUTCToLocalDate(startDate || null)}
-        endDate={convertUTCToLocalDate(endDate || null)}
+        selected={startDate}
+        startDate={startDate}
+        endDate={endDate}
         selectsRange={range}
         onChange={(date) => {
           Array.isArray(date)

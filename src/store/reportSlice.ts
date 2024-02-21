@@ -54,7 +54,13 @@ interface IBasicReportData {
 export const createReport = createAsyncThunk(
   "report/createReport",
   async (
-    { data, update = false }: { data: DynamicFormData; update?: boolean },
+    {
+      data,
+      update = false,
+    }: {
+      data: DynamicFormData;
+      update?: boolean;
+    },
     { dispatch, getState, rejectWithValue }
   ): Promise<any> => {
     try {
@@ -64,44 +70,80 @@ export const createReport = createAsyncThunk(
       if (!userEmail) return false;
       dispatch(setIsColumnCreated(true));
       if (update && reportId) {
-        const columnPromises = data[EDataKeys.COLUMN_IDS].map(
-          async (columnId: number) => {
-            const filterIndex = data[EDataKeys.FILTERED_LIST].findIndex(
-              (filter: IIFilters) => String(filter.id) === String(columnId)
-            );
-            if (filterIndex !== -1) {
-              const filterData = data[EDataKeys.FILTERED_LIST][filterIndex];
-              if (isNameExcluded(filterData.name, data[EDataKeys.DATA_SOURCE]))
-                return;
-              const columnData = {
-                "Report Setting": reportId,
-                id: columnId,
-                selectedTableCell: filterData[EDataKeys.SELECTED_TABLE_CELL],
-                selectedTableFilter:
-                  filterData[EDataKeys.SELECTED_TABLE_FILTER],
-                disabled: filterData[EDataKeys.DISABLED],
-                pinToMainView: filterData[EDataKeys.PIN_TO_MAIN_VIEW],
-                name: filterData[EDataKeys.NAME],
-                choice: filterData[EDataKeys.CHOICE],
-                alias: filterData[EDataKeys.ALIAS],
-                description: filterData[EDataKeys.DESCRIPTION],
-                type: filterData[EDataKeys.TYPE],
-                position: filterData?.position
-                  ? filterData?.position
-                  : filterIndex,
-              };
-              return await dispatch(
-                reportColumnApi.endpoints.createReportColumn.initiate(
-                  columnData
-                )
-              ).unwrap();
-            }
-            return null;
-          }
+        // Get existing report columns from the database
+        const columnUpdateUrl = `${Endpoints.API_REPORT_COLUMN}List%20All/select.json`;
+        const columnURLParams = new URLSearchParams();
+        columnURLParams.append(
+          "filter",
+          `[Report Name]='${data[EDataKeys.REPORT_TITLE]}'`
         );
+        const findColumnResponse = await axios.get(
+          `${columnUpdateUrl}?${columnURLParams.toString()}`
+        );
+        const reportColumn = findColumnResponse.data;
+        const filteredList = data[EDataKeys.FILTERED_LIST];
+
+        // Update existing columns that exist both in the database and on the client
+        for (const column of reportColumn) {
+          const filteredItem = filteredList.find(
+            (item: any) => item.id === Number(column.id)
+          );
+          if (filteredItem) {
+            const updateData = {
+              "@row.id": column["@row.id"],
+              "Column Position": column["Column Position"],
+              choice: filteredItem["choice"],
+              pinToMainView: filteredItem["pinToMainView"],
+              position: filteredItem["position"],
+              selectedTableCell: filteredItem["selectedTableCell"],
+              selectedTableFilter: filteredItem["selectedTableFilter"],
+            };
+            await dispatch(
+              reportColumnApi.endpoints.updateReportColumn.initiate(updateData)
+            ).unwrap();
+          }
+        }
+
+        // Create new columns that are not in the database
+        for (const item of filteredList) {
+          if (
+            !reportColumn.some((column: any) => Number(column.id) === item.id)
+          ) {
+            const columnData = {
+              "Report Setting": reportId,
+              id: item.id,
+              selectedTableCell: item[EDataKeys.SELECTED_TABLE_CELL],
+              selectedTableFilter: item[EDataKeys.SELECTED_TABLE_FILTER],
+              disabled: item[EDataKeys.DISABLED],
+              pinToMainView: item[EDataKeys.PIN_TO_MAIN_VIEW],
+              name: item[EDataKeys.NAME],
+              choice: item[EDataKeys.CHOICE],
+              alias: item[EDataKeys.ALIAS],
+              description: item[EDataKeys.DESCRIPTION],
+              type: item[EDataKeys.TYPE],
+              position: item?.position ? item?.position : null,
+            };
+            await dispatch(
+              reportColumnApi.endpoints.createReportColumn.initiate(columnData)
+            ).unwrap();
+          }
+        }
+
+        // Delete columns that are not on the client
+        for (const column of reportColumn) {
+          if (
+            !filteredList.some((item: any) => item.id === Number(column.id))
+          ) {
+            await dispatch(
+              reportColumnApi.endpoints.deleteReportColumn.initiate(
+                column["@row.id"]
+              )
+            ).unwrap();
+          }
+        }
+        console.log("Updating, creating and deleting columns completed");
+
         const findUrl = `${Endpoints.API_CUSTOM_REPORT}List%20All/select.json`;
-        const columnResults = await Promise.all(columnPromises.filter(Boolean));
-        console.log("All Columns Created Successfully:", columnResults);
         const urlParams = new URLSearchParams();
         urlParams.append("filter", `[id]='${reportId}'`);
 
@@ -109,6 +151,7 @@ export const createReport = createAsyncThunk(
           `${findUrl}?${urlParams.toString()}`
         );
         const item = findResponse.data;
+
         return { item, update };
       } else {
         const reportData: ICreateReport = {
@@ -145,7 +188,8 @@ export const createReport = createAsyncThunk(
                 type: filterData[EDataKeys.TYPE],
                 position: filterData?.position
                   ? filterData?.position
-                  : filterIndex,
+                  : null,
+                "Column Position": filterData["Column Position"]
               };
               return await dispatch(
                 reportColumnApi.endpoints.createReportColumn.initiate(
@@ -188,14 +232,6 @@ export const deleteReport = createAsyncThunk(
     { dispatch, rejectWithValue }
   ) => {
     try {
-      const deleteColumnPromises = columnIds.map((columnId: number) => {
-        return dispatch(
-          reportColumnApi.endpoints.deleteReportColumn.initiate(columnId)
-        ).unwrap();
-      });
-
-      const deleteColumnResults = await Promise.all(deleteColumnPromises);
-      console.log("All columns deleted:", deleteColumnResults);
       if (update && newName && newType) {
         const updateData = {
           "@row.id": reportId,
@@ -206,6 +242,14 @@ export const deleteReport = createAsyncThunk(
           customReportApi.endpoints.updateCustomReport.initiate(updateData)
         ).unwrap();
       } else {
+        const deleteColumnPromises = columnIds.map((columnId: number) => {
+          return dispatch(
+            reportColumnApi.endpoints.deleteReportColumn.initiate(columnId)
+          ).unwrap();
+        });
+
+        const deleteColumnResults = await Promise.all(deleteColumnPromises);
+        console.log("All columns deleted:", deleteColumnResults);
         await dispatch(
           customReportApi.endpoints.deleteCustomReport.initiate(reportId)
         ).unwrap();

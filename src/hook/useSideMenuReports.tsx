@@ -84,7 +84,7 @@ const useSideMenuReports = (): ExtendedSourceReports[] | any => {
             const userResource = userResources.find((user: any) => user.email === report["Report Creator Email"]);
             const details = {
               reportName: report.name,
-              creator: userResource ? userResource.fullName : report["Created By"],
+              creator: userResource ? userResource?.fullName : report["Created By"],
               department: userResource ? userResource.role : "Unknown",
               dateCreated: report["Date Created"]
                 ? format(parseISO(report["Date Created"]), "dd.MM.yyyy")
